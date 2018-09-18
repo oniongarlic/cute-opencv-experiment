@@ -8,10 +8,12 @@
 
 using namespace cv;
 
+#ifdef __ANDROID__
 void cv::error(int _code, const std::string& _err, const char* _func, const char* _file, int _line) {
     qDebug() << _code << _func << _file << _line;
     qFatal("%s", _err.c_str());
 }
+#endif
 
 OCVObjectColorDetector::OCVObjectColorDetector(QObject *parent) :
     QObject(parent),
@@ -151,8 +153,7 @@ bool OCVObjectColorDetector::processImageFile(QString path)
 
 bool OCVObjectColorDetector::processFrame(QImage &frame)
 {
-    Mat cvframe;
-
+    qDebug() << frame.format();
     switch(frame.format()) {
     case QImage::Format_Invalid:
     {
@@ -161,25 +162,23 @@ bool OCVObjectColorDetector::processFrame(QImage &frame)
     case QImage::Format_RGB32:
     {
         Mat view(frame.height(), frame.width(), CV_8UC4,(void *)frame.constBits(), frame.bytesPerLine());
-        view.copyTo(cvframe);
-        break;
+        return processFrame(view);
     }
     case QImage::Format_RGB888:
     {
         Mat view(frame.height(), frame.width(), CV_8UC3,(void *)frame.constBits(), frame.bytesPerLine());
-        cvtColor(view, cvframe, COLOR_RGB2BGR);
-        break;
+        cvtColor(view, view, COLOR_RGB2BGR);
+        return processFrame(view);
     }
     default:
     {
-        QImage conv = frame.convertToFormat(QImage::Format_ARGB32);
+        QImage conv = frame.convertToFormat(QImage::Format_ARGB32);        
         Mat view(conv.height(),conv.width(),CV_8UC4,(void *)conv.constBits(),conv.bytesPerLine());
-        view.copyTo(cvframe);
-        break;
+        return processFrame(view);
     }
     }
 
-    return processFrame(cvframe);
+    return false;
 }
 
 bool OCVObjectColorDetector::processFrame(Mat &frame)
@@ -187,7 +186,6 @@ bool OCVObjectColorDetector::processFrame(Mat &frame)
     Mat center, rl, rr, ru, rd, n, hls;
     Rect roi, roiL, roiR, roiU, roiD;
     int ci;
-    bool r=false;
     double dist=999.0;
     Size blr(4,4);
 
@@ -227,7 +225,7 @@ bool OCVObjectColorDetector::processFrame(Mat &frame)
             dp=deltaE(lab, labm);
 
         if (isValid() && dp<m_hysterecis) {
-            r=true;
+            // Do nothing
         } else {
             lab=labm;
             bgr=bgrm;

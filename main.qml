@@ -40,11 +40,15 @@ ApplicationWindow {
 
     ColorDetector {
         id: cd
-        onColorIndexChanged: console.debug("Color index is"+colorIndex)
-        onColorChanged: {
+
+        onColorFound: {
             cname.text=getColorName();
             cgroup.text=getColorGroup();
             crect.color=getColorRGB();
+        }
+
+        onColorNotFound: {
+            cname.text=cgroup.text="";
         }
     }
 
@@ -90,6 +94,32 @@ ApplicationWindow {
     VideoOutput {
         anchors.fill: parent
         source: camera
+
+        MouseArea {
+            anchors.fill: parent
+            onPressAndHold: {
+                console.debug(mouse.x)
+                console.debug(mouse.y)
+
+                console.debug(mouse.x/width)
+                console.debug(mouse.y/height)
+
+                // cd.setRoi();
+            }
+            onClicked: {
+                camera.searchAndLock();
+            }
+        }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: 33
+            height: 33
+            border.width: 4
+            border.color: "green"
+            color: "transparent"
+        }
+
     }
 
     Component.onCompleted: {

@@ -14,8 +14,7 @@
 class OCVObjectColorDetector : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(double tolerance READ tolerance WRITE setTolerance NOTIFY toleranceChanged)
-    Q_PROPERTY(int colorIndex READ colorIndex NOTIFY colorIndexChanged)
+    Q_PROPERTY(double tolerance READ tolerance WRITE setTolerance NOTIFY toleranceChanged)    
 
 public:
     explicit OCVObjectColorDetector(QObject *parent = nullptr);
@@ -74,6 +73,7 @@ private:
     QVector<QString> m_colorgroups;
     QVector<QString> m_colornames;
     int m_colorIndex;
+    int m_bs;
 };
 
 #endif // OCVOBJECTCOLORDETECTOR_H
