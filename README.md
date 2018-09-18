@@ -1,0 +1,1 @@
+Using OpenCV from Qt
