@@ -5,13 +5,14 @@
 #include <QImage>
 #include <QJsonDocument>
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/imgproc/types_c.h>
 
+#include "cuteopencvbase.h"
 
-class OCVObjectColorDetector : public QObject
+class OCVObjectColorDetector : public CuteOpenCVBase
 {
     Q_OBJECT
     Q_PROPERTY(double tolerance READ tolerance WRITE setTolerance NOTIFY toleranceChanged)    
@@ -19,12 +20,14 @@ class OCVObjectColorDetector : public QObject
 public:
     explicit OCVObjectColorDetector(QObject *parent = nullptr);
 
-    Q_INVOKABLE bool processFrame(cv::Mat &frame);
-    Q_INVOKABLE bool processFrame(QImage &frame);
+    bool processOpenCVFrame(cv::Mat &frame);
+
     double tolerance() const
     {
         return m_tolerance;
     }
+
+    Q_INVOKABLE void setROI(double x, double y);
 
     Q_INVOKABLE bool isValid() const;
     Q_INVOKABLE QString getColorGroup() const;
@@ -40,7 +43,7 @@ public:
 private:
     cv::Mat equalizeIntensity(const cv::Mat &inputImage);
     void calculateRoi(cv::Mat &frame, cv::Rect &roi, int ox, int oy);
-    double deltaE(const cv::Scalar &a, const cv::Scalar &b) const;
+    double deltaE76(const cv::Scalar &a, const cv::Scalar &b) const;
     bool findClosestMatch(const cv::Scalar &lab, const double tolerance, int &cindex, double &distance) const;
 
 signals:
@@ -74,6 +77,9 @@ private:
     QVector<QString> m_colornames;
     int m_colorIndex;
     int m_bs;
+    int m_br;
+    double m_roix;
+    double m_roiy;
 };
 
 #endif // OCVOBJECTCOLORDETECTOR_H

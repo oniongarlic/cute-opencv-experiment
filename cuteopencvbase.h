@@ -1,0 +1,30 @@
+#ifndef CUTEOPENCVBASE_H
+#define CUTEOPENCVBASE_H
+
+#include <QObject>
+#include <QImage>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/dnn.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgproc/types_c.h>
+
+class CuteOpenCVBase : public QObject
+{
+    Q_OBJECT
+public:
+    explicit CuteOpenCVBase(QObject *parent = nullptr);
+
+    Q_INVOKABLE bool processFrame(QImage &frame);
+    Q_INVOKABLE bool processImageFile(QString path);
+
+signals:
+
+protected:
+    virtual bool processOpenCVFrame(cv::Mat &frame);
+
+public slots:
+};
+
+#endif // CUTEOPENCVBASE_H

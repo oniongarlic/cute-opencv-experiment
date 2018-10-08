@@ -1,5 +1,5 @@
 import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.3
 import QtMultimedia 5.5
 
@@ -9,7 +9,7 @@ ApplicationWindow {
     visible: true
     width: 640
     height: 480
-    title: qsTr("Scroll")
+    title: qsTr("OpenCV QtQuick Test")
     header: mainToolbar
 
     ToolBar {
@@ -19,7 +19,7 @@ ApplicationWindow {
             ToolButton {
                 text: "Capture"
                 onClicked: {
-                     camera.imageCapture.capture();
+                    camera.imageCapture.capture();
                 }
             }
             Text {
@@ -35,7 +35,20 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 width: 40;
             }
-        }        
+        }
+    }
+
+    footer: ToolBar {
+        RowLayout {
+            anchors.fill: parent
+            Text {
+                id: objectID
+            }
+            Text {
+                id: objectConfidence
+                text: "n/a"
+            }
+        }
     }
 
     ColorDetector {
@@ -49,6 +62,27 @@ ApplicationWindow {
 
         onColorNotFound: {
             cname.text=cgroup.text="";
+        }
+    }
+
+    ObjectDetector {
+        id: od
+
+        Component.onCompleted: {
+            loadModel();
+        }
+
+        onObjectDetected: {
+            objectID.text="CID: "+cid;
+            objectConfidence.text=confidence;
+            console.debug(x+" : "+y)
+
+            objectRect.x=x;
+            objectRect.y=y;
+        }
+
+        onNoObjectDetected: {
+            objectID.text="<Nothing found>"
         }
     }
 
@@ -79,8 +113,9 @@ ApplicationWindow {
                 console.debug("Capture failed")
             }
             onImageSaved: {
-               console.debug("Image saved: "+path)
+                console.debug("Image saved: "+path)
                 cd.processImageFile(path);
+                od.processImageFile(path);
             }
         }
 
@@ -118,6 +153,15 @@ ApplicationWindow {
             border.width: 4
             border.color: "green"
             color: "transparent"
+        }
+
+        Rectangle {
+            id: objectRect
+            color: "transparent"
+            width: 5
+            height: 5
+            border.width: 2
+            border.color: "white"
         }
 
     }

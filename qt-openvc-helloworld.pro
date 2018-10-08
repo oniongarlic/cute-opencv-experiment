@@ -14,15 +14,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-    ocvobjectcolordetector.cpp
+    ocvobjectcolordetector.cpp \
+    objectdetector.cpp \
+    cuteopencv.cpp \
+    cuteopencvbase.cpp
 
 RESOURCES += qml.qrc
 
 unix:!qnx:!android {
     CONFIG +=link_pkgconfig
 
-packagesExist(opencv) {
-    PKGCONFIG += opencv
+packagesExist(opencv4) {
+    PKGCONFIG += opencv4
 }
 
 }
@@ -55,4 +58,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    ocvobjectcolordetector.h
+    ocvobjectcolordetector.h \
+    objectdetector.h \
+    cuteopencv.h \
+    cuteopencvbase.h
