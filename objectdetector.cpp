@@ -5,8 +5,8 @@
 
 ObjectDetector::ObjectDetector(QObject *parent) :
     CuteOpenCVBase(parent),
-    m_model("/home/milang/Documents/training-data-items/data/test.weights"),
-    m_config("/home/milang/Documents/training-data-items/data/yolo/obj-detect.cfg"),
+    m_model("/home/milang/qt/qt-openvc-helloworld/yolo/test.weights"),
+    m_config(":///yolo/obj-detect.cfg"),
     m_confidence(0.75),
     m_darknet_scale(0.00392),
     m_width(480),
@@ -23,13 +23,33 @@ ObjectDetector::~ObjectDetector()
 
 bool ObjectDetector::loadModel()
 {
-    if (!QFile::exists(m_config) || !QFile::exists(m_model)) {
-        qWarning() << "Model or configuration files not found.";
+    if (!QFile::exists(m_model)) {
+        qWarning() << "Model network file not found.";
+        return false;
+    }
+
+    if (!QFile::exists(m_config)) {
+        qWarning() << "Model configuration not found.";
         return false;
     }
 
     try {
-        m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
+        if (m_config.startsWith(":///")) {
+            QFile config(m_config);
+            config.open(QIODevice::ReadOnly);
+            QByteArray cdata=config.readAll();
+
+            QFile model(m_model);
+            model.open(QIODevice::ReadOnly);
+            QByteArray mdata=model.readAll();
+
+            m_net = cv::dnn::readNetFromDarknet(cdata, cdata.size(), mdata, mdata.size());
+        } else {
+            m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
+        }
+
+
+        //        m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
         //m_net=cv::dnn::readNet(m_model.toStdString(), m_config.toStdString());
         //m_net.setPreferableBackend(0);
         //m_net.setPreferableTarget(0);

@@ -19,7 +19,8 @@ SOURCES += \
     cuteopencv.cpp \
     cuteopencvbase.cpp
 
-RESOURCES += qml.qrc
+RESOURCES += qml.qrc \
+    yolo.qrc
 
 unix:!qnx:!android {
     CONFIG +=link_pkgconfig
