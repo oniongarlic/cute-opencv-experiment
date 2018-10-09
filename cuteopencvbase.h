@@ -24,6 +24,10 @@ signals:
 protected:
     virtual bool processOpenCVFrame(cv::Mat &frame);
 
+    bool m_scaledown;
+    int m_scalewidth;
+    int m_scaleheight;
+
 public slots:
 };
 

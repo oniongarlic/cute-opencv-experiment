@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.2
 import QtMultimedia 5.5
 
 import org.tal 1.0
@@ -16,6 +17,12 @@ ApplicationWindow {
         id: mainToolbar
         RowLayout {
             anchors.fill: parent
+            ToolButton {
+                text: "Open..."
+                onClicked: {
+                    filesDialog.open();
+                }
+            }
             ToolButton {
                 text: "Capture"
                 onClicked: {
@@ -51,6 +58,19 @@ ApplicationWindow {
         }
     }
 
+    FileDialog {
+        id: filesDialog
+        nameFilters: [ "*.jpg" ]
+        title: qsTr("Select image file")
+        selectExisting: true
+        selectFolder: false
+        selectMultiple: false
+        onAccepted: {
+            var f=""+fileUrl
+            od.processImageFile(f)
+        }
+    }
+
     ColorDetector {
         id: cd
 
@@ -77,8 +97,13 @@ ApplicationWindow {
             objectConfidence.text=confidence;
             console.debug(x+" : "+y)
 
-            objectRect.x=x;
-            objectRect.y=y;
+            var vx=((x-w/2)*vc.width);
+            var vy=((y-h/2)*vc.height);
+
+            objectRect.x=vx;
+            objectRect.y=vy;
+            objectRect.width=w*vc.width;
+            objectRect.height=h*vc.height;
         }
 
         onNoObjectDetected: {
@@ -127,8 +152,11 @@ ApplicationWindow {
     }
 
     VideoOutput {
+        id: vc
         anchors.fill: parent
         source: camera
+        autoOrientation: true
+        fillMode: Image.PreserveAspectFit
 
         MouseArea {
             anchors.fill: parent

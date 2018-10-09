@@ -25,6 +25,14 @@ struct DetectedObject
     int height;
     int left;
     int top;
+
+    float cxf;
+    float cyf;
+    float xf;
+    float yx;
+    float wf;
+    float hf;
+
     double confidence;
 };
 
@@ -59,7 +67,7 @@ signals:
 
     void noObjectDetected();
 
-    void objectDetected(int cid, double confidence, int x, int y);
+    void objectDetected(int cid, double confidence, float x, float y, float w, float h);
 
 public slots:
 
@@ -86,7 +94,7 @@ protected:
 private:
     QString m_model;
     QString m_config;
-    QString m_framework;
+    QString m_class;
 
     double m_confidence;
 

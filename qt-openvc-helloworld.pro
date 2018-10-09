@@ -33,18 +33,24 @@ packagesExist(opencv4) {
 
 android {
 # QT += androidextras
- QMAKE_CXXFLAGS += -mfpu=neon
 }
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
+    QMAKE_CXXFLAGS += -mfpu=neon
+
     ANDROID_EXTRA_LIBS = \
         $$PWD/3rdparty/opencv-armv7/libopencv_core.so \
         $$PWD/3rdparty/opencv-armv7/libopencv_imgproc.so \
         $$PWD/3rdparty/opencv-armv7/libopencv_dnn.so
 
-    INCLUDEPATH = /home/milang/repos/opencv/ba/install/sdk/native/jni/include
+    INCLUDEPATH = /home/milang/repos/opencv/buildandroidgcc/install/sdk/native/jni/include
 
-    LIBS += -L/home/milang/repos/opencv/ba/install/sdk/native/libs/armeabi-v7a -lopencv_core -lopencv_imgproc
+    LIBS += -L/home/milang/repos/opencv/buildandroidgcc/install/sdk/native/libs/armeabi-v7a -lopencv_core -lopencv_imgproc -lopencv_dnn
+
+yolow.path = /assets
+yolow.source = yolo
+yolow.files = yolo/test.weights
+INSTALLS += yolow
 }
 
 # Additional import path used to resolve QML modules in Qt Creator's code model

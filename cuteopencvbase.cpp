@@ -2,7 +2,11 @@
 
 #include <QDebug>
 
-CuteOpenCVBase::CuteOpenCVBase(QObject *parent) : QObject(parent)
+CuteOpenCVBase::CuteOpenCVBase(QObject *parent) :
+    QObject(parent),
+    m_scaledown(false),
+    m_scalewidth(0),
+    m_scaleheight(0)
 {
 
 }
@@ -11,7 +15,14 @@ bool CuteOpenCVBase::processImageFile(QString path)
 {
     QImage i;
 
+    qDebug() << path;
+    if (path.startsWith("file://")) {        
+        path=path.remove(0,7);
+        qDebug() << path;
+    }
+
     i.load(path);
+
     if (i.isNull()) {
         qWarning() << "Failed to load image file " << path;
         return false;
@@ -31,7 +42,13 @@ bool CuteOpenCVBase::processOpenCVFrame(cv::Mat &frame)
 
 bool CuteOpenCVBase::processFrame(QImage &frame)
 {
-    qDebug() << frame.format();
+    qDebug() << frame.format() << frame.width() << frame.height();
+
+    if (m_scaledown && m_scalewidth>0 && m_scaleheight>0) {
+        frame=frame.scaled(m_scalewidth, m_scaleheight, Qt::KeepAspectRatioByExpanding);
+        qDebug() << "ScaledDownTo" << frame.format() << frame.width() << frame.height();
+    }
+
     switch(frame.format()) {
     case QImage::Format_Invalid:
     {
