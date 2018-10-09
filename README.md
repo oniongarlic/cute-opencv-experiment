@@ -20,3 +20,7 @@ Build OpenCV for Android with:
  -DWITH_OPENCL=ON
  -DENABLE_NEON=ON
  -DANDROID_ARM_NEON=ON
+
+Copy libraries into 3rdparty/opencv-armv7/
+
+
