@@ -92,22 +92,21 @@ ApplicationWindow {
             loadModel();
         }
 
+        property rect o;
+        property point c;
+
         onObjectDetected: {
-            objectID.text="CID: "+cid;
-            objectConfidence.text=confidence;
-            console.debug(x+" : "+y)
+            objectID.text=od.getClassName(cid);
+            objectConfidence.text=cid+":"+Math.round(confidence*100)+"%";
 
-            var vx=((x-w/2)*vc.width);
-            var vy=((y-h/2)*vc.height);
-
-            objectRect.x=vx;
-            objectRect.y=vy;
-            objectRect.width=w*vc.width;
-            objectRect.height=h*vc.height;
+            od.c=vc.mapNormalizedPointToItem(center);
+            od.o=vc.mapNormalizedRectToItem(rect);
         }
 
         onNoObjectDetected: {
-            objectID.text="<Nothing found>"
+            console.debug("Nothing found!")
+            objectID.text=""
+            objectConfidence.text="-:---%"
         }
     }
 
@@ -126,7 +125,7 @@ ApplicationWindow {
             focusPointMode: Camera.FocusPointCenter
         }
 
-        metaData.subject: "OpenCV Test"
+        metaData.subject: "QtOpenCVHelloWorld"
 
         imageCapture {
             onImageCaptured: {
@@ -186,10 +185,24 @@ ApplicationWindow {
         Rectangle {
             id: objectRect
             color: "transparent"
-            width: 5
-            height: 5
+            width: od.o.width
+            height: od.o.height
+            x: od.o.x
+            y: od.o.y
             border.width: 2
-            border.color: "white"
+            border.color: "red"
+        }
+
+        Rectangle {
+            id: objectCenter
+            color: "transparent"
+            x: od.c.x-2
+            y: od.c.y-2
+            width: 4
+            height: 4
+            border.width: 2
+            border.color: "green"
+            visible: x>0 && y>0
         }
 
     }

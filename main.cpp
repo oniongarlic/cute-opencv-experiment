@@ -12,6 +12,9 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    app.setApplicationName("HelloWorldQtOpenCV");
+    app.setOrganizationDomain("tal.org");
+
     qmlRegisterType<OCVObjectColorDetector>("org.tal", 1,0, "ColorDetector");
     qmlRegisterType<ObjectDetector>("org.tal", 1,0, "ObjectDetector");
 

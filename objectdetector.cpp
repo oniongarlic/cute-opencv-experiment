@@ -8,11 +8,11 @@
 
 ObjectDetector::ObjectDetector(QObject *parent) :
     CuteOpenCVBase(parent),
-#ifdef Q_OS_ANDROID
+    #ifdef Q_OS_ANDROID
     m_model("assets:/test.weights"),
-#else
+    #else
     m_model("/home/milang/qt/qt-openvc-helloworld/yolo/test.weights"),
-#endif
+    #endif
     m_config(":///yolo/obj-detect.cfg"),
     m_confidence(0.75),
     m_darknet_scale(0.00392),
@@ -23,11 +23,62 @@ ObjectDetector::ObjectDetector(QObject *parent) :
     m_scaledown=true;
     m_scaleheight=480;
     m_scalewidth=480;
+
+    m_classes.insert(0, "Shelf");
+    m_classes.insert(1, "Cabinet");
+    m_classes.insert(2, "Drawer");
+    m_classes.insert(3, "Instrument");
+    m_classes.insert(4, "Table");
+    m_classes.insert(5, "Soffa");
+    m_classes.insert(6, "Chair");
+    m_classes.insert(7, "Office chair");
+    m_classes.insert(8, "Bicycle");
+    m_classes.insert(9, "Coffemaker");
+    m_classes.insert(10, "Microwaveoven");
+    m_classes.insert(11, "School desk");
 }
 
 ObjectDetector::~ObjectDetector()
 {
 
+}
+
+#if 0
+class AsyncFileLoader : public QObject
+{
+    Q_OBJECT
+public:
+    AsyncFileLoader(const QString file, QObject *parent=nullptr) : QObject (parent), m_file(file) {
+
+    }
+    virtual ~AsyncFileLoader() {
+        m_data.clear();
+    }
+
+signals:
+    void dataLoaded(const QByteArray &data);
+
+private:
+    QString m_file;
+    QByteArray m_data;
+};
+#endif
+
+void ObjectDetector::dataLoaded(const QByteArray &data)
+{
+
+}
+
+bool ObjectDetector::loadModelAsync()
+{
+#if 0
+    AsyncFileLoader *afl=new AsyncFileLoader(m_model, this);
+    afl->moveToThread(&m_thread);
+    connect(&m_thread, &QThread::finished, afl, &QObject::deleteLater);
+    m_thread.setObjectName("ModelLoader");
+    m_thread.start();
+#endif
+    return true;
 }
 
 bool ObjectDetector::loadModel()
@@ -49,11 +100,11 @@ bool ObjectDetector::loadModel()
         if (m_config.startsWith(":///")) {
             QFile config(m_config);
             config.open(QIODevice::ReadOnly);
-            QByteArray cdata=config.readAll();
+            const QByteArray cdata=config.readAll();
 
             QFile model(m_model);
             model.open(QIODevice::ReadOnly);
-            QByteArray mdata=model.readAll();
+            const QByteArray mdata=model.readAll();
 
             m_net = cv::dnn::readNetFromDarknet(cdata, cdata.size(), mdata, mdata.size());
         } else {
@@ -65,7 +116,7 @@ bool ObjectDetector::loadModel()
         //m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
         //m_net=cv::dnn::readNet(m_model.toStdString(), m_config.toStdString());
         m_net.setPreferableBackend(0);
-        m_net.setPreferableTarget(0);                
+        m_net.setPreferableTarget(0);
 
         qDebug() << "Model loaded in " << timer.elapsed()/1000.0 << "s" << (m_net.empty() ? "Empty net" : "Net OK");
 
@@ -88,6 +139,11 @@ std::vector<cv::String> ObjectDetector::getOutputsNames(const cv::dnn::Net& net)
             names[i] = layersNames[outLayers[i] - 1];
     }
     return names;
+}
+
+QString ObjectDetector::getClassName(int i) const
+{
+    return m_classes.value(i, "");
 }
 
 bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
@@ -117,11 +173,11 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
     qDebug() << "blobFromImage" << timer.elapsed()/1000.0 << "s";
 
     m_net.setInput(blob);
-    std::vector<cv::Mat> outs;        
+    std::vector<cv::Mat> outs;
 
     try {
         const cv::String a;
-        m_net.forward(outs, getOutputsNames(m_net));        
+        m_net.forward(outs, getOutputsNames(m_net));
     } catch (const std::exception& e) {
         qWarning() << e.what();
         return false;
@@ -132,10 +188,9 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
     std::vector<int> outLayers = m_net.getUnconnectedOutLayers();
     std::string outLayerType = m_net.getLayer(outLayers[0])->type;
 
-    if (outs.size()==0) {
-        emit noObjectDetected();
-        return false;
-    }
+    m_objects.clear();
+
+    bool found=false;
 
     for (size_t i = 0; i < outs.size(); ++i) {
         // Network produces output blob with a shape NxC where N is a number of
@@ -146,9 +201,13 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
             cv::Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
             cv::Point classIdPoint;
             double confidence;
+
             minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
+
             if (confidence > m_confidence) {
                 DetectedObject o;
+
+                found=true;
 
                 o.id=classIdPoint.x;
 
@@ -156,6 +215,11 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
                 o.cyf=data[1];
                 o.wf=data[2];
                 o.hf=data[3];
+
+                o.center.setX(o.cxf);
+                o.center.setY(o.cyf);
+
+                o.relative.setRect(o.cxf-o.wf/2, o.cyf-o.hf/2, o.wf, o.hf);
 
                 o.centerX = (int)(data[0] * frame.cols);
                 o.centerY = (int)(data[1] * frame.rows);
@@ -169,16 +233,15 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
 
                 m_objects.push_back(o);
 
-                emit objectDetected(o.id, o.confidence, o.cxf, o.cyf, o.wf, o.hf);
-
-                //classIds.push_back(classIdPoint.x);
-                //confidences.push_back((float)confidence);
-                //boxes.push_back(Rect(left, top, width, height));
+                emit objectDetected(o.id, o.confidence, o.center, o.relative);
             }
         }
     }
 
-    return true;
+    if (!found)
+        emit noObjectDetected();
+
+    return found;
 }
 
 

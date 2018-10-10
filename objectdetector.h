@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QImage>
+#include <QThread>
+#include <QMap>
 
 #include <iostream>
 #include <fstream>
@@ -33,6 +35,10 @@ struct DetectedObject
     float wf;
     float hf;
 
+    QPointF center;
+    QRect coords;
+    QRectF relative;
+
     double confidence;
 };
 
@@ -59,6 +65,10 @@ public:
         return m_config;
     }
 
+    Q_INVOKABLE QString getClassName(int i) const;
+    Q_INVOKABLE int getObjectCount() const {
+        return m_objects.size();
+    }
 signals:
 
     void modelChanged(QString model);
@@ -67,7 +77,7 @@ signals:
 
     void noObjectDetected();
 
-    void objectDetected(int cid, double confidence, float x, float y, float w, float h);
+    void objectDetected(int cid, double confidence, QPointF center, QRectF rect);
 
 public slots:
 
@@ -89,12 +99,17 @@ void setConfig(QString config)
     emit configChanged(m_config);
 }
 
+void dataLoaded(const QByteArray &data);
+
 protected:
-    bool processOpenCVFrame(cv::Mat &frame);
+bool processOpenCVFrame(cv::Mat &frame);
+bool loadModelAsync();
 private:
     QString m_model;
     QString m_config;
     QString m_class;
+
+    QThread m_thread;
 
     double m_confidence;
 
@@ -109,6 +124,7 @@ private:
     std::vector<cv::String> getOutputsNames(const cv::dnn::Net &net);
 
     QList<DetectedObject> m_objects;
+    QMap<int, QString>m_classes;
 };
 
 #endif // OBJECTDETECTOR_H
