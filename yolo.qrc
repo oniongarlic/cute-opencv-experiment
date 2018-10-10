@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>yolo/obj-detect.cfg</file>
+        <file>yolo/obj.names</file>
     </qresource>
 </RCC>

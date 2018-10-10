@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QTextStream>
 
 ObjectDetector::ObjectDetector(QObject *parent) :
     CuteOpenCVBase(parent),
@@ -14,6 +15,7 @@ ObjectDetector::ObjectDetector(QObject *parent) :
     m_model("/home/milang/qt/qt-openvc-helloworld/yolo/test.weights"),
     #endif
     m_config(":///yolo/obj-detect.cfg"),
+    m_class(":///yolo/obj.names"),
     m_confidence(0.75),
     m_darknet_scale(0.00392),
     m_width(480),
@@ -93,6 +95,11 @@ bool ObjectDetector::loadModel()
         return false;
     }
 
+    if (m_class!="" && !QFile::exists(m_class)) {
+        qWarning() << "Class ID to name mapping configuration set but not found.";
+        return false;
+    }
+
     QElapsedTimer timer;
     timer.start();
 
@@ -101,6 +108,19 @@ bool ObjectDetector::loadModel()
             QFile config(m_config);
             config.open(QIODevice::ReadOnly);
             const QByteArray cdata=config.readAll();
+
+            if (m_class!="") {
+                QFile classes(m_class);
+                classes.open(QIODevice::ReadOnly);
+                QTextStream text(&classes);
+                int l=0;
+                m_classes.clear();
+                while (!text.atEnd()) {
+                    QString line=text.readLine();
+                    m_classes.insert(l, line);
+                    l++;
+                }
+            }
 
             QFile model(m_model);
             model.open(QIODevice::ReadOnly);
