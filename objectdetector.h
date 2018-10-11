@@ -17,6 +17,7 @@
 #include <opencv2/imgproc/types_c.h>
 
 #include "cuteopencvbase.h"
+#include "objectdetectorworker.h"
 
 struct DetectedObject
 {
@@ -84,7 +85,7 @@ signals:
 
     void detectionEnded();
 
-    void processFrameInThread(cv::Mat frame);
+    void processFrameInThread();
 
 public slots:
 
@@ -117,6 +118,8 @@ private:
     QString m_class;
 
     QThread m_thread;
+
+    ObjectDetectorWorker *w;
 
     double m_confidence;
 

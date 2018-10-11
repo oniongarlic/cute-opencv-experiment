@@ -57,10 +57,13 @@ void ObjectDetectorWorker::loadModel(QString config, QString model, QString clas
         m_net.setPreferableBackend(0);
         m_net.setPreferableTarget(0);
 
-        qDebug() << "Model loaded in " << timer.elapsed()/1000.0 << "s" << (m_net.empty() ? "Empty net" : "Net OK");
+        qDebug() << "WorkerModel loaded in " << timer.elapsed()/1000.0 << "s" << (m_net.empty() ? "Empty net" : "Net OK");
+
+        emit modelLoaded();
     } catch (const std::exception& e) {
         qWarning() << e.what();
     }
+    emit error();
 }
 
 std::vector<cv::String> ObjectDetectorWorker::getOutputsNames(const cv::dnn::Net& net)
@@ -77,9 +80,17 @@ std::vector<cv::String> ObjectDetectorWorker::getOutputsNames(const cv::dnn::Net
     return names;
 }
 
-void ObjectDetectorWorker::processOpenCVFrame(cv::Mat frame)
+void ObjectDetectorWorker::processOpenCVFrame()
 {
     cv::Mat blob, f;
+
+    if (m_processing==true) {
+        qWarning() << "Processing is running...";
+        return;
+    }
+
+    m_processing=true;
+    const cv::Mat frame=m_frame;
 
     if (m_net.empty()) {
         qWarning() << "Net is not loaded";
@@ -99,9 +110,9 @@ void ObjectDetectorWorker::processOpenCVFrame(cv::Mat frame)
         return;
     }
 
-    emit detectionStarted();
+    emit detectionStarted();        
 
-    qDebug() << "Starting...";
+    qDebug() << "Starting processing in thread...";
     QElapsedTimer timer;
     timer.start();
 
@@ -118,6 +129,8 @@ void ObjectDetectorWorker::processOpenCVFrame(cv::Mat frame)
         qWarning() << e.what();
         return;
     }
+
+    QThread::sleep(4);
 
     qDebug() << "Frame processed in " << timer.elapsed()/1000.0 << "s";
 
@@ -182,4 +195,12 @@ void ObjectDetectorWorker::processOpenCVFrame(cv::Mat frame)
 
 #endif
     emit detectionEnded();
+    m_processing=false;
+}
+
+void ObjectDetectorWorker::setFrame(cv::Mat &frame)
+{
+    //m_mutex.lock();
+    m_frame=frame.clone();
+    //m_mutex.unlock();
 }

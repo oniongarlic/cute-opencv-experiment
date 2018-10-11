@@ -7,8 +7,6 @@
 #include <QFile>
 #include <QTextStream>
 
-#include "objectdetectorworker.h"
-
 ObjectDetector::ObjectDetector(QObject *parent) :
     CuteOpenCVBase(parent),
     #ifdef Q_OS_ANDROID
@@ -57,11 +55,11 @@ void ObjectDetector::dataLoaded(const QByteArray &data)
 
 bool ObjectDetector::startWorkerThread()
 {
-    ObjectDetectorWorker *w=new ObjectDetectorWorker(this);
+    w=new ObjectDetectorWorker(this);
     w->loadModel(m_config, m_model, m_class);
     w->moveToThread(&m_thread);
     connect(&m_thread, &QThread::finished, w, &QObject::deleteLater);
-    connect(&w, &ObjectDetectorWorker::processOpenCVFrame, this, &ObjectDetector::processFrameInThread);
+    connect(this, &ObjectDetector::processFrameInThread, w, &ObjectDetectorWorker::processOpenCVFrame);
     m_thread.setObjectName("WorkerThread");
     m_thread.start();
 
@@ -154,6 +152,11 @@ QString ObjectDetector::getClassName(int i) const
 bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
 {
     cv::Mat blob, f;
+
+    w->setFrame(frame);
+    emit processFrameInThread();
+
+    return true;
 
     if (m_net.empty()) {
         qWarning() << "Net is not loaded";

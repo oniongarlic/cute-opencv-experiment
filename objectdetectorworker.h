@@ -16,6 +16,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgproc/types_c.h>
 
+#include <QThread>
+#include <QMutex>
+
 class ObjectDetectorWorker : public QObject
 {
     Q_OBJECT
@@ -25,13 +28,14 @@ public:
 signals:
     void error();
     void detectionStarted();
-    void detectionEnded();
+    void detectionEnded();   
+    void modelLoaded();
 
 public slots:
 
     void loadModel(QString config, QString model, QString classes);
-
-    void processOpenCVFrame(cv::Mat frame);
+    void processOpenCVFrame();
+    void setFrame(cv::Mat &frame);
 
 private:
     QString m_model;
@@ -43,8 +47,13 @@ private:
     int m_width;
     int m_height;
 
+    bool m_processing;
+
+    //QMutex m_mutex;
+
     bool m_crop;
     cv::dnn::Net m_net;
+    cv::Mat m_frame;
     std::vector<cv::String> getOutputsNames(const cv::dnn::Net &net);
 };
 
