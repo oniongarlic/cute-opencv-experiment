@@ -6,7 +6,8 @@ SOURCES += \
     ocvobjectcolordetector.cpp \
     objectdetector.cpp \
     cuteopencv.cpp \
-    cuteopencvbase.cpp
+    cuteopencvbase.cpp \
+    objectdetectorworker.cpp
 
 RESOURCES += qml.qrc \
     yolo.qrc
@@ -59,7 +60,8 @@ HEADERS += \
     ocvobjectcolordetector.h \
     objectdetector.h \
     cuteopencv.h \
-    cuteopencvbase.h
+    cuteopencvbase.h \
+    objectdetectorworker.h
 
 DISTFILES += \
     android/AndroidManifest.xml \

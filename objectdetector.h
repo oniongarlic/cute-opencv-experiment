@@ -69,6 +69,7 @@ public:
     Q_INVOKABLE int getObjectCount() const {
         return m_objects.size();
     }
+    bool startWorkerThread();
 signals:
 
     void modelChanged(QString model);
@@ -79,31 +80,37 @@ signals:
 
     void objectDetected(int cid, double confidence, QPointF center, QRectF rect);
 
+    void detectionStarted();
+
+    void detectionEnded();
+
+    void processFrameInThread(cv::Mat frame);
+
 public slots:
 
-void setModel(QString model)
-{
-    if (m_model == model)
-        return;
+    void setModel(QString model)
+    {
+        if (m_model == model)
+            return;
 
-    m_model = model;
-    emit modelChanged(m_model);
-}
+        m_model = model;
+        emit modelChanged(m_model);
+    }
 
-void setConfig(QString config)
-{
-    if (m_config == config)
-        return;
+    void setConfig(QString config)
+    {
+        if (m_config == config)
+            return;
 
-    m_config = config;
-    emit configChanged(m_config);
-}
+        m_config = config;
+        emit configChanged(m_config);
+    }
 
-void dataLoaded(const QByteArray &data);
+    void dataLoaded(const QByteArray &data);
 
 protected:
-bool processOpenCVFrame(cv::Mat &frame);
-bool loadModelAsync();
+    bool processOpenCVFrame(cv::Mat &frame);
+    bool loadModelAsync();
 private:
     QString m_model;
     QString m_config;

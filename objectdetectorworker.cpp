@@ -1,89 +1,23 @@
-#include "objectdetector.h"
-
-#include <string>
-
-#include <QDebug>
-#include <QElapsedTimer>
-#include <QFile>
-#include <QTextStream>
-
 #include "objectdetectorworker.h"
 
-ObjectDetector::ObjectDetector(QObject *parent) :
-    CuteOpenCVBase(parent),
-    #ifdef Q_OS_ANDROID
-    m_model("assets:/test.weights"),
-    #else
-    m_model("/home/milang/qt/qt-openvc-helloworld/yolo/test.weights"),
-    #endif
-    m_config(":///yolo/obj-detect.cfg"),
-    m_class(":///yolo/obj.names"),
-    m_confidence(0.75),
+#include <QElapsedTimer>
+#include <QFile>
+#include <QDebug>
+
+ObjectDetectorWorker::ObjectDetectorWorker(QObject *parent) :
+    QObject(parent),
     m_darknet_scale(0.00392),
     m_width(480),
     m_height(480),
     m_crop(false)
 {
-    m_scaledown=true;
-    m_scaleheight=480;
-    m_scalewidth=480;
-
-    m_classes.insert(0, "Shelf");
-    m_classes.insert(1, "Cabinet");
-    m_classes.insert(2, "Drawer");
-    m_classes.insert(3, "Instrument");
-    m_classes.insert(4, "Table");
-    m_classes.insert(5, "Soffa");
-    m_classes.insert(6, "Chair");
-    m_classes.insert(7, "Office chair");
-    m_classes.insert(8, "Bicycle");
-    m_classes.insert(9, "Coffemaker");
-    m_classes.insert(10, "Microwaveoven");
-    m_classes.insert(11, "School desk");
-
-    startWorkerThread();
-}
-
-ObjectDetector::~ObjectDetector()
-{
-    m_thread.quit();
-    m_thread.wait();
-}
-
-void ObjectDetector::dataLoaded(const QByteArray &data)
-{
 
 }
 
-bool ObjectDetector::startWorkerThread()
+void ObjectDetectorWorker::loadModel(QString config, QString model, QString classes)
 {
-    ObjectDetectorWorker *w=new ObjectDetectorWorker(this);
-    w->loadModel(m_config, m_model, m_class);
-    w->moveToThread(&m_thread);
-    connect(&m_thread, &QThread::finished, w, &QObject::deleteLater);
-    connect(&w, &ObjectDetectorWorker::processOpenCVFrame, this, &ObjectDetector::processFrameInThread);
-    m_thread.setObjectName("WorkerThread");
-    m_thread.start();
-
-    return true;
-}
-
-bool ObjectDetector::loadModel()
-{
-    if (!QFile::exists(m_model)) {
-        qWarning() << "Model network file not found.";
-        return false;
-    }
-
-    if (!QFile::exists(m_config)) {
-        qWarning() << "Model configuration not found.";
-        return false;
-    }
-
-    if (m_class!="" && !QFile::exists(m_class)) {
-        qWarning() << "Class ID to name mapping configuration set but not found.";
-        return false;
-    }
+    m_config=config;
+    m_model=model;
 
     QElapsedTimer timer;
     timer.start();
@@ -99,10 +33,10 @@ bool ObjectDetector::loadModel()
                 classes.open(QIODevice::ReadOnly);
                 QTextStream text(&classes);
                 int l=0;
-                m_classes.clear();
+                //m_classes.clear();
                 while (!text.atEnd()) {
                     QString line=text.readLine();
-                    m_classes.insert(l, line);
+                    //m_classes.insert(l, line);
                     l++;
                 }
             }
@@ -124,15 +58,12 @@ bool ObjectDetector::loadModel()
         m_net.setPreferableTarget(0);
 
         qDebug() << "Model loaded in " << timer.elapsed()/1000.0 << "s" << (m_net.empty() ? "Empty net" : "Net OK");
-
-        return true;
     } catch (const std::exception& e) {
         qWarning() << e.what();
     }
-    return false;
 }
 
-std::vector<cv::String> ObjectDetector::getOutputsNames(const cv::dnn::Net& net)
+std::vector<cv::String> ObjectDetectorWorker::getOutputsNames(const cv::dnn::Net& net)
 {
     static std::vector<cv::String> names;
     if (names.empty())
@@ -146,33 +77,29 @@ std::vector<cv::String> ObjectDetector::getOutputsNames(const cv::dnn::Net& net)
     return names;
 }
 
-QString ObjectDetector::getClassName(int i) const
-{
-    return m_classes.value(i, "");
-}
-
-bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
+void ObjectDetectorWorker::processOpenCVFrame(cv::Mat frame)
 {
     cv::Mat blob, f;
 
     if (m_net.empty()) {
         qWarning() << "Net is not loaded";
-        return false;
+        emit error();
+        return;
     }
 
     if (frame.empty()) {
         qWarning() << "Empty frame";
-        return false;
+        emit error();
+        return;
     }
-
 
     if (frame.channels()!=3) {
         qWarning() << "Image must have 3 channels!";
+        emit error();
+        return;
     }
 
     emit detectionStarted();
-
-
 
     qDebug() << "Starting...";
     QElapsedTimer timer;
@@ -189,7 +116,7 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
         m_net.forward(outs, getOutputsNames(m_net));
     } catch (const std::exception& e) {
         qWarning() << e.what();
-        return false;
+        return;
     }
 
     qDebug() << "Frame processed in " << timer.elapsed()/1000.0 << "s";
@@ -197,6 +124,7 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
     std::vector<int> outLayers = m_net.getUnconnectedOutLayers();
     std::string outLayerType = m_net.getLayer(outLayers[0])->type;
 
+#if 0
     m_objects.clear();
 
     bool found=false;
@@ -252,9 +180,6 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
     if (!found)
         emit noObjectDetected();
 
+#endif
     emit detectionEnded();
-
-    return found;
 }
-
-
