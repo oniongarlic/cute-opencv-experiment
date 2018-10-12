@@ -42,7 +42,6 @@ OCVObjectColorDetector::OCVObjectColorDetector(QObject *parent) :
         i.next();
         QVariantMap cmap=i.value().toMap();
         QColor c(i.key());
-        qDebug() << i.key() << cmap << c;
 
         Mat lab;
         Mat bgr(1, 1, CV_8UC3, Scalar(c.blue(),c.green(),c.red()));
@@ -52,8 +51,6 @@ OCVObjectColorDetector::OCVObjectColorDetector(QObject *parent) :
         double il = (double)ci.val[0];
         double ia = (double)ci.val[1];
         double ib = (double)ci.val[2];
-
-        qDebug() << i.key() << il << ia << ib;
 
         m_colors.append(Scalar(il,ia,ib));
         m_colorgroups.append(cmap["group"].toString());
