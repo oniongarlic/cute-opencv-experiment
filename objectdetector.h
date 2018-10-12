@@ -109,6 +109,11 @@ public slots:
 
     void dataLoaded(const QByteArray &data);
 
+    void objectDetectedByWorker(int cid, double confidence, QPointF center, QRectF rect);
+
+    void workerDetectionStarted();
+    void workerDetectionEnded();
+
 protected:
     bool processOpenCVFrame(cv::Mat &frame);
     bool loadModelAsync();

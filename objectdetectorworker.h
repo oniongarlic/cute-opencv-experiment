@@ -26,32 +26,32 @@ public:
     explicit ObjectDetectorWorker(QObject *parent = nullptr);
 
 signals:
-    void error();
+    void error(int code);
     void detectionStarted();
-    void detectionEnded();   
-    void modelLoaded();
+    void detectionEnded();
+    void noObjectDetected();
+    void objectDetected(int cid, double confidence, QPointF center, QRectF rect);
+    void modelLoaded();    
 
 public slots:
 
     void loadModel(QString config, QString model, QString classes);
     void processOpenCVFrame();
-    void setFrame(cv::Mat &frame);
+    bool setFrame(cv::Mat &frame);
 
 private:
+    QMutex m_mutex;
+
     QString m_model;
     QString m_config;
     QString m_class;
-
-    const double m_darknet_scale;
-
+    const double m_darknet_scale;    
     int m_width;
     int m_height;
-
+    double m_confidence;
+    bool m_crop;
     bool m_processing;
 
-    //QMutex m_mutex;
-
-    bool m_crop;
     cv::dnn::Net m_net;
     cv::Mat m_frame;
     std::vector<cv::String> getOutputsNames(const cv::dnn::Net &net);

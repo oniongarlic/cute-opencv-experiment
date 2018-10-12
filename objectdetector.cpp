@@ -26,19 +26,7 @@ ObjectDetector::ObjectDetector(QObject *parent) :
     m_scaleheight=480;
     m_scalewidth=480;
 
-    m_classes.insert(0, "Shelf");
-    m_classes.insert(1, "Cabinet");
-    m_classes.insert(2, "Drawer");
-    m_classes.insert(3, "Instrument");
-    m_classes.insert(4, "Table");
-    m_classes.insert(5, "Soffa");
-    m_classes.insert(6, "Chair");
-    m_classes.insert(7, "Office chair");
-    m_classes.insert(8, "Bicycle");
-    m_classes.insert(9, "Coffemaker");
-    m_classes.insert(10, "Microwaveoven");
-    m_classes.insert(11, "School desk");
-
+    // We do the actual work in a separate thread
     startWorkerThread();
 }
 
@@ -53,13 +41,34 @@ void ObjectDetector::dataLoaded(const QByteArray &data)
 
 }
 
+void ObjectDetector::objectDetectedByWorker(int cid, double confidence, QPointF center, QRectF rect)
+{
+    qDebug() << "Worker Reports: " << cid << confidence << center << rect;
+    emit objectDetected(cid, confidence, center, rect);
+}
+
+void ObjectDetector::workerDetectionStarted()
+{
+    qDebug() << "Worker workerDetectionStarted";
+    emit detectionStarted();
+}
+
+void ObjectDetector::workerDetectionEnded()
+{
+    qDebug() << "Worker workerDetectionEnded";
+    emit detectionEnded();
+}
+
 bool ObjectDetector::startWorkerThread()
 {
-    w=new ObjectDetectorWorker(this);
+    w=new ObjectDetectorWorker();
     w->loadModel(m_config, m_model, m_class);
     w->moveToThread(&m_thread);
     connect(&m_thread, &QThread::finished, w, &QObject::deleteLater);
     connect(this, &ObjectDetector::processFrameInThread, w, &ObjectDetectorWorker::processOpenCVFrame);
+    connect(w, &ObjectDetectorWorker::objectDetected, this, &ObjectDetector::objectDetectedByWorker);
+    connect(w, &ObjectDetectorWorker::detectionEnded, this, &ObjectDetector::workerDetectionEnded);
+    connect(w, &ObjectDetectorWorker::detectionStarted, this, &ObjectDetector::workerDetectionStarted);
     m_thread.setObjectName("WorkerThread");
     m_thread.start();
 
@@ -153,7 +162,8 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
 {
     cv::Mat blob, f;
 
-    w->setFrame(frame);
+    if (!w->setFrame(frame))
+        return false;
     emit processFrameInThread();
 
     return true;
@@ -174,8 +184,6 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
     }
 
     emit detectionStarted();
-
-
 
     qDebug() << "Starting...";
     QElapsedTimer timer;

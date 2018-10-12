@@ -3,13 +3,17 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <QDebug>
+#include <QMutexLocker>
 
 ObjectDetectorWorker::ObjectDetectorWorker(QObject *parent) :
     QObject(parent),
+    m_mutex(QMutex::NonRecursive),
     m_darknet_scale(0.00392),
     m_width(480),
     m_height(480),
-    m_crop(false)
+    m_confidence(0.75),
+    m_crop(false),
+    m_processing(false)
 {
 
 }
@@ -21,6 +25,8 @@ void ObjectDetectorWorker::loadModel(QString config, QString model, QString clas
 
     QElapsedTimer timer;
     timer.start();
+
+    QMutexLocker locker(&m_mutex);
 
     try {
         if (m_config.startsWith(":///")) {
@@ -50,20 +56,13 @@ void ObjectDetectorWorker::loadModel(QString config, QString model, QString clas
             m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
         }
 
-        //m_net.getMemoryConsumption()
-
-        //m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
-        //m_net=cv::dnn::readNet(m_model.toStdString(), m_config.toStdString());
-        m_net.setPreferableBackend(0);
-        m_net.setPreferableTarget(0);
-
-        qDebug() << "WorkerModel loaded in " << timer.elapsed()/1000.0 << "s" << (m_net.empty() ? "Empty net" : "Net OK");
+        qDebug() << "WorkerThread: Model loaded in " << timer.elapsed()/1000.0 << "s" << (m_net.empty() ? "Empty net" : "Net OK");
 
         emit modelLoaded();
     } catch (const std::exception& e) {
         qWarning() << e.what();
     }
-    emit error();
+    emit error(1);
 }
 
 std::vector<cv::String> ObjectDetectorWorker::getOutputsNames(const cv::dnn::Net& net)
@@ -84,8 +83,10 @@ void ObjectDetectorWorker::processOpenCVFrame()
 {
     cv::Mat blob, f;
 
+    QMutexLocker locker(&m_mutex);
+
     if (m_processing==true) {
-        qWarning() << "Processing is running...";
+        qWarning() << "Processing is already running...";
         return;
     }
 
@@ -94,23 +95,23 @@ void ObjectDetectorWorker::processOpenCVFrame()
 
     if (m_net.empty()) {
         qWarning() << "Net is not loaded";
-        emit error();
+        emit error(2);
         return;
     }
 
     if (frame.empty()) {
         qWarning() << "Empty frame";
-        emit error();
+        emit error(3);
         return;
     }
 
     if (frame.channels()!=3) {
         qWarning() << "Image must have 3 channels!";
-        emit error();
+        emit error(4);
         return;
     }
 
-    emit detectionStarted();        
+    emit detectionStarted();
 
     qDebug() << "Starting processing in thread...";
     QElapsedTimer timer;
@@ -130,15 +131,16 @@ void ObjectDetectorWorker::processOpenCVFrame()
         return;
     }
 
+#ifndef Q_OS_ANDROID
+    qDebug("Waisting time for debugging...");
     QThread::sleep(4);
+    qDebug("...done");
+#endif
 
     qDebug() << "Frame processed in " << timer.elapsed()/1000.0 << "s";
 
     std::vector<int> outLayers = m_net.getUnconnectedOutLayers();
     std::string outLayerType = m_net.getLayer(outLayers[0])->type;
-
-#if 0
-    m_objects.clear();
 
     bool found=false;
 
@@ -154,53 +156,56 @@ void ObjectDetectorWorker::processOpenCVFrame()
 
             minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
 
-            if (confidence > m_confidence) {
-                DetectedObject o;
+            if (confidence < m_confidence)
+                continue;
 
-                found=true;
+            found=true;
+            QPointF center;
+            QRectF relative;
+            int id=classIdPoint.x;
 
-                o.id=classIdPoint.x;
+            float cxf=data[0];
+            float cyf=data[1];
+            float wf=data[2];
+            float hf=data[3];
 
-                o.cxf=data[0];
-                o.cyf=data[1];
-                o.wf=data[2];
-                o.hf=data[3];
+            center.setX(cxf);
+            center.setY(cyf);
 
-                o.center.setX(o.cxf);
-                o.center.setY(o.cyf);
+            relative.setRect(center.x()-wf/2, center.y()-hf/2, wf, hf);
 
-                o.relative.setRect(o.cxf-o.wf/2, o.cyf-o.hf/2, o.wf, o.hf);
-
-                o.centerX = (int)(data[0] * frame.cols);
-                o.centerY = (int)(data[1] * frame.rows);
-                o.width = (int)(data[2] * frame.cols);
-                o.height = (int)(data[3] * frame.rows);
-                o.left = o.centerX - o.width / 2;
-                o.top = o.centerY - o.height / 2;
-                o.confidence=confidence;
-
-                qDebug() << o.id << o.confidence << o.centerX << o.centerY;
-
-                m_objects.push_back(o);
-
-                emit objectDetected(o.id, o.confidence, o.center, o.relative);
-            } else {
-                qDebug() << confidence << classIdPoint.x;
-            }
+#if 0
+            o.centerX = (int)(data[0] * frame.cols);
+            o.centerY = (int)(data[1] * frame.rows);
+            o.width = (int)(data[2] * frame.cols);
+            o.height = (int)(data[3] * frame.rows);
+            o.left = o.centerX - o.width / 2;
+            o.top = o.centerY - o.height / 2;
+            o.confidence=confidence;
+#endif
+            emit objectDetected(id, confidence, center, relative);
         }
     }
 
     if (!found)
         emit noObjectDetected();
 
-#endif
     emit detectionEnded();
+
+    qDebug() << "Detection done in " << timer.elapsed()/1000.0 << "s";
+
     m_processing=false;
 }
 
-void ObjectDetectorWorker::setFrame(cv::Mat &frame)
+bool ObjectDetectorWorker::setFrame(cv::Mat &frame)
 {
-    //m_mutex.lock();
+    QMutexLocker locker(&m_mutex);
+    if (m_processing) {
+        qDebug("Frame is active, can not set new at this time.");
+        return false;
+    }
+
     m_frame=frame.clone();
-    //m_mutex.unlock();
+
+    return true;
 }
