@@ -13,18 +13,22 @@ ApplicationWindow {
     title: qsTr("OpenCV QtQuick Test")
     header: mainToolbar
 
+    property bool inProgress: false
+
     ToolBar {
         id: mainToolbar
         RowLayout {
             anchors.fill: parent
             ToolButton {
                 text: "Open..."
+                enabled: !inProgress
                 onClicked: {
                     filesDialog.open();
                 }
             }
             ToolButton {
                 text: "Capture"
+                enabled: !inProgress
                 onClicked: {
                     camera.imageCapture.capture();
                 }
@@ -108,6 +112,11 @@ ApplicationWindow {
             objectID.text=""
             objectConfidence.text="-:---%"
         }
+
+        onDetectionEnded: inProgress=false;
+
+        onDetectionStarted: inProgress=true;
+
     }
 
     Camera {
@@ -204,7 +213,13 @@ ApplicationWindow {
             border.color: "green"
             visible: x>0 && y>0
         }
-
+        BusyIndicator {
+            anchors.centerIn: parent
+            width: 128
+            height: 128
+            visible: inProgress
+            running: inProgress
+        }
     }
 
     Component.onCompleted: {
