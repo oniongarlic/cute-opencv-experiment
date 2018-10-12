@@ -35,7 +35,7 @@ signals:
 
 public slots:
 
-    void loadModel(QString config, QString model, QString classes);
+    void loadModel(const QString config, const QString model);
     void processOpenCVFrame();
     bool setFrame(cv::Mat &frame);
 
@@ -44,7 +44,7 @@ private:
 
     QString m_model;
     QString m_config;
-    QString m_class;
+
     const double m_darknet_scale;    
     int m_width;
     int m_height;

@@ -18,7 +18,7 @@ ObjectDetectorWorker::ObjectDetectorWorker(QObject *parent) :
 
 }
 
-void ObjectDetectorWorker::loadModel(QString config, QString model, QString classes)
+void ObjectDetectorWorker::loadModel(const QString config, const QString model)
 {
     m_config=config;
     m_model=model;
@@ -32,20 +32,7 @@ void ObjectDetectorWorker::loadModel(QString config, QString model, QString clas
         if (m_config.startsWith(":///")) {
             QFile config(m_config);
             config.open(QIODevice::ReadOnly);
-            const QByteArray cdata=config.readAll();
-
-            if (m_class!="") {
-                QFile classes(m_class);
-                classes.open(QIODevice::ReadOnly);
-                QTextStream text(&classes);
-                int l=0;
-                //m_classes.clear();
-                while (!text.atEnd()) {
-                    QString line=text.readLine();
-                    //m_classes.insert(l, line);
-                    l++;
-                }
-            }
+            const QByteArray cdata=config.readAll();           
 
             QFile model(m_model);
             model.open(QIODevice::ReadOnly);
@@ -201,10 +188,11 @@ bool ObjectDetectorWorker::setFrame(cv::Mat &frame)
 {
     QMutexLocker locker(&m_mutex);
     if (m_processing) {
-        qDebug("Frame is active, can not set new at this time.");
+        qDebug("Frame is active, can not set at this time.");
         return false;
     }
 
+    // Make a copy of it for our use
     m_frame=frame.clone();
 
     return true;

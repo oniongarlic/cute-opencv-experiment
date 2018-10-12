@@ -17,14 +17,15 @@ void cv::error(int _code, const std::string& _err, const char* _func, const char
 
 OCVObjectColorDetector::OCVObjectColorDetector(QObject *parent) :
     CuteOpenCVBase(parent),
-    m_tolerance(20),
-    m_distance(9999),
-    m_hysterecis(5),
+    m_tolerance(20.0),
+    m_distance(9999.0),
+    m_hysterecis(5.0),
     m_colorIndex(-1),
     m_bs(33),
     m_br(2),
     m_roix(0.5),
-    m_roiy(0.5)
+    m_roiy(0.5),
+    m_avg(false)
 {
     QFile cf(":colors.json");
     if (!cf.open(QIODevice::ReadOnly)) {
@@ -91,7 +92,7 @@ double OCVObjectColorDetector::deltaE76(const Scalar &a, const Scalar &b) const
 bool OCVObjectColorDetector::findClosestMatch(const Scalar &lab, const double tolerance, int &cindex, double &distance) const
 {
     bool r=false;
-    int ci;
+    int ci=-1;
     double dist=999;
 
     for (int i=0;i<m_colors.size();i++) {
@@ -166,28 +167,37 @@ bool OCVObjectColorDetector::processOpenCVFrame(Mat &frame)
     Size blr(4,4);
 
     calculateRoi(frame, roi, 0, 0);
-    calculateRoi(frame, roiL, -m_br, 0);
-    calculateRoi(frame, roiR, m_br, 0);
-    calculateRoi(frame, roiU, 0, -m_br);
-    calculateRoi(frame, roiD, 0, m_br);
-
     rc=frame(roi);
-    rl=frame(roiL);
-    rr=frame(roiR);
-    rd=frame(roiD);
-    ru=frame(roiU);
 
+    Scalar bgrm;
+
+    if (m_avg) {
+        calculateRoi(frame, roiL, -m_br, 0);
+        calculateRoi(frame, roiR, m_br, 0);
+        calculateRoi(frame, roiU, 0, -m_br);
+        calculateRoi(frame, roiD, 0, m_br);
+
+        rl=frame(roiL);
+        rr=frame(roiR);
+        rd=frame(roiD);
+        ru=frame(roiU);
 #ifdef ROI_BLUR
-    blur(rc, rc, blr);
-    blur(rl, rl, blr);
-    blur(rr, rr, blr);
-    blur(rd, rd, blr);
-    blur(ru, ru, blr);
+        blur(rc, rc, blr);
+        blur(rl, rl, blr);
+        blur(rr, rr, blr);
+        blur(rd, rd, blr);
+        blur(ru, ru, blr);
 #endif
-
-    // Average, double weight center of image
-    Scalar tmp=mean(rc)+mean(rc)+mean(rr)+mean(rl)+mean(ru)+mean(rd);
-    Scalar bgrm(tmp[0]/6, tmp[1]/6, tmp[2]/6);
+        // Average, double weight center of image
+        Scalar tmp=mean(rc)+mean(rc)+mean(rr)+mean(rl)+mean(ru)+mean(rd);
+        Scalar mtmp(tmp[0]/6, tmp[1]/6, tmp[2]/6);
+        bgrm=mtmp;
+    } else {
+#ifdef ROI_BLUR
+        blur(rc, rc, blr);
+#endif
+        bgrm=mean(rc);
+    }
 
     // Convert to Lab color for easy comparission
     Mat ctmp(Size(1,1), CV_8UC3, bgrm);
@@ -198,7 +208,7 @@ bool OCVObjectColorDetector::processOpenCVFrame(Mat &frame)
     double dp=m_tolerance;
 
     if (findClosestMatch(labm, m_tolerance, ci, dist)) {
-        // Are we very close to previous color ? If so don't switch over to fast        
+        // Are we very close to previous color ? If so don't switch over to fast
         if (isValid())
             dp=deltaE76(lab, labm);
 
@@ -210,13 +220,14 @@ bool OCVObjectColorDetector::processOpenCVFrame(Mat &frame)
             cvtColor(ctmp, hls, CV_BGR2HLS);
             hls=mean(ltmp);
             m_distance=dist;
-            m_colorIndex=ci;            
+            m_colorIndex=ci;
         }
     } else {
-        m_distance=9999;       
+        m_distance=9999;
     }
 
     qDebug() << isValid() << m_colorIndex << getColorGroup() << getColorName();
+
     if (isValid()) {
         emit colorFound();
     } else {

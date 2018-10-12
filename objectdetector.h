@@ -22,25 +22,9 @@
 struct DetectedObject
 {
     int id;
-    int centerX;
-    int centerY;
-    int width;
-    int height;
-    int left;
-    int top;
-
-    float cxf;
-    float cyf;
-    float xf;
-    float yx;
-    float wf;
-    float hf;
-
-    QPointF center;
-    QRect coords;
-    QRectF relative;
-
     double confidence;
+    QPointF center;    
+    QRectF relative;  
 };
 
 class ObjectDetector : public CuteOpenCVBase
@@ -53,8 +37,6 @@ class ObjectDetector : public CuteOpenCVBase
 public:
     explicit ObjectDetector(QObject *parent = nullptr);
     ~ObjectDetector();
-
-    Q_INVOKABLE bool loadModel();
 
     QString model() const
     {
@@ -71,6 +53,7 @@ public:
         return m_objects.size();
     }
     bool startWorkerThread();
+    Q_INVOKABLE bool loadClasses();
 signals:
 
     void modelChanged(QString model);

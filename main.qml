@@ -93,7 +93,7 @@ ApplicationWindow {
         id: od
 
         Component.onCompleted: {
-            loadModel();
+            loadClasses();
         }
 
         property rect o;
@@ -114,9 +114,7 @@ ApplicationWindow {
         }
 
         onDetectionEnded: inProgress=false;
-
         onDetectionStarted: inProgress=true;
-
     }
 
     Camera {

@@ -80,6 +80,7 @@ private:
     int m_br;
     double m_roix;
     double m_roiy;
+    bool m_avg;
 };
 
 #endif // OCVOBJECTCOLORDETECTOR_H
