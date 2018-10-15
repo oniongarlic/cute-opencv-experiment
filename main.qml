@@ -157,12 +157,18 @@ ApplicationWindow {
         }
     }
 
+    OpenCVVideoFilter {
+        id: cvfilter
+    }
+
     VideoOutput {
         id: vc
         anchors.fill: parent
         source: camera
         autoOrientation: true
         fillMode: Image.PreserveAspectFit
+
+        filters: [ cvfilter ]
 
         MouseArea {
             anchors.fill: parent

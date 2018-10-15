@@ -1,4 +1,4 @@
-QT += quick
+QT += quick multimedia
 CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
@@ -7,7 +7,9 @@ SOURCES += \
     objectdetector.cpp \
     cuteopencv.cpp \
     cuteopencvbase.cpp \
-    objectdetectorworker.cpp
+    objectdetectorworker.cpp \
+    ovvideofilter.cpp \
+    ovvideofilterrunnable.cpp
 
 RESOURCES += qml.qrc \
     yolo.qrc
@@ -61,7 +63,9 @@ HEADERS += \
     objectdetector.h \
     cuteopencv.h \
     cuteopencvbase.h \
-    objectdetectorworker.h
+    objectdetectorworker.h \
+    ovvideofilter.h \
+    ovvideofilterrunnable.h
 
 DISTFILES += \
     android/AndroidManifest.xml \
