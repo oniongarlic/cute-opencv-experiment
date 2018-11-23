@@ -24,11 +24,13 @@ packagesExist(opencv4) {
 }
 
 android {
-# QT += androidextras
+ QT += androidextras
+ HEADERS += androidhelper.h
+ SOURCES += androidhelper.cpp
 }
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
-    # QMAKE_CXXFLAGS += -mfpu=neon
+    QMAKE_CXXFLAGS += -mfpu=neon
 
     ANDROID_EXTRA_LIBS = \
         $$PWD/3rdparty/opencv-armv7/libopencv_core.so \

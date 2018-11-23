@@ -23,7 +23,9 @@ public:
 private:
     OvVideoFilter *m_parent;
     bool frameToImage(const QVideoFrame &input);
+    QImage m_result;
     cv::Mat m_frame;
+    int m_ci;
 
     OCVObjectColorDetector m_cd;
 };

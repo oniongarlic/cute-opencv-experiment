@@ -23,7 +23,7 @@ ApplicationWindow {
                 text: "Open..."
                 enabled: !inProgress
                 onClicked: {
-                    filesDialog.open();
+                    filesDialog.startSelector();
                 }
             }
             ToolButton {
@@ -34,11 +34,11 @@ ApplicationWindow {
                 }
             }
             Text {
-                id: cname
+                id: cnameText
                 text: "n/a"
             }
             Text {
-                id: cgroup
+                id: cgroupText
                 text: "n/a"
             }
             Rectangle {
@@ -62,16 +62,12 @@ ApplicationWindow {
         }
     }
 
-    FileDialog {
+    ImageGallerySelector {
         id: filesDialog
-        nameFilters: [ "*.jpg" ]
-        title: qsTr("Select image file")
-        selectExisting: true
-        selectFolder: false
-        selectMultiple: false
-        onAccepted: {
-            var f=""+fileUrl
-            od.processImageFile(f)
+        onFileSelected: {
+            previewImage.source=src
+            cd.processImageFile(src);
+            od.processImageFile(src);
         }
     }
 
@@ -79,13 +75,13 @@ ApplicationWindow {
         id: cd
 
         onColorFound: {
-            cname.text=getColorName();
-            cgroup.text=getColorGroup();
+            cnameText.text=getColorName();
+            cgroupText.text=getColorGroup();
             crect.color=getColorRGB();
         }
 
         onColorNotFound: {
-            cname.text=cgroup.text="";
+            cnameText.text=cgroup.text="";
         }
     }
 
@@ -105,12 +101,16 @@ ApplicationWindow {
 
             od.c=vc.mapNormalizedPointToItem(center);
             od.o=vc.mapNormalizedRectToItem(rect);
+
+            previewImage.opacity=0.9;
         }
 
         onNoObjectDetected: {
             console.debug("Nothing found!")
             objectID.text=""
             objectConfidence.text="-:---%"
+
+            previewImage.visible=false;
         }
 
         onDetectionEnded: inProgress=false;
@@ -138,7 +138,8 @@ ApplicationWindow {
             onImageCaptured: {
                 console.debug("Image captured!")
                 console.debug(camera.imageCapture.capturedImagePath)
-                //previewImage.source=preview
+                previewImage.source=preview
+                previewImage.visible=true;
             }
             onCaptureFailed: {
                 console.debug("Capture failed")
@@ -159,6 +160,12 @@ ApplicationWindow {
 
     OpenCVVideoFilter {
         id: cvfilter
+
+        onColorFound: {
+            console.debug(cgroup+":"+cname)
+            cnameText.text=cname;
+            cgroupText.text=cgroup;
+        }
     }
 
     VideoOutput {
@@ -193,6 +200,17 @@ ApplicationWindow {
             border.width: 4
             border.color: "green"
             color: "transparent"
+        }    
+
+        Image {
+            id: previewImage
+            anchors.fill: parent
+            fillMode: Image.PreserveAspectFit
+            opacity: 0.75
+            MouseArea {
+                anchors.fill: parent
+                onClicked: previewImage.visible=false;
+            }
         }
 
         Rectangle {
@@ -217,6 +235,7 @@ ApplicationWindow {
             border.color: "green"
             visible: x>0 && y>0
         }
+
         BusyIndicator {
             anchors.centerIn: parent
             width: 128

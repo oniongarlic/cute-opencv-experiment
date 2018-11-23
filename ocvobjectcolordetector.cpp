@@ -226,7 +226,7 @@ bool OCVObjectColorDetector::processOpenCVFrame(Mat &frame)
         m_distance=9999;
     }
 
-    qDebug() << isValid() << m_colorIndex << getColorGroup() << getColorName();
+    // qDebug() << isValid() << m_colorIndex << getColorGroup() << getColorName();
 
     if (isValid()) {
         emit colorFound();

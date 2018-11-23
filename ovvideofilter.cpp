@@ -10,5 +10,7 @@ OvVideoFilter::OvVideoFilter(QAbstractVideoFilter *parent) :
 
 QVideoFilterRunnable *OvVideoFilter::createFilterRunnable()
 {
-    return new OvVideoFilterRunnable(this);
+    QVideoFilterRunnable *rf=new OvVideoFilterRunnable(this);    
+
+    return rf;
 }
