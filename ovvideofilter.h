@@ -14,7 +14,7 @@ public:
     QVideoFilterRunnable *createFilterRunnable();
 
 signals:
-    void colorFound(const QString cgroup, const QString cname);
+    void colorFound(const QString cgroup, const QString cname, const QString chex);
 
 };
 

@@ -15,13 +15,13 @@ RESOURCES += qml.qrc
 
 # DEFINES += YOLOV2CUSTOM
 # DEFINES += YOLOV2
-# DEFINES += YOLOV3
-DEFINES += YOLOV3TINY
+DEFINES += YOLOV3
+# DEFINES += YOLOV3TINY
 
 RESOURCES += yolo.qrc
-//RESOURCES += yolo-v2.qrc
+# RESOURCES += yolo-v2.qrc
 RESOURCES += yolo-v3.qrc
-RESOURCES += yolo-v3tiny.qrc
+RESOURCES += yolo-v3-tiny.qrc
 
 unix:!qnx:!android {
     CONFIG +=link_pkgconfig
@@ -40,7 +40,7 @@ contains(DEFINES,YOLOV3) {
     DEFINES+= YOLO_NAMES=\\\":///yolo3/coco.names\\\"
 }
 
-contains(DEFINES,YOLOV3) {
+contains(DEFINES,YOLOV3TINY) {
     DEFINES+= YOLO_WEIGHTS=\\\"/home/milang/qt/qt-openvc-helloworld/yolo3tiny/yolov3-tiny.weights\\\"
     DEFINES+= YOLO_CFG=\\\":///yolo3tiny/yolov3-tiny.cfg\\\"
     DEFINES+= YOLO_NAMES=\\\":///yolo3tiny/coco.names\\\"
@@ -83,6 +83,9 @@ contains(DEFINES,YOLOV2) {
     yolow.path = /assets
     yolow.source = yolo2
     yolow.files = yolo3/test.weights
+    DEFINES+= YOLO_WEIGHTS=\\\"assets:/test.weights\\\"
+    DEFINES+= YOLO_CFG=\\\":///yolo2/yolo.cfg\\\"
+    DEFINES+= YOLO_NAMES=\\\":///yolo2/obj.names\\\"
 }
 
 #coco.names  yolov3.cfg  yolov3.weights

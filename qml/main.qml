@@ -18,6 +18,27 @@ ApplicationWindow {
     ToolBar {
         id: mainToolbar
         RowLayout {
+            anchors.fill: parent            
+            Text {
+                id: cnameText
+                text: "n/a"
+                Layout.preferredWidth: 100
+            }
+            Text {
+                id: cgroupText
+                text: "n/a"
+                Layout.preferredWidth: 100
+            }
+            Rectangle {
+                id: crect
+                Layout.fillHeight: true
+                width: 40;
+            }
+        }
+    }
+
+    footer: ToolBar {
+        RowLayout {
             anchors.fill: parent
             ToolButton {
                 text: "Open..."
@@ -32,32 +53,6 @@ ApplicationWindow {
                 onClicked: {
                     camera.imageCapture.capture();
                 }
-            }
-            Text {
-                id: cnameText
-                text: "n/a"
-            }
-            Text {
-                id: cgroupText
-                text: "n/a"
-            }
-            Rectangle {
-                id: crect
-                Layout.fillHeight: true
-                width: 40;
-            }
-        }
-    }
-
-    footer: ToolBar {
-        RowLayout {
-            anchors.fill: parent
-            Text {
-                id: objectID
-            }
-            Text {
-                id: objectConfidence
-                text: "n/a"
             }
         }
     }
@@ -165,6 +160,7 @@ ApplicationWindow {
             console.debug(cgroup+":"+cname)
             cnameText.text=cname;
             cgroupText.text=cgroup;
+            crect.color=chex;
         }
     }
 
@@ -190,6 +186,9 @@ ApplicationWindow {
             }
             onClicked: {
                 camera.searchAndLock();
+            }
+            onDoubleClicked: {
+                camera.imageCapture.capture();
             }
         }
 
@@ -222,6 +221,20 @@ ApplicationWindow {
             y: od.o.y
             border.width: 2
             border.color: "red"
+            Text {
+                id: objectID
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                anchors.left: parent.left
+                anchors.bottom: parent.top
+            }
+            Text {
+                id: objectConfidence
+                text: ""
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+            }
         }
 
         Rectangle {

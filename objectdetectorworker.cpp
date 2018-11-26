@@ -93,7 +93,7 @@ void ObjectDetectorWorker::processOpenCVFrame()
     }
 
     if (frame.channels()!=3) {
-        qWarning() << "Image must have 3 channels!";
+        qWarning() << "Image must have 3 channels, got " << frame.channels();
         emit error(4);
         return;
     }

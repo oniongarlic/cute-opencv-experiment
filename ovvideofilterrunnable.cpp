@@ -19,6 +19,8 @@ OvVideoFilterRunnable::OvVideoFilterRunnable(OvVideoFilter *parent) :
 
 QVideoFrame OvVideoFilterRunnable::run(QVideoFrame *input, const QVideoSurfaceFormat &surfaceFormat, QVideoFilterRunnable::RunFlags flags)
 {    
+    static bool once=false;
+
     Q_UNUSED(flags)
 
     if (!input->isValid()) {
@@ -31,16 +33,10 @@ QVideoFrame OvVideoFilterRunnable::run(QVideoFrame *input, const QVideoSurfaceFo
         return *input;
     }
 
-#if 0
-    if (surfaceFormat.handleType()!=QAbstractVideoBuffer::NoHandle) {
-        qWarning("Surface format not supported.");
-        return *input;
+    if (!once) {
+        qDebug() << "Frame format: " << input->pixelFormat() << surfaceFormat.frameRate();
+        once=true;
     }
-#endif
-
-#ifdef DEBUG_FRAMES
-    qDebug() << "Frame format: " << input->pixelFormat() << surfaceFormat.frameRate();
-#endif
 
 #if 0
     QImage image(input->bits(),input->width(), input->height(), QVideoFrame::imageFormatFromPixelFormat(input->pixelFormat()));
@@ -58,7 +54,7 @@ QVideoFrame OvVideoFilterRunnable::run(QVideoFrame *input, const QVideoSurfaceFo
         if (m_cd.isValid()) {
             int i=m_cd.colorIndex();
             if (i!=m_ci) {
-                emit m_parent->colorFound(m_cd.getColorGroup(), m_cd.getColorName());
+                emit m_parent->colorFound(m_cd.getColorGroup(), m_cd.getColorName(), m_cd.getColorRGB());
                 m_ci=i;
             }
         }
@@ -225,23 +221,33 @@ bool OvVideoFilterRunnable::frameToImage(const QVideoFrame &input)
     case QVideoFrame::Format_RGB565:
     case QVideoFrame::Format_RGB555: {
         m_frame=cv::Mat(h, w, CV_8UC3, (void*) input.bits());
-        //cvtColor(m_frame, m_frame, CV_RGB2BGR555, 3);
+        cvtColor(m_frame, m_frame, CV_RGB2BGR555, 3);
         return true;
     }
     case QVideoFrame::Format_BGR32: {
-        m_frame=cv::Mat(h, w, CV_8UC3, (void*) input.bits(), input.bytesPerLine());
+#if 0
+        m_result = QImage(input.width(), input.height(), QImage::Format_ARGB32);
+        // https://bugreports.qt.io/browse/QTBUG-67578
+        m_result=m_result.rgbSwapped();
+        m_frame=cv::Mat(h, w, CV_8UC4, (void*) m_result.bits(), m_result.bytesPerLine());
+#else
+        //  0xAABBGGRR
+        m_frame=cv::Mat(h, w, CV_8UC4, (void*) input.bits(), input.bytesPerLine());
+        //cvtColor(m_frame, m_frame, cv::COLOR_RGB2BGR);
+#endif
         return true;
     }
     case QVideoFrame::Format_NV12: {
         m_result = QImage(input.width(), input.height(), QImage::Format_ARGB32);
         qt_convert_NV12_to_ARGB32(input, m_result.bits());
-        m_frame=cv::Mat(h, w, CV_8UC4, (void*) m_result.bits());
+        //m_result=m_result.convertToFormat(QImage::Format_RGBA8888);
+        m_frame=cv::Mat(h, w, CV_8UC4, (void*) m_result.bits(), m_result.bytesPerLine());
         return true;
     }
     case QVideoFrame::Format_NV21: {
         m_result = QImage(input.width(), input.height(), QImage::Format_ARGB32);
         qt_convert_NV21_to_ARGB32(input, m_result.bits());
-        m_frame=cv::Mat(h, w, CV_8UC4, (void*) m_result.bits());
+        m_frame=cv::Mat(h, w, CV_8UC4, (void*) m_result.bits(), m_result.bytesPerLine());
         return true;
     }
     case QVideoFrame::Format_YUV420P: {

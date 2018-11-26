@@ -58,8 +58,9 @@ bool CuteOpenCVBase::processFrame(QImage &frame)
     case QImage::Format_RGB32:
     {
         qDebug() << "Format_RGB32";
+        frame=frame.rgbSwapped();
         cv::Mat view(frame.height(), frame.width(), CV_8UC4,(void *)frame.constBits(), frame.bytesPerLine());
-        cvtColor(view, view, cv::COLOR_RGB2BGR);
+        cvtColor(view, view, cv::COLOR_RGBA2BGR);
         return processOpenCVFrame(view);
     }
     case QImage::Format_RGB888:
@@ -73,7 +74,8 @@ bool CuteOpenCVBase::processFrame(QImage &frame)
     {
         qDebug() << "Format_ARGB32";
         QImage conv = frame.convertToFormat(QImage::Format_ARGB32);
-        cv::Mat view(conv.height(),conv.width(),CV_8UC4,(void *)conv.constBits(),conv.bytesPerLine());
+        cv::Mat view(conv.height(),conv.width(),CV_8UC4,(void *)conv.constBits(), conv.bytesPerLine());
+        cvtColor(view, view, cv::COLOR_RGBA2BGR);
         return processOpenCVFrame(view);
     }
     }

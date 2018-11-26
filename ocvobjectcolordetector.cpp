@@ -166,6 +166,16 @@ bool OCVObjectColorDetector::processOpenCVFrame(Mat &frame)
     double dist=999.0;
     Size blr(4,4);
 
+    if (frame.channels()<3) {
+        qDebug() << "Frame should have 3 or more channels.";
+        return false;
+    }
+
+    if (frame.channels()==4) {
+        qDebug() << "Removing alpha, assuming BGRA, consider using 3 channel input.";
+        cvtColor(frame, frame, CV_BGRA2BGR);
+    }
+
     calculateRoi(frame, roi, 0, 0);
     rc=frame(roi);
 

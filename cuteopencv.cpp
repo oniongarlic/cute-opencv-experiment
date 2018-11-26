@@ -24,7 +24,7 @@ cv::Mat CuteOpenCv::CuteImageToOpenCVMat(QImage &frame)
     default:
     {
         QImage conv = frame.convertToFormat(QImage::Format_ARGB32);
-        cv::Mat view(conv.height(),conv.width(),CV_8UC4,(void *)conv.constBits(),conv.bytesPerLine());
+        cv::Mat view(conv.height(),conv.width(),CV_8UC4,(void *)conv.constBits(), conv.bytesPerLine());
         return view;
     }
     }
