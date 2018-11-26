@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>yolo3/yolov3.cfg</file>
+        <file>yolo3/coco.names</file>
+    </qresource>
+</RCC>

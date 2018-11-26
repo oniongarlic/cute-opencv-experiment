@@ -1,26 +1,11 @@
-Using OpenCV from Qt
+= Example on using OpenCV from Qt
 
-Tested with Desktop and Android.
+Tested with both linux desktop and on Android.
 
-Using OpenCV from git 
+Issues
+* Something wrong with color detection filter on Android, colospace conversion must be wrong
 
-Build OpenCV for Android with:
+= Object detetction with YOLO
 
-~/Android/Sdk/cmake/3.6.4111459/bin/cmake .. 
- -DANDROID_ABI="armeabi-v7a with NEON" 
- -DANDROID_NATIVE_API_LEVEL=23 
- -DANDROID_TOOLCHAIN=gcc 
- -DCMAKE_TOOLCHAIN_FILE=/home/milang/Android/Sdk/ndk-bundle/build/cmake/android.toolchain.cmake 
- -DANDROID_NDK=/home/milang/Android/Sdk/ndk-bundle 
- -DCMAKE_BUILD_TYPE=Release 
- -DANDROID_SDK=/home/milang/Android/Sdk
- -DBUILD_SHARED_LIBS=ON
- -DBUILD_ANDROID_PROJECTS=OFF
- -DANDROID_STL=gnustl_static
- -DWITH_OPENCL=ON
- -DENABLE_NEON=ON
- -DANDROID_ARM_NEON=ON
-
-Copy libraries into 3rdparty/opencv-armv7/
-
-
+The example uses YOLO for object detection, you need to download yolo weights from https://pjreddie.com/darknet/yolo/ and put in respective directory.
+Configuration CFG and object name files are already included. Then choose the version to use in the project file.

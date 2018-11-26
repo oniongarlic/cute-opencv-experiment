@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <opencv2/imgproc/types_c.h>
 
-#define DEBUG_FRAMES 1
+// #define DEBUG_FRAMES 1
 // #define DEBUG_CVW 1
 
 OvVideoFilterRunnable::OvVideoFilterRunnable(OvVideoFilter *parent) :
@@ -62,7 +62,6 @@ QVideoFrame OvVideoFilterRunnable::run(QVideoFrame *input, const QVideoSurfaceFo
                 m_ci=i;
             }
         }
-
     }
 #endif
     input->unmap();

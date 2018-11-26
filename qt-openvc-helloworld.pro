@@ -11,22 +11,47 @@ SOURCES += \
     ovvideofilter.cpp \
     ovvideofilterrunnable.cpp
 
-RESOURCES += qml.qrc \
-    yolo.qrc
+RESOURCES += qml.qrc
+
+# DEFINES += YOLOV2CUSTOM
+# DEFINES += YOLOV2
+# DEFINES += YOLOV3
+DEFINES += YOLOV3TINY
+
+RESOURCES += yolo.qrc
+//RESOURCES += yolo-v2.qrc
+RESOURCES += yolo-v3.qrc
+RESOURCES += yolo-v3tiny.qrc
 
 unix:!qnx:!android {
     CONFIG +=link_pkgconfig
+    packagesExist(opencv4) {
+        PKGCONFIG += opencv4
+    }
+contains(DEFINES,YOLOV2CUSTOM) {
+    DEFINES+= YOLO_WEIGHTS=\\\"/home/milang/qt/qt-openvc-helloworld/yolo/test.weights\\\"
+    DEFINES+= YOLO_CFG=\\\":///yolo/obj-detect.cfg\\\"
+    DEFINES+= YOLO_NAMES=\\\":///yolo/obj.names\\\"
+}
 
-packagesExist(opencv4) {
-    PKGCONFIG += opencv4
+contains(DEFINES,YOLOV3) {
+    DEFINES+= YOLO_WEIGHTS=\\\"/home/milang/qt/qt-openvc-helloworld/yolo3/yolov3.weights\\\"
+    DEFINES+= YOLO_CFG=\\\":///yolo3/yolov3.cfg\\\"
+    DEFINES+= YOLO_NAMES=\\\":///yolo3/coco.names\\\"
+}
+
+contains(DEFINES,YOLOV3) {
+    DEFINES+= YOLO_WEIGHTS=\\\"/home/milang/qt/qt-openvc-helloworld/yolo3tiny/yolov3-tiny.weights\\\"
+    DEFINES+= YOLO_CFG=\\\":///yolo3tiny/yolov3-tiny.cfg\\\"
+    DEFINES+= YOLO_NAMES=\\\":///yolo3tiny/coco.names\\\"
 }
 
 }
 
 android {
- QT += androidextras
- HEADERS += androidhelper.h
- SOURCES += androidhelper.cpp
+    QT += androidextras
+    HEADERS += androidhelper.h
+    SOURCES += androidhelper.cpp
 }
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
@@ -43,10 +68,46 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
     # Order is important, linker in old droids (4.2) are dumb
     LIBS += -L$$PWD/3rdparty/opencv-armv7/ -ltbb -lopencv_core -lopencv_imgproc -lopencv_dnn
 
-yolow.path = /assets
-yolow.source = yolo
-yolow.files = yolo/test.weights
+#"/home/milang/qt/qt-openvc-helloworld/yolo/test.weights"
+
+contains(DEFINES,YOLOV2CUSTOM) {
+    yolow.path = /assets
+    yolow.source = yolo
+    yolow.files = yolo/test.weights
+    DEFINES+= YOLO_WEIGHTS=\\\"assets:/test.weights\\\"
+    DEFINES+= YOLO_CFG=\\\":///yolo/obj-detect.cfg\\\"
+    DEFINES+= YOLO_NAMES=\\\":///yolo/obj.names\\\"
+}
+
+contains(DEFINES,YOLOV2) {
+    yolow.path = /assets
+    yolow.source = yolo2
+    yolow.files = yolo3/test.weights
+}
+
+#coco.names  yolov3.cfg  yolov3.weights
+contains(DEFINES,YOLOV3) {
+    yolow.path = /assets
+    yolow.source = yolo3
+    yolow.files = yolo3/yolov3.weights
+
+    DEFINES+= YOLO_WEIGHTS=\\\"assets:/yolov3.weights\\\"
+    DEFINES+= YOLO_CFG=\\\":///yolo3/yolov3.cfg\\\"
+    DEFINES+= YOLO_NAMES=\\\":///yolo3/coco.names\\\"
+}
+
+contains(DEFINES,YOLOV3TINY) {
+    yolow.path = /assets
+    yolow.source = yolo3tiny
+    yolow.files = yolo3tiny/yolov3tiny.weights
+
+    DEFINES+= YOLO_WEIGHTS=\\\"assets:/yolov3-tiny.weights\\\"
+    DEFINES+= YOLO_CFG=\\\":///yolo3/yolov3-tiny.cfg\\\"
+    DEFINES+= YOLO_NAMES=\\\":///yolo3/coco.names\\\"
+}
+
 INSTALLS += yolow
+
 }
 
 # Additional import path used to resolve QML modules in Qt Creator's code model

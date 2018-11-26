@@ -9,13 +9,9 @@
 
 ObjectDetector::ObjectDetector(QObject *parent) :
     CuteOpenCVBase(parent),
-    #ifdef Q_OS_ANDROID
-    m_model("assets:/test.weights"),
-    #else
-    m_model("/home/milang/qt/qt-openvc-helloworld/yolo/test.weights"),
-    #endif
-    m_config(":///yolo/obj-detect.cfg"),
-    m_class(":///yolo/obj.names"),
+    m_model(YOLO_WEIGHTS),
+    m_config(YOLO_CFG),
+    m_class(YOLO_NAMES),
     m_confidence(0.75),
     m_darknet_scale(0.00392),
     m_width(480),

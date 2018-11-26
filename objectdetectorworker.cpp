@@ -118,12 +118,6 @@ void ObjectDetectorWorker::processOpenCVFrame()
         return;
     }
 
-#ifndef Q_OS_ANDROID
-    qDebug("Waisting time for debugging...");
-    QThread::sleep(4);
-    qDebug("...done");
-#endif
-
     qDebug() << "Frame processed in " << timer.elapsed()/1000.0 << "s";
 
     std::vector<int> outLayers = m_net.getUnconnectedOutLayers();
