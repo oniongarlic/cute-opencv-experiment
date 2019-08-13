@@ -1,14 +1,14 @@
-import QtQuick 2.9
-import QtQuick.Controls 2.4
-import QtQuick.Layouts 1.3
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
-import QtMultimedia 5.5
+import QtMultimedia 5.12
 
 import org.tal 1.0
 
 ApplicationWindow {
     visible: true
-    width: 640
+    width: 800
     height: 480
     title: qsTr("OpenCV QtQuick Test")
     header: mainToolbar
@@ -41,7 +41,7 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent
             ToolButton {
-                text: "Open..."
+                text: "Image..."
                 enabled: !inProgress
                 onClicked: {
                     filesDialog.startSelector();
@@ -53,7 +53,7 @@ ApplicationWindow {
                 onClicked: {
                     camera.imageCapture.capture();
                 }
-            }
+            }            
         }
     }
 
@@ -76,15 +76,19 @@ ApplicationWindow {
         }
 
         onColorNotFound: {
-            cnameText.text=cgroup.text="";
+            cnameText.text=cgroupText.text="";
         }
     }
 
     ObjectDetector {
         id: od
+        config: dnnConfig
+        model: dnnWeights
+        classes: dnnClasses
 
         Component.onCompleted: {
             loadClasses();
+            start();
         }
 
         property rect o;

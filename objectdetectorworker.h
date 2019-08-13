@@ -34,10 +34,9 @@ signals:
     void modelLoaded();    
 
 public slots:
-
     void loadModel(const QString config, const QString model);
     void processOpenCVFrame();
-    bool setFrame(cv::Mat &frame);
+    bool setFrame(cv::Mat &frame);    
 
 private:
     QMutex m_mutex;
@@ -51,6 +50,8 @@ private:
     double m_confidence;
     bool m_crop;
     bool m_processing;
+
+    double m_frametime;
 
     cv::dnn::Net m_net;
     cv::Mat m_frame;

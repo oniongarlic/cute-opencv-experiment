@@ -33,6 +33,13 @@ class ObjectDetector : public CuteOpenCVBase
 
     Q_PROPERTY(QString model READ model WRITE setModel NOTIFY modelChanged)
     Q_PROPERTY(QString config READ config WRITE setConfig NOTIFY configChanged)
+    Q_PROPERTY(QString classes MEMBER m_class NOTIFY classChanged)
+
+    Q_PROPERTY(double confidence MEMBER m_confidence)
+    Q_PROPERTY(bool crop MEMBER m_crop)
+
+    Q_PROPERTY(int width MEMBER m_width)
+    Q_PROPERTY(int height MEMBER m_height)
 
 public:
     explicit ObjectDetector(QObject *parent = nullptr);
@@ -48,6 +55,9 @@ public:
         return m_config;
     }
 
+    Q_INVOKABLE bool start();
+    Q_INVOKABLE bool stop();
+
     Q_INVOKABLE QString getClassName(int i) const;
     Q_INVOKABLE int getObjectCount() const {
         return m_objects.size();
@@ -59,6 +69,8 @@ signals:
     void modelChanged(QString model);
 
     void configChanged(QString config);
+
+    void classChanged(QString classes);
 
     void noObjectDetected();
 

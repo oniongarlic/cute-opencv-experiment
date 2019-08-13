@@ -171,10 +171,12 @@ bool OCVObjectColorDetector::processOpenCVFrame(Mat &frame)
         return false;
     }
 
+#if 1
     if (frame.channels()==4) {
         qDebug() << "Removing alpha, assuming BGRA, consider using 3 channel input.";
         cvtColor(frame, frame, CV_BGRA2BGR);
     }
+#endif
 
     calculateRoi(frame, roi, 0, 0);
     rc=frame(roi);

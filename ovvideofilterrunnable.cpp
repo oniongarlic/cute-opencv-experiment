@@ -97,8 +97,13 @@ QVideoFrame OvVideoFilterRunnable::run(QVideoFrame *input, const QVideoSurfaceFo
     int vv = v - 128; \
     int rv = 409 * vv + 128; \
     int guv = 100 * uu + 208 * vv + 128; \
-    int bu = 516 * uu + 128; \
+    int bu = 516 * uu + 128;
 
+#define FETCH_INFO_PACKED(frame) \
+    const uchar *src = frame.bits(); \
+    int stride = frame.bytesPerLine(); \
+    int width = frame.width(); \
+    int height = frame.height();
 
 #define FETCH_INFO_BIPLANAR(frame) \
     const uchar *plane1 = frame.bits(0); \
@@ -117,6 +122,13 @@ QVideoFrame OvVideoFilterRunnable::run(QVideoFrame *input, const QVideoSurfaceFo
     int plane3Stride = frame.bytesPerLine(2); \
     int width = frame.width(); \
     int height = frame.height(); \
+
+#define MERGE_LOOPS(width, height, stride, bpp) \
+    if (stride == width * bpp) { \
+        width *= height; \
+        height = 1; \
+        stride = 0; \
+    }
 
 static inline quint32 qYUVToARGB32(int y, int rv, int guv, int bu, int a = 0xff)
 {
@@ -156,6 +168,14 @@ static inline void planarYUV420_to_ARGB32(const uchar *y, int yStride,
         rgb0 += width;
         rgb1 += width;
     }
+}
+
+inline quint32 qConvertBGRA32ToARGB32(quint32 bgra)
+{
+    return (((bgra & 0xFF000000) >> 24)
+            | ((bgra & 0x00FF0000) >> 8)
+            | ((bgra & 0x0000FF00) << 8)
+            | ((bgra & 0x000000FF) << 24));
 }
 
 void QT_FASTCALL qt_convert_YUV420P_to_ARGB32(const QVideoFrame &frame, uchar *output)
@@ -200,6 +220,32 @@ void QT_FASTCALL qt_convert_NV21_to_ARGB32(const QVideoFrame &frame, uchar *outp
                            width, height);
 }
 
+void QT_FASTCALL qt_convert_BGRA32_to_ARGB32(const QVideoFrame &frame, uchar *output)
+{
+    FETCH_INFO_PACKED(frame)
+    MERGE_LOOPS(width, height, stride, 4)
+    quint32 *argb = reinterpret_cast<quint32*>(output);
+    for (int y = 0; y < height; ++y) {
+        const quint32 *bgra = reinterpret_cast<const quint32*>(src);
+        int x = 0;
+        for (; x < width - 3; x += 4) {
+            *argb++ = qConvertBGRA32ToARGB32(*bgra++);
+            *argb++ = qConvertBGRA32ToARGB32(*bgra++);
+            *argb++ = qConvertBGRA32ToARGB32(*bgra++);
+            *argb++ = qConvertBGRA32ToARGB32(*bgra++);
+        }
+        // leftovers
+        for (; x < width; ++x)
+            *argb++ = qConvertBGRA32ToARGB32(*bgra++);
+        src += stride;
+    }
+}
+
+inline quint32 qConvertBGR24ToARGB32(const uchar *bgr)
+{
+    return 0xFF000000 | bgr[0] | bgr[1] << 8 | bgr[2] << 16;
+}
+
 bool OvVideoFilterRunnable::frameToImage(const QVideoFrame &input)
 {
     QVideoFrame::PixelFormat m_format=input.pixelFormat();
@@ -224,7 +270,7 @@ bool OvVideoFilterRunnable::frameToImage(const QVideoFrame &input)
         cvtColor(m_frame, m_frame, CV_RGB2BGR555, 3);
         return true;
     }
-    case QVideoFrame::Format_BGR32: {
+    case QVideoFrame::Format_BGR32: { // 0xBBGGRRff
 #if 0
         m_result = QImage(input.width(), input.height(), QImage::Format_ARGB32);
         // https://bugreports.qt.io/browse/QTBUG-67578
@@ -232,8 +278,16 @@ bool OvVideoFilterRunnable::frameToImage(const QVideoFrame &input)
         m_frame=cv::Mat(h, w, CV_8UC4, (void*) m_result.bits(), m_result.bytesPerLine());
 #else
         //  0xAABBGGRR
-        m_frame=cv::Mat(h, w, CV_8UC4, (void*) input.bits(), input.bytesPerLine());
+        //m_frame=cv::Mat(h, w, CV_8UC4, (void*) input.bits(), input.bytesPerLine());
+        //m_frame=cv::Mat(h, w, CV_8UC3, (void*) input.bits(0), input.bytesPerLine());
         //cvtColor(m_frame, m_frame, cv::COLOR_RGB2BGR);
+
+        //m_result = QImage(input.width(), input.height(), QImage::Format_ARGB32);
+        //qt_convert_BGRA32_to_ARGB32(input, m_result.bits());
+        //m_frame=cv::Mat(h, w, CV_8UC4, (void*) m_result.bits(), m_result.bytesPerLine());
+
+        m_frame=cv::Mat(h, w, CV_8UC4, (void*) input.bits());
+        cvtColor(m_frame, m_frame, cv::COLOR_RGB2BGR);
 #endif
         return true;
     }

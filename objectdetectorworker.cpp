@@ -31,11 +31,15 @@ void ObjectDetectorWorker::loadModel(const QString config, const QString model)
     try {
         if (m_config.startsWith(":///")) {
             QFile config(m_config);
-            config.open(QIODevice::ReadOnly);
+            if (config.open(QIODevice::ReadOnly)==false)
+                throw std::invalid_argument("Invalid model configuration");
+
             const QByteArray cdata=config.readAll();           
 
             QFile model(m_model);
-            model.open(QIODevice::ReadOnly);
+            if (model.open(QIODevice::ReadOnly)==false)
+                throw std::invalid_argument("Invalid model data");
+
             const QByteArray mdata=model.readAll();
 
             m_net = cv::dnn::readNetFromDarknet(cdata, cdata.size(), mdata, mdata.size());
@@ -47,7 +51,7 @@ void ObjectDetectorWorker::loadModel(const QString config, const QString model)
 
         emit modelLoaded();
     } catch (const std::exception& e) {
-        qWarning() << e.what();
+        qWarning() << "Loading model failed with error" << e.what();
     }
     emit error(1);
 }
@@ -72,6 +76,12 @@ void ObjectDetectorWorker::processOpenCVFrame()
 
     QMutexLocker locker(&m_mutex);
 
+    if (m_net.empty()) {
+        qWarning() << "Net is not loaded";
+        emit error(2);
+        return;
+    }
+
     if (m_processing==true) {
         qWarning() << "Processing is already running...";
         return;
@@ -79,12 +89,6 @@ void ObjectDetectorWorker::processOpenCVFrame()
 
     m_processing=true;
     const cv::Mat frame=m_frame;
-
-    if (m_net.empty()) {
-        qWarning() << "Net is not loaded";
-        emit error(2);
-        return;
-    }
 
     if (frame.empty()) {
         qWarning() << "Empty frame";
@@ -101,6 +105,7 @@ void ObjectDetectorWorker::processOpenCVFrame()
     emit detectionStarted();
 
     qDebug() << "Starting processing in thread...";
+
     QElapsedTimer timer;
     timer.start();
 
@@ -153,7 +158,7 @@ void ObjectDetectorWorker::processOpenCVFrame()
             center.setX(cxf);
             center.setY(cyf);
 
-            relative.setRect(center.x()-wf/2, center.y()-hf/2, wf, hf);
+            relative.setRect(center.x()-wf/2.0, center.y()-hf/2.0, wf, hf);
 
 #if 0
             o.centerX = (int)(data[0] * frame.cols);
@@ -168,12 +173,13 @@ void ObjectDetectorWorker::processOpenCVFrame()
         }
     }
 
+    m_frametime=timer.elapsed()/1000.0;
+    qDebug() << "Detection done in " << m_frametime << "s";
+
     if (!found)
         emit noObjectDetected();
 
-    emit detectionEnded();
-
-    qDebug() << "Detection done in " << timer.elapsed()/1000.0 << "s";
+    emit detectionEnded();  
 
     m_processing=false;
 }
@@ -191,3 +197,4 @@ bool ObjectDetectorWorker::setFrame(cv::Mat &frame)
 
     return true;
 }
+

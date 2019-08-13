@@ -8,6 +8,19 @@ AndroidHelper::AndroidHelper(QObject *parent) : QObject(parent)
     resCANCEL = QAndroidJniObject::getStaticField<jint>("android/app/Activity", "RESULT_CANCELED");
 }
 
+QString AndroidHelper::getExternalStorage()
+{
+    QAndroidJniObject mediaDir = QAndroidJniObject::callStaticObjectMethod("android/os/Environment", "getExternalStorageDirectory", "()Ljava/io/File;");
+    QAndroidJniObject mediaPath = mediaDir.callObjectMethod( "getAbsolutePath", "()Ljava/lang/String;" );
+    QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+    QAndroidJniObject package = activity.callObjectMethod("getPackageName", "()Ljava/lang/String;");
+
+    QAndroidJniEnvironment env; // Don't know what this is for ?
+    if (env->ExceptionCheck()) { env->ExceptionClear(); } // Or this...?
+
+    return mediaPath.toString();
+}
+
 bool AndroidHelper::imagePicker()
 {
     QAndroidJniObject ACTION_PICK=QAndroidJniObject::getStaticObjectField("android/content/Intent", "ACTION_PICK", "Ljava/lang/String;");

@@ -8,10 +8,7 @@
 #include <QTextStream>
 
 ObjectDetector::ObjectDetector(QObject *parent) :
-    CuteOpenCVBase(parent),
-    m_model(YOLO_WEIGHTS),
-    m_config(YOLO_CFG),
-    m_class(YOLO_NAMES),
+    CuteOpenCVBase(parent),    
     m_confidence(0.75),
     m_darknet_scale(0.00392),
     m_width(480),
@@ -21,15 +18,31 @@ ObjectDetector::ObjectDetector(QObject *parent) :
     m_scaledown=true;
     m_scaleheight=480;
     m_scalewidth=480;
-
-    // We do the actual work in a separate thread
-    startWorkerThread();
 }
 
 ObjectDetector::~ObjectDetector()
 {
     m_thread.quit();
     m_thread.wait();
+}
+
+bool ObjectDetector::start()
+{
+    if (m_thread.isRunning())
+        return false;
+
+    return startWorkerThread();
+}
+
+bool ObjectDetector::stop()
+{
+    if (m_thread.isFinished())
+        return false;
+
+    m_thread.quit();
+    m_thread.wait();
+
+    return true;
 }
 
 void ObjectDetector::dataLoaded(const QByteArray &data)
@@ -118,6 +131,7 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
 
     if (!w->setFrame(frame))
         return false;
+
     emit processFrameInThread();
 
     return true;
