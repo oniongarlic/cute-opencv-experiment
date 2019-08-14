@@ -1,1 +1,1542 @@
-{"#000000":{"group":"Black","name":"Black"},"#0C090A":{"group":"Black","name":"Night"},"#2C3539":{"group":"Black","name":"Gunmetal"},"#2B1B17":{"group":"Black","name":"Midnight"},"#34282C":{"group":"Black","name":"Charcoal"},"#25383C":{"group":"Black","name":"Dark Slate Grey"},"#3B3131":{"group":"Black","name":"Oil"},"#413839":{"group":"Black","name":"Black Cat"},"#3D3C3A":{"group":"Black","name":"Iridium"},"#463E3F":{"group":"Black","name":"Black Eel"},"#4C4646":{"group":"Black","name":"Black Cow"},"#504A4B":{"group":"Gray","name":"Gray Wolf"},"#565051":{"group":"Gray","name":"Vampire Gray"},"#5C5858":{"group":"Gray","name":"Gray Dolphin"},"#625D5D":{"group":"Gray","name":"Carbon Gray"},"#666362":{"group":"Gray","name":"Ash Gray"},"#6D6968":{"group":"Gray","name":"Cloudy Gray"},"#726E6D":{"group":"Gray","name":"Smokey Gray"},"#736F6E":{"group":"Gray","name":"Gray"},"#837E7C":{"group":"Gray","name":"Granite"},"#848482":{"group":"Gray","name":"Battleship Gray"},"#B6B6B4":{"group":"Gray","name":"Gray Cloud"},"#D1D0CE":{"group":"Gray","name":"Gray Goose"},"#E5E4E2":{"group":"Gray","name":"Platinum"},"#BCC6CC":{"group":"Gray","name":"Metallic Silver"},"#98AFC7":{"group":"Blue","name":"Blue Gray"},"#6D7B8D":{"group":"Gray","name":"Light Slate Gray"},"#657383":{"group":"Gray","name":"Slate Gray"},"#616D7E":{"group":"Gray","name":"Jet Gray"},"#a2a2a2":{"group":"Gray","name":"Gray"},"#2c363e":{"group":"Blue","name":"Dark Blue"},"#333d46":{"group":"Blue","name":"Dark Blue"},"#2f373e":{"group":"Blue","name":"Dark Blue"},"#646D7E":{"group":"Blue","name":"Mist Blue"},"#566D7E":{"group":"Blue","name":"Marble Blue"},"#737CA1":{"group":"Blue","name":"Slate Blue"},"#4863A0":{"group":"Blue","name":"Steel Blue"},"#2B547E":{"group":"Blue","name":"Blue Jay"},"#2B3856":{"group":"Blue","name":"Dark Slate Blue"},"#151B54":{"group":"Blue","name":"Midnight Blue"},"#000080":{"group":"Blue","name":"Navy Blue"},"#342D7E":{"group":"Blue","name":"Blue Whale"},"#15317E":{"group":"Blue","name":"Lapis Blue"},"#151B8D":{"group":"Blue","name":"Denim Dark Blue"},"#0000A0":{"group":"Blue","name":"Earth Blue"},"#0020C2":{"group":"Blue","name":"Cobalt Blue"},"#0041C2":{"group":"Blue","name":"Blueberry Blue"},"#2554C7":{"group":"Blue","name":"Sapphire Blue"},"#1569C7":{"group":"Blue","name":"Blue Eyes"},"#2B60DE":{"group":"Blue","name":"Royal Blue"},"#1F45FC":{"group":"Blue","name":"Blue Orchid"},"#6960EC":{"group":"Blue","name":"Blue Lotus"},"#736AFF":{"group":"Blue","name":"Light Slate Blue"},"#357EC7":{"group":"Blue","name":"Windows Blue"},"#368BC1":{"group":"Blue","name":"Glacial Blue Ice"},"#488AC7":{"group":"Blue","name":"Silk Blue"},"#3090C7":{"group":"Blue","name":"Blue Ivy"},"#659EC7":{"group":"Blue","name":"Blue Koi"},"#87AFC7":{"group":"Blue","name":"Columbia Blue"},"#95B9C7":{"group":"Blue","name":"Baby Blue"},"#728FCE":{"group":"Blue","name":"Light Steel Blue"},"#2B65EC":{"group":"Blue","name":"Ocean Blue"},"#306EFF":{"group":"Blue","name":"Blue Ribbon"},"#157DEC":{"group":"Blue","name":"Blue Dress"},"#1589FF":{"group":"Blue","name":"Dodger Blue"},"#6495ED":{"group":"Blue","name":"Cornflower Blue"},"#6698FF":{"group":"Blue","name":"Sky Blue"},"#38ACEC":{"group":"Blue","name":"Butterfly Blue"},"#56A5EC":{"group":"Blue","name":"Iceberg"},"#5CB3FF":{"group":"Blue","name":"Crystal Blue"},"#3BB9FF":{"group":"Blue","name":"Deep Sky Blue"},"#79BAEC":{"group":"Blue","name":"Denim Blue"},"#82CAFA":{"group":"Blue","name":"Light Sky Blue"},"#82CAFF":{"group":"Blue","name":"Day Sky Blue"},"#A0CFEC":{"group":"Blue","name":"Jeans Blue"},"#B7CEEC":{"group":"Blue","name":"Blue Angel"},"#B4CFEC":{"group":"Blue","name":"Pastel Blue"},"#C2DFFF":{"group":"Blue","name":"Sea Blue"},"#C6DEFF":{"group":"Blue","name":"Powder Blue"},"#AFDCEC":{"group":"Blue","name":"Coral Blue"},"#ADDFFF":{"group":"Blue","name":"Light Blue"},"#BDEDFF":{"group":"Blue","name":"Robin Egg Blue"},"#CFECEC":{"group":"Blue","name":"Pale Blue Lily"},"#E0FFFF":{"group":"Cyan","name":"Light Cyan"},"#EBF4FA":{"group":"Blue","name":"Water"},"#F0F8FF":{"group":"Blue","name":"AliceBlue"},"#007FFF":{"group":"Blue","name":"Azure"},"#CCFFFF":{"group":"Blue","name":"Light Slate"},"#93FFE8":{"group":"Blue","name":"Light Aquamarine"},"#9AFEFF":{"group":"Blue","name":"Electric Blue"},"#7FFFD4":{"group":"Blue","name":"Aquamarine"},"#00FFFF":{"group":"Cyan","name":"Cyan"},"#7f9ba1":{"group":"Cyan","name":"Light Cyan"},"#0D98BA":{"group":"Cyan","name":"Blue-Green"},"#B2FFFF":{"group":"Cyan","name":"Celeste"},"#007BA7":{"group":"Cyan","name":"Cerulean"},"#232B2B":{"group":"Cyan","name":"Charleston green"},"#008B8B":{"group":"Cyan","name":"Dark Cyan"},"#7DF9FF":{"group":"Cyan","name":"Electric Blue"},"#1164B4":{"group":"Cyan","name":"Green-Blue"},"#3AB09E":{"group":"Cyan","name":"Keppel"},"#00CCCC":{"group":"Cyan","name":"Robin Egg Blue"},"#80DAEB":{"group":"Cyan","name":"Sky Blue"},"#008080":{"group":"Green","name":"Teal"},"#81D8D0":{"group":"Blue","name":"Tiffany Blue"},"#40E0D0":{"group":"Turquoise","name":"Turquoise"},"#7DFDFE":{"group":"Blue","name":"Tron Blue"},"#57FEFF":{"group":"Blue","name":"Blue Zircon"},"#8EEBEC":{"group":"Blue","name":"Blue Lagoon"},"#50EBEC":{"group":"Blue","name":"Celeste"},"#4EE2EC":{"group":"Blue","name":"Blue Diamond"},"#92C7C7":{"group":"Blue","name":"Cyan Opaque"},"#77BFC7":{"group":"Blue","name":"Blue Hosta"},"#78C7C7":{"group":"Blue","name":"Northern Lights Blue"},"#48CCCD":{"group":"Turquoise","name":"Medium Turquoise"},"#43C6DB":{"group":"Turquoise","name":"Turquoise"},"#46C7C7":{"group":"Blue","name":"Jellyfish"},"#7BCCB5":{"group":"Green","name":"Blue green"},"#43BFC7":{"group":"Green","name":"Macaw Blue Green"},"#3EA99F":{"group":"Green","name":"Light Sea Green"},"#3B9C9C":{"group":"Turquoise","name":"Dark Turquoise"},"#438D80":{"group":"Green","name":"Sea Turtle Green"},"#348781":{"group":"Green","name":"Medium Aquamarine"},"#307D7E":{"group":"Green","name":"Greenish Blue"},"#5E7D7E":{"group":"Turquoise","name":"Grayish Turquoise"},"#4C787E":{"group":"Green","name":"Beetle Green"},"#4E8975":{"group":"Green","name":"Sea Green"},"#78866B":{"group":"Green","name":"Camouflage Green"},"#848b79":{"group":"Green","name":"Sage Green"},"#617C58":{"group":"Green","name":"Hazel Green"},"#728C00":{"group":"Green","name":"Venom Green"},"#667C26":{"group":"Green","name":"Fern Green"},"#254117":{"group":"Green","name":"Dark Forest Green"},"#306754":{"group":"Green","name":"Medium Sea Green"},"#347235":{"group":"Green","name":"Medium Forest Green"},"#437C17":{"group":"Green","name":"Seaweed Green"},"#387C44":{"group":"Green","name":"Pine Green"},"#347C2C":{"group":"Green","name":"Jungle Green"},"#347C17":{"group":"Green","name":"Shamrock Green"},"#348017":{"group":"Green","name":"Medium Spring Green"},"#4E9258":{"group":"Green","name":"Forest Green"},"#6AA121":{"group":"Green","name":"Green Onion"},"#4AA02C":{"group":"Green","name":"Spring Green"},"#41A317":{"group":"Green","name":"Lime Green"},"#3EA055":{"group":"Green","name":"Clover Green"},"#6CBB3C":{"group":"Green","name":"Green Snake"},"#6CC417":{"group":"Green","name":"Alien Green"},"#4CC417":{"group":"Green","name":"Green Apple"},"#52D017":{"group":"Green","name":"Yellow Green"},"#4CC552":{"group":"Green","name":"Kelly Green"},"#54C571":{"group":"Green","name":"Zombie Green"},"#99C68E":{"group":"Green","name":"Frog Green"},"#89C35C":{"group":"Green","name":"Green Peas"},"#85BB65":{"group":"Green","name":"Dollar Bill Green"},"#8BB381":{"group":"Green","name":"Dark Sea Green"},"#9CB071":{"group":"Green","name":"Iguana Green"},"#B2C248":{"group":"Green","name":"Avocado Green"},"#9DC209":{"group":"Green","name":"Pistachio Green"},"#A1C935":{"group":"Green","name":"Salad Green"},"#7FE817":{"group":"Green","name":"Hummingbird Green"},"#59E817":{"group":"Green","name":"Nebula Green"},"#57E964":{"group":"Green","name":"Stoplight Go Green"},"#64E986":{"group":"Green","name":"Algae Green"},"#5EFB6E":{"group":"Green","name":"Jade Green"},"#002F00":{"group":"Green","name":"Dark Green"},"#007F00":{"group":"Green","name":"Dark Green"},"#00FF00":{"group":"Green","name":"Green"},"#8f9d4c":{"group":"Green","name":"Dark Green"},"#5FFB17":{"group":"Green","name":"Emerald Green"},"#87F717":{"group":"Green","name":"Lawn Green"},"#8AFB17":{"group":"Green","name":"Chartreuse"},"#6AFB92":{"group":"Green","name":"Dragon Green"},"#98FF98":{"group":"Green","name":"Mint green"},"#B5EAAA":{"group":"Green","name":"Green Thumb"},"#C3FDB8":{"group":"Green","name":"Light Jade"},"#CCFB5D":{"group":"Green","name":"Tea Green"},"#B1FB17":{"group":"Green","name":"Green Yellow"},"#BCE954":{"group":"Green","name":"Slime Green"},"#EDDA74":{"group":"Gold","name":"Goldenrod"},"#EDE275":{"group":"Gold","name":"Harvest Gold"},"#FFE87C":{"group":"Yellow","name":"Sun Yellow"},"#FFFF00":{"group":"Yellow","name":"Yellow"},"#FFF380":{"group":"Yellow","name":"Corn Yellow"},"#FFFFC2":{"group":"Yellow","name":"Parchment"},"#FFFFCC":{"group":"Yellow","name":"Cream"},"#FFF8C6":{"group":"Yellow","name":"Lemon Chiffon"},"#FFF8DC":{"group":"Yellow","name":"Cornsilk"},"#F5F5DC":{"group":"Yellow","name":"Beige"},"#FBF6D9":{"group":"Yellow","name":"Blonde"},"#FAEBD7":{"group":"Yellow","name":"AntiqueWhite"},"#F7E7CE":{"group":"Yellow","name":"Champagne"},"#FFEBCD":{"group":"Yellow","name":"BlanchedAlmond"},"#F3E5AB":{"group":"Yellow","name":"Vanilla"},"#ECE5B6":{"group":"Yellow","name":"Tan Brown"},"#FFE5B4":{"group":"Yellow","name":"Peach"},"#FFDB58":{"group":"Yellow","name":"Mustard"},"#FFD801":{"group":"Yellow","name":"Rubber Ducky Yellow"},"#FDD017":{"group":"Gold","name":"Bright Gold"},"#EAC117":{"group":"Brown","name":"Golden brown"},"#806650":{"group":"Brown","name":"Light Brown"},"#F2BB66":{"group":"Brown","name":"Macaroni and Cheese"},"#FBB917":{"group":"Brown","name":"Saffron"},"#FBB117":{"group":"Brown","name":"Beer"},"#FFA62F":{"group":"Brown","name":"Cantaloupe"},"#E9AB17":{"group":"Brown","name":"Bee Yellow"},"#E2A76F":{"group":"Brown","name":"Brown Sugar"},"#DEB887":{"group":"Brown","name":"BurlyWood"},"#FFCBA4":{"group":"Brown","name":"Deep Peach"},"#C9BE62":{"group":"Brown","name":"Ginger Brown"},"#E8A317":{"group":"Brown","name":"School Bus Yellow"},"#EE9A4D":{"group":"Brown","name":"Sandy Brown"},"#C8B560":{"group":"Brown","name":"Fall Leaf Brown"},"#D4A017":{"group":"Brown","name":"Orange Gold"},"#C2B280":{"group":"Brown","name":"Sand"},"#C7A317":{"group":"Brown","name":"Cookie Brown"},"#C68E17":{"group":"Brown","name":"Caramel"},"#B5A642":{"group":"Brown","name":"Brass"},"#ADA96E":{"group":"Brown","name":"Khaki"},"#C19A6B":{"group":"Brown","name":"Camel brown"},"#CD7F32":{"group":"Bronze","name":"Bronze"},"#C88141":{"group":"Orange","name":"Tiger Orange"},"#C58917":{"group":"Brown","name":"Cinnamon"},"#AF9B60":{"group":"Brown","name":"Bullet Shell"},"#AF7817":{"group":"Brown","name":"Dark Goldenrod"},"#B87333":{"group":"Copper","name":"Copper"},"#896d44":{"group":"Wood","name":"Dark Wood"},"#966F33":{"group":"Wood","name":"Wood"},"#806517":{"group":"Oak","name":"Oak Brown"},"#827839":{"group":"Brown","name":"Moccasin"},"#827B60":{"group":"Brown","name":"Army Brown"},"#786D5F":{"group":"Gray","name":"Sandstone"},"#493D26":{"group":"Brown","name":"Mocha"},"#483C32":{"group":"Brown","name":"Taupe"},"#6F4E37":{"group":"Brown","name":"Coffee"},"#835C3B":{"group":"Brown","name":"Brown Bear"},"#7F5217":{"group":"Red","name":"Red Dirt"},"#7F2222":{"group":"Red","name":"Dark Red"},"#7F3333":{"group":"Red","name":"Dark Red"},"#7F4646":{"group":"Red","name":"Dark Red"},"#87483b":{"group":"Red","name":"Dark Red"},"#7F462C":{"group":"Sepia","name":"Sepia"},"#C47451":{"group":"Orange","name":"Orange Salmon"},"#C36241":{"group":"Orange","name":"Rust"},"#C35817":{"group":"Orange","name":"Red Fox"},"#C85A17":{"group":"Orange","name":"Chocolate"},"#CC6600":{"group":"Orange","name":"Sedona"},"#E56717":{"group":"Orange","name":"Papaya Orange"},"#E66C2C":{"group":"Orange","name":"Halloween Orange"},"#F87217":{"group":"Orange","name":"Pumpkin Orange"},"#F87431":{"group":"Orange","name":"Construction Cone Orange"},"#E67451":{"group":"Orange","name":"Sunrise Orange"},"#FF8040":{"group":"Orange","name":"Mango Orange"},"#F88017":{"group":"Orange","name":"Dark Orange"},"#FF7F50":{"group":"Orange","name":"Coral"},"#F88158":{"group":"Orange","name":"Basket Ball Orange"},"#F9966B":{"group":"Orange","name":"Light Salmon"},"#E78A61":{"group":"Orange","name":"Tangerine"},"#E18B6B":{"group":"Orange","name":"Dark Salmon"},"#E77471":{"group":"Red","name":"Light Coral"},"#F75D59":{"group":"Red","name":"Bean Red"},"#E55451":{"group":"Red","name":"Valentine Red"},"#E55B3C":{"group":"Red","name":"Shocking Orange"},"#FF0000":{"group":"Red","name":"Red"},"#FF2400":{"group":"Red","name":"Scarlet"},"#F62217":{"group":"Red","name":"Ruby Red"},"#F70D1A":{"group":"Red","name":"Ferrari Red"},"#F62817":{"group":"Red","name":"Fire Engine Red"},"#E42217":{"group":"Red","name":"Lava Red"},"#E41B17":{"group":"Red","name":"Love Red"},"#DC381F":{"group":"Red","name":"Grapefruit"},"#C34A2C":{"group":"Red","name":"Chestnut Red"},"#C24641":{"group":"Red","name":"Cherry Red"},"#C04000":{"group":"Red","name":"Mahogany"},"#C11B17":{"group":"Red","name":"Chilli Pepper"},"#9F000F":{"group":"Red","name":"Cranberry"},"#990012":{"group":"Red","name":"Red Wine"},"#8C001A":{"group":"Red","name":"Burgundy"},"#954535":{"group":"Red","name":"Chestnut"},"#7E3517":{"group":"Red","name":"Blood Red"},"#8A4117":{"group":"Red","name":"Sienna"},"#7E3817":{"group":"Red","name":"Sangria"},"#800517":{"group":"Red","name":"Firebrick"},"#810541":{"group":"Purple","name":"Maroon"},"#7D0541":{"group":"Purple","name":"Plum Pie"},"#7E354D":{"group":"Purple","name":"Velvet Maroon"},"#7D0552":{"group":"Purple","name":"Plum Velvet"},"#7F4E52":{"group":"Purple","name":"Rosy Finch"},"#7F5A58":{"group":"Purple","name":"Puce"},"#7F525D":{"group":"Purple","name":"Dull Purple"},"#B38481":{"group":"Purple","name":"Rosy Brown"},"#C5908E":{"group":"Purple","name":"Khaki Rose"},"#C48189":{"group":"Pink","name":"Pink Bow"},"#C48793":{"group":"Pink","name":"Lipstick Pink"},"#E8ADAA":{"group":"Purple","name":"Rose"},"#ECC5C0":{"group":"Purple","name":"Rose Gold"},"#EDC9AF":{"group":"Purple","name":"Desert Sand"},"#9E496C":{"group":"Purple","name":"Dark Purple"},"#FDD7E4":{"group":"Pink","name":"Pig Pink"},"#FCDFFF":{"group":"Pink","name":"Cotton Candy"},"#9e7382":{"group":"Pink","name":"Gray Pink"},"#FFDFDD":{"group":"Pink","name":"Pink Bubble Gum"},"#FBBBB9":{"group":"Pink","name":"Misty Rose"},"#FAAFBE":{"group":"Pink","name":"Pink"},"#FAAFBA":{"group":"Pink","name":"Light Pink"},"#F9A7B0":{"group":"Pink","name":"Flamingo Pink"},"#E7A1B0":{"group":"Pink","name":"Pink Rose"},"#E799A3":{"group":"Pink","name":"Pink Daisy"},"#E38AAE":{"group":"Pink","name":"Cadillac Pink"},"#F778A1":{"group":"Pink","name":"Carnation Pink"},"#E56E94":{"group":"Pink","name":"Blush Red"},"#F660AB":{"group":"Pink","name":"Hot Pink"},"#FC6C85":{"group":"Pink","name":"Watermelon Pink"},"#F6358A":{"group":"Pink","name":"Violet Red"},"#F52887":{"group":"Pink","name":"Deep Pink"},"#E45E9D":{"group":"Pink","name":"Pink Cupcake"},"#E4287C":{"group":"Pink","name":"Pink Lemonade"},"#F535AA":{"group":"Pink","name":"Neon Pink"},"#FF00FF":{"group":"Pink","name":"Magenta"},"#E3319D":{"group":"Pink","name":"Dimorphotheca Magenta"},"#F433FF":{"group":"Pink","name":"Bright Neon Pink"},"#D16587":{"group":"Pink","name":"Pale Violet Red"},"#C25A7C":{"group":"Pink","name":"Tulip Pink"},"#CA226B":{"group":"Pink","name":"Medium Violet Red"},"#C12869":{"group":"Pink","name":"Rogue Pink"},"#C12267":{"group":"Pink","name":"Burnt Pink"},"#C25283":{"group":"Pink","name":"Bashful Pink"},"#C12283":{"group":"Pink","name":"Dark Carnation Pink"},"#B93B8F":{"group":"Pink","name":"Plum"},"#7E587E":{"group":"Purple","name":"Viola Purple"},"#571B7E":{"group":"Purple","name":"Purple Iris"},"#583759":{"group":"Purple","name":"Plum Purple"},"#4B0082":{"group":"Purple","name":"Indigo"},"#461B7E":{"group":"Purple","name":"Purple Monster"},"#4E387E":{"group":"Purple","name":"Purple Haze"},"#614051":{"group":"Purple","name":"Eggplant"},"#5E5A80":{"group":"Purple","name":"Grape"},"#6A287E":{"group":"Purple","name":"Purple Jam"},"#7D1B7E":{"group":"Purple","name":"Dark Orchid"},"#A74AC7":{"group":"Purple","name":"Purple Flower"},"#B048B5":{"group":"Purple","name":"Medium Orchid"},"#6C2DC7":{"group":"Purple","name":"Purple Amethyst"},"#842DCE":{"group":"Violet","name":"Dark Violet"},"#8D38C9":{"group":"Violet","name":"Violet"},"#7A5DC7":{"group":"Violet","name":"Purple Sage Bush"},"#7F38EC":{"group":"Violet","name":"Lovely Purple"},"#8E35EF":{"group":"Violet","name":"Purple"},"#893BFF":{"group":"Violet","name":"Aztech Purple"},"#8467D7":{"group":"Violet","name":"Medium Purple"},"#A23BEC":{"group":"Violet","name":"Jasmine Purple"},"#B041FF":{"group":"Violet","name":"Purple Daffodil"},"#C45AEC":{"group":"Violet","name":"Tyrian Purple"},"#9172EC":{"group":"Violet","name":"Crocus Purple"},"#9E7BFF":{"group":"Violet","name":"Purple Mimosa"},"#D462FF":{"group":"Purple","name":"Heliotrope Purple"},"#E238EC":{"group":"Purple","name":"Crimson"},"#C38EC7":{"group":"Purple","name":"Purple Dragon"},"#C8A2C8":{"group":"Lilac","name":"Lilac"},"#E6A9EC":{"group":"Pink","name":"Blush Pink"},"#E0B0FF":{"group":"","name":"Mauve"},"#C6AEC7":{"group":"Purple","name":"Wisteria Purple"},"#F9B7FF":{"group":"Pink","name":"Blossom Pink"},"#D2B9D3":{"group":"","name":"Thistle"},"#E9CFEC":{"group":"","name":"Periwinkle"},"#EBDDE2":{"group":"Green","name":"Lavender Pinocchio"},"#E3E4FA":{"group":"Blue","name":"Lavender blue"},"#FDEEF4":{"group":"White","name":"Pearl"},"#FFF5EE":{"group":"White","name":"SeaShell"},"#FEFCFF":{"group":"White","name":"Milk White"},"#FCFCFC":{"group":"White","name":"White"},"#FEFEFE":{"group":"White","name":"White"},"#FFFFFF":{"group":"White","name":"White"},"#65272e":{"group":"Red","name":"Dark Red"},"#5d282c":{"group":"Red","name":"Dark Red"},"#324b4a":{"group":"Green","name":"Blue Green"},"#375453":{"group":"Green","name":"Blue Green"},"#334e4e":{"group":"Green","name":"Dark Blue Green"},"#324d4e":{"group":"Green","name":"Dark Blue Green"},"#c1cb81":{"group":"Yellow","name":"Dark Yellow"},"#c3cb79":{"group":"Yellow","name":"Dark Yellow"},"#c5cc72":{"group":"Yellow","name":"Dark Yellow"},"#9fab50":{"group":"Green","name":"Brown Green"},"#836c5d":{"group":"Brown","name":"Light Brown"}}
+{
+    "#000000": {
+        "group": "Black",
+        "name": "Black"
+    },
+    "#0C090A": {
+        "group": "Black",
+        "name": "Night"
+    },
+    "#2C3539": {
+        "group": "Black",
+        "name": "Gunmetal"
+    },
+    "#2B1B17": {
+        "group": "Black",
+        "name": "Midnight"
+    },
+    "#34282C": {
+        "group": "Black",
+        "name": "Charcoal"
+    },
+    "#25383C": {
+        "group": "Black",
+        "name": "Dark Slate Grey"
+    },
+    "#3B3131": {
+        "group": "Black",
+        "name": "Oil"
+    },
+    "#413839": {
+        "group": "Black",
+        "name": "Black Cat"
+    },
+    "#3D3C3A": {
+        "group": "Black",
+        "name": "Iridium"
+    },
+    "#463E3F": {
+        "group": "Black",
+        "name": "Black Eel"
+    },
+    "#4C4646": {
+        "group": "Black",
+        "name": "Black Cow"
+    },
+    "#504A4B": {
+        "group": "Gray",
+        "name": "Gray Wolf"
+    },
+    "#565051": {
+        "group": "Gray",
+        "name": "Vampire Gray"
+    },
+    "#5C5858": {
+        "group": "Gray",
+        "name": "Gray Dolphin"
+    },
+    "#625D5D": {
+        "group": "Gray",
+        "name": "Carbon Gray"
+    },
+    "#666362": {
+        "group": "Gray",
+        "name": "Ash Gray"
+    },
+    "#6D6968": {
+        "group": "Gray",
+        "name": "Cloudy Gray"
+    },
+    "#726E6D": {
+        "group": "Gray",
+        "name": "Smokey Gray"
+    },
+    "#736F6E": {
+        "group": "Gray",
+        "name": "Gray"
+    },
+    "#837E7C": {
+        "group": "Gray",
+        "name": "Granite"
+    },
+    "#848482": {
+        "group": "Gray",
+        "name": "Battleship Gray"
+    },
+    "#B6B6B4": {
+        "group": "Gray",
+        "name": "Gray Cloud"
+    },
+    "#D1D0CE": {
+        "group": "Gray",
+        "name": "Gray Goose"
+    },
+    "#E5E4E2": {
+        "group": "Gray",
+        "name": "Platinum"
+    },
+    "#BCC6CC": {
+        "group": "Gray",
+        "name": "Metallic Silver"
+    },
+    "#98AFC7": {
+        "group": "Blue",
+        "name": "Blue Gray"
+    },
+    "#6D7B8D": {
+        "group": "Gray",
+        "name": "Light Slate Gray"
+    },
+    "#657383": {
+        "group": "Gray",
+        "name": "Slate Gray"
+    },
+    "#616D7E": {
+        "group": "Gray",
+        "name": "Jet Gray"
+    },
+    "#a2a2a2": {
+        "group": "Gray",
+        "name": "Gray"
+    },
+    "#2c363e": {
+        "group": "Blue",
+        "name": "Dark Blue"
+    },
+    "#333d46": {
+        "group": "Blue",
+        "name": "Dark Blue"
+    },
+    "#2f373e": {
+        "group": "Blue",
+        "name": "Dark Blue"
+    },
+    "#646D7E": {
+        "group": "Blue",
+        "name": "Mist Blue"
+    },
+    "#566D7E": {
+        "group": "Blue",
+        "name": "Marble Blue"
+    },
+    "#737CA1": {
+        "group": "Blue",
+        "name": "Slate Blue"
+    },
+    "#4863A0": {
+        "group": "Blue",
+        "name": "Steel Blue"
+    },
+    "#2B547E": {
+        "group": "Blue",
+        "name": "Blue Jay"
+    },
+    "#2B3856": {
+        "group": "Blue",
+        "name": "Dark Slate Blue"
+    },
+    "#151B54": {
+        "group": "Blue",
+        "name": "Midnight Blue"
+    },
+    "#000080": {
+        "group": "Blue",
+        "name": "Navy Blue"
+    },
+    "#342D7E": {
+        "group": "Blue",
+        "name": "Blue Whale"
+    },
+    "#15317E": {
+        "group": "Blue",
+        "name": "Lapis Blue"
+    },
+    "#151B8D": {
+        "group": "Blue",
+        "name": "Denim Dark Blue"
+    },
+    "#0000A0": {
+        "group": "Blue",
+        "name": "Earth Blue"
+    },
+    "#0020C2": {
+        "group": "Blue",
+        "name": "Cobalt Blue"
+    },
+    "#0041C2": {
+        "group": "Blue",
+        "name": "Blueberry Blue"
+    },
+    "#2554C7": {
+        "group": "Blue",
+        "name": "Sapphire Blue"
+    },
+    "#1569C7": {
+        "group": "Blue",
+        "name": "Blue Eyes"
+    },
+    "#2B60DE": {
+        "group": "Blue",
+        "name": "Royal Blue"
+    },
+    "#1F45FC": {
+        "group": "Blue",
+        "name": "Blue Orchid"
+    },
+    "#6960EC": {
+        "group": "Blue",
+        "name": "Blue Lotus"
+    },
+    "#736AFF": {
+        "group": "Blue",
+        "name": "Light Slate Blue"
+    },
+    "#357EC7": {
+        "group": "Blue",
+        "name": "Windows Blue"
+    },
+    "#368BC1": {
+        "group": "Blue",
+        "name": "Glacial Blue Ice"
+    },
+    "#488AC7": {
+        "group": "Blue",
+        "name": "Silk Blue"
+    },
+    "#3090C7": {
+        "group": "Blue",
+        "name": "Blue Ivy"
+    },
+    "#659EC7": {
+        "group": "Blue",
+        "name": "Blue Koi"
+    },
+    "#87AFC7": {
+        "group": "Blue",
+        "name": "Columbia Blue"
+    },
+    "#95B9C7": {
+        "group": "Blue",
+        "name": "Baby Blue"
+    },
+    "#728FCE": {
+        "group": "Blue",
+        "name": "Light Steel Blue"
+    },
+    "#2B65EC": {
+        "group": "Blue",
+        "name": "Ocean Blue"
+    },
+    "#306EFF": {
+        "group": "Blue",
+        "name": "Blue Ribbon"
+    },
+    "#157DEC": {
+        "group": "Blue",
+        "name": "Blue Dress"
+    },
+    "#1589FF": {
+        "group": "Blue",
+        "name": "Dodger Blue"
+    },
+    "#6495ED": {
+        "group": "Blue",
+        "name": "Cornflower Blue"
+    },
+    "#6698FF": {
+        "group": "Blue",
+        "name": "Sky Blue"
+    },
+    "#38ACEC": {
+        "group": "Blue",
+        "name": "Butterfly Blue"
+    },
+    "#56A5EC": {
+        "group": "Blue",
+        "name": "Iceberg"
+    },
+    "#5CB3FF": {
+        "group": "Blue",
+        "name": "Crystal Blue"
+    },
+    "#3BB9FF": {
+        "group": "Blue",
+        "name": "Deep Sky Blue"
+    },
+    "#79BAEC": {
+        "group": "Blue",
+        "name": "Denim Blue"
+    },
+    "#82CAFA": {
+        "group": "Blue",
+        "name": "Light Sky Blue"
+    },
+    "#82CAFF": {
+        "group": "Blue",
+        "name": "Day Sky Blue"
+    },
+    "#A0CFEC": {
+        "group": "Blue",
+        "name": "Jeans Blue"
+    },
+    "#B7CEEC": {
+        "group": "Blue",
+        "name": "Blue Angel"
+    },
+    "#B4CFEC": {
+        "group": "Blue",
+        "name": "Pastel Blue"
+    },
+    "#C2DFFF": {
+        "group": "Blue",
+        "name": "Sea Blue"
+    },
+    "#C6DEFF": {
+        "group": "Blue",
+        "name": "Powder Blue"
+    },
+    "#AFDCEC": {
+        "group": "Blue",
+        "name": "Coral Blue"
+    },
+    "#ADDFFF": {
+        "group": "Blue",
+        "name": "Light Blue"
+    },
+    "#BDEDFF": {
+        "group": "Blue",
+        "name": "Robin Egg Blue"
+    },
+    "#CFECEC": {
+        "group": "Blue",
+        "name": "Pale Blue Lily"
+    },
+    "#E0FFFF": {
+        "group": "Cyan",
+        "name": "Light Cyan"
+    },
+    "#EBF4FA": {
+        "group": "Blue",
+        "name": "Water"
+    },
+    "#F0F8FF": {
+        "group": "Blue",
+        "name": "AliceBlue"
+    },
+    "#007FFF": {
+        "group": "Blue",
+        "name": "Azure"
+    },
+    "#CCFFFF": {
+        "group": "Blue",
+        "name": "Light Slate"
+    },
+    "#93FFE8": {
+        "group": "Blue",
+        "name": "Light Aquamarine"
+    },
+    "#9AFEFF": {
+        "group": "Blue",
+        "name": "Electric Blue"
+    },
+    "#7FFFD4": {
+        "group": "Blue",
+        "name": "Aquamarine"
+    },
+    "#00FFFF": {
+        "group": "Cyan",
+        "name": "Cyan"
+    },
+    "#7f9ba1": {
+        "group": "Cyan",
+        "name": "Light Cyan"
+    },
+    "#0D98BA": {
+        "group": "Cyan",
+        "name": "Blue-Green"
+    },
+    "#B2FFFF": {
+        "group": "Cyan",
+        "name": "Celeste"
+    },
+    "#007BA7": {
+        "group": "Cyan",
+        "name": "Cerulean"
+    },
+    "#232B2B": {
+        "group": "Cyan",
+        "name": "Charleston green"
+    },
+    "#008B8B": {
+        "group": "Cyan",
+        "name": "Dark Cyan"
+    },
+    "#7DF9FF": {
+        "group": "Cyan",
+        "name": "Electric Blue"
+    },
+    "#1164B4": {
+        "group": "Cyan",
+        "name": "Green-Blue"
+    },
+    "#3AB09E": {
+        "group": "Cyan",
+        "name": "Keppel"
+    },
+    "#00CCCC": {
+        "group": "Cyan",
+        "name": "Robin Egg Blue"
+    },
+    "#80DAEB": {
+        "group": "Cyan",
+        "name": "Sky Blue"
+    },
+    "#008080": {
+        "group": "Green",
+        "name": "Teal"
+    },
+    "#81D8D0": {
+        "group": "Blue",
+        "name": "Tiffany Blue"
+    },
+    "#40E0D0": {
+        "group": "Turquoise",
+        "name": "Turquoise"
+    },
+    "#7DFDFE": {
+        "group": "Blue",
+        "name": "Tron Blue"
+    },
+    "#57FEFF": {
+        "group": "Blue",
+        "name": "Blue Zircon"
+    },
+    "#8EEBEC": {
+        "group": "Blue",
+        "name": "Blue Lagoon"
+    },
+    "#50EBEC": {
+        "group": "Blue",
+        "name": "Celeste"
+    },
+    "#4EE2EC": {
+        "group": "Blue",
+        "name": "Blue Diamond"
+    },
+    "#92C7C7": {
+        "group": "Blue",
+        "name": "Cyan Opaque"
+    },
+    "#77BFC7": {
+        "group": "Blue",
+        "name": "Blue Hosta"
+    },
+    "#78C7C7": {
+        "group": "Blue",
+        "name": "Northern Lights Blue"
+    },
+    "#48CCCD": {
+        "group": "Turquoise",
+        "name": "Medium Turquoise"
+    },
+    "#43C6DB": {
+        "group": "Turquoise",
+        "name": "Turquoise"
+    },
+    "#46C7C7": {
+        "group": "Blue",
+        "name": "Jellyfish"
+    },
+    "#7BCCB5": {
+        "group": "Green",
+        "name": "Blue green"
+    },
+    "#43BFC7": {
+        "group": "Green",
+        "name": "Macaw Blue Green"
+    },
+    "#3EA99F": {
+        "group": "Green",
+        "name": "Light Sea Green"
+    },
+    "#3B9C9C": {
+        "group": "Turquoise",
+        "name": "Dark Turquoise"
+    },
+    "#438D80": {
+        "group": "Green",
+        "name": "Sea Turtle Green"
+    },
+    "#348781": {
+        "group": "Green",
+        "name": "Medium Aquamarine"
+    },
+    "#307D7E": {
+        "group": "Green",
+        "name": "Greenish Blue"
+    },
+    "#5E7D7E": {
+        "group": "Turquoise",
+        "name": "Grayish Turquoise"
+    },
+    "#4C787E": {
+        "group": "Green",
+        "name": "Beetle Green"
+    },
+    "#4E8975": {
+        "group": "Green",
+        "name": "Sea Green"
+    },
+    "#78866B": {
+        "group": "Green",
+        "name": "Camouflage Green"
+    },
+    "#848b79": {
+        "group": "Green",
+        "name": "Sage Green"
+    },
+    "#617C58": {
+        "group": "Green",
+        "name": "Hazel Green"
+    },
+    "#728C00": {
+        "group": "Green",
+        "name": "Venom Green"
+    },
+    "#667C26": {
+        "group": "Green",
+        "name": "Fern Green"
+    },
+    "#254117": {
+        "group": "Green",
+        "name": "Dark Forest Green"
+    },
+    "#306754": {
+        "group": "Green",
+        "name": "Medium Sea Green"
+    },
+    "#347235": {
+        "group": "Green",
+        "name": "Medium Forest Green"
+    },
+    "#437C17": {
+        "group": "Green",
+        "name": "Seaweed Green"
+    },
+    "#387C44": {
+        "group": "Green",
+        "name": "Pine Green"
+    },
+    "#347C2C": {
+        "group": "Green",
+        "name": "Jungle Green"
+    },
+    "#347C17": {
+        "group": "Green",
+        "name": "Shamrock Green"
+    },
+    "#348017": {
+        "group": "Green",
+        "name": "Medium Spring Green"
+    },
+    "#4E9258": {
+        "group": "Green",
+        "name": "Forest Green"
+    },
+    "#6AA121": {
+        "group": "Green",
+        "name": "Green Onion"
+    },
+    "#4AA02C": {
+        "group": "Green",
+        "name": "Spring Green"
+    },
+    "#41A317": {
+        "group": "Green",
+        "name": "Lime Green"
+    },
+    "#3EA055": {
+        "group": "Green",
+        "name": "Clover Green"
+    },
+    "#6CBB3C": {
+        "group": "Green",
+        "name": "Green Snake"
+    },
+    "#6CC417": {
+        "group": "Green",
+        "name": "Alien Green"
+    },
+    "#4CC417": {
+        "group": "Green",
+        "name": "Green Apple"
+    },
+    "#52D017": {
+        "group": "Green",
+        "name": "Yellow Green"
+    },
+    "#4CC552": {
+        "group": "Green",
+        "name": "Kelly Green"
+    },
+    "#54C571": {
+        "group": "Green",
+        "name": "Zombie Green"
+    },
+    "#99C68E": {
+        "group": "Green",
+        "name": "Frog Green"
+    },
+    "#89C35C": {
+        "group": "Green",
+        "name": "Green Peas"
+    },
+    "#85BB65": {
+        "group": "Green",
+        "name": "Dollar Bill Green"
+    },
+    "#8BB381": {
+        "group": "Green",
+        "name": "Dark Sea Green"
+    },
+    "#9CB071": {
+        "group": "Green",
+        "name": "Iguana Green"
+    },
+    "#B2C248": {
+        "group": "Green",
+        "name": "Avocado Green"
+    },
+    "#9DC209": {
+        "group": "Green",
+        "name": "Pistachio Green"
+    },
+    "#A1C935": {
+        "group": "Green",
+        "name": "Salad Green"
+    },
+    "#7FE817": {
+        "group": "Green",
+        "name": "Hummingbird Green"
+    },
+    "#59E817": {
+        "group": "Green",
+        "name": "Nebula Green"
+    },
+    "#57E964": {
+        "group": "Green",
+        "name": "Stoplight Go Green"
+    },
+    "#64E986": {
+        "group": "Green",
+        "name": "Algae Green"
+    },
+    "#5EFB6E": {
+        "group": "Green",
+        "name": "Jade Green"
+    },
+    "#002F00": {
+        "group": "Green",
+        "name": "Dark Green"
+    },
+    "#007F00": {
+        "group": "Green",
+        "name": "Dark Green"
+    },
+    "#00FF00": {
+        "group": "Green",
+        "name": "Green"
+    },
+    "#8f9d4c": {
+        "group": "Green",
+        "name": "Dark Green"
+    },
+    "#5FFB17": {
+        "group": "Green",
+        "name": "Emerald Green"
+    },
+    "#87F717": {
+        "group": "Green",
+        "name": "Lawn Green"
+    },
+    "#8AFB17": {
+        "group": "Green",
+        "name": "Chartreuse"
+    },
+    "#6AFB92": {
+        "group": "Green",
+        "name": "Dragon Green"
+    },
+    "#98FF98": {
+        "group": "Green",
+        "name": "Mint green"
+    },
+    "#B5EAAA": {
+        "group": "Green",
+        "name": "Green Thumb"
+    },
+    "#C3FDB8": {
+        "group": "Green",
+        "name": "Light Jade"
+    },
+    "#CCFB5D": {
+        "group": "Green",
+        "name": "Tea Green"
+    },
+    "#B1FB17": {
+        "group": "Green",
+        "name": "Green Yellow"
+    },
+    "#BCE954": {
+        "group": "Green",
+        "name": "Slime Green"
+    },
+    "#EDDA74": {
+        "group": "Gold",
+        "name": "Goldenrod"
+    },
+    "#EDE275": {
+        "group": "Gold",
+        "name": "Harvest Gold"
+    },
+    "#FFE87C": {
+        "group": "Yellow",
+        "name": "Sun Yellow"
+    },
+    "#FFFF00": {
+        "group": "Yellow",
+        "name": "Yellow"
+    },
+    "#FFF380": {
+        "group": "Yellow",
+        "name": "Corn Yellow"
+    },
+    "#FFFFC2": {
+        "group": "Yellow",
+        "name": "Parchment"
+    },
+    "#FFFFCC": {
+        "group": "Yellow",
+        "name": "Cream"
+    },
+    "#FFF8C6": {
+        "group": "Yellow",
+        "name": "Lemon Chiffon"
+    },
+    "#FFF8DC": {
+        "group": "Yellow",
+        "name": "Cornsilk"
+    },
+    "#F5F5DC": {
+        "group": "Yellow",
+        "name": "Beige"
+    },
+    "#FBF6D9": {
+        "group": "Yellow",
+        "name": "Blonde"
+    },
+    "#FAEBD7": {
+        "group": "Yellow",
+        "name": "AntiqueWhite"
+    },
+    "#F7E7CE": {
+        "group": "Yellow",
+        "name": "Champagne"
+    },
+    "#FFEBCD": {
+        "group": "Yellow",
+        "name": "BlanchedAlmond"
+    },
+    "#F3E5AB": {
+        "group": "Yellow",
+        "name": "Vanilla"
+    },
+    "#ECE5B6": {
+        "group": "Yellow",
+        "name": "Tan Brown"
+    },
+    "#FFE5B4": {
+        "group": "Yellow",
+        "name": "Peach"
+    },
+    "#FFDB58": {
+        "group": "Yellow",
+        "name": "Mustard"
+    },
+    "#FFD801": {
+        "group": "Yellow",
+        "name": "Rubber Ducky Yellow"
+    },
+    "#FDD017": {
+        "group": "Gold",
+        "name": "Bright Gold"
+    },
+    "#EAC117": {
+        "group": "Brown",
+        "name": "Golden brown"
+    },
+    "#806650": {
+        "group": "Brown",
+        "name": "Light Brown"
+    },
+    "#F2BB66": {
+        "group": "Brown",
+        "name": "Macaroni and Cheese"
+    },
+    "#FBB917": {
+        "group": "Brown",
+        "name": "Saffron"
+    },
+    "#FBB117": {
+        "group": "Brown",
+        "name": "Beer"
+    },
+    "#FFA62F": {
+        "group": "Brown",
+        "name": "Cantaloupe"
+    },
+    "#E9AB17": {
+        "group": "Brown",
+        "name": "Bee Yellow"
+    },
+    "#E2A76F": {
+        "group": "Brown",
+        "name": "Brown Sugar"
+    },
+    "#DEB887": {
+        "group": "Brown",
+        "name": "BurlyWood"
+    },
+    "#FFCBA4": {
+        "group": "Brown",
+        "name": "Deep Peach"
+    },
+    "#C9BE62": {
+        "group": "Brown",
+        "name": "Ginger Brown"
+    },
+    "#E8A317": {
+        "group": "Brown",
+        "name": "School Bus Yellow"
+    },
+    "#EE9A4D": {
+        "group": "Brown",
+        "name": "Sandy Brown"
+    },
+    "#C8B560": {
+        "group": "Brown",
+        "name": "Fall Leaf Brown"
+    },
+    "#D4A017": {
+        "group": "Brown",
+        "name": "Orange Gold"
+    },
+    "#C2B280": {
+        "group": "Brown",
+        "name": "Sand"
+    },
+    "#C7A317": {
+        "group": "Brown",
+        "name": "Cookie Brown"
+    },
+    "#C68E17": {
+        "group": "Brown",
+        "name": "Caramel"
+    },
+    "#B5A642": {
+        "group": "Brown",
+        "name": "Brass"
+    },
+    "#ADA96E": {
+        "group": "Brown",
+        "name": "Khaki"
+    },
+    "#C19A6B": {
+        "group": "Brown",
+        "name": "Camel brown"
+    },
+    "#CD7F32": {
+        "group": "Bronze",
+        "name": "Bronze"
+    },
+    "#C88141": {
+        "group": "Orange",
+        "name": "Tiger Orange"
+    },
+    "#C58917": {
+        "group": "Brown",
+        "name": "Cinnamon"
+    },
+    "#AF9B60": {
+        "group": "Brown",
+        "name": "Bullet Shell"
+    },
+    "#AF7817": {
+        "group": "Brown",
+        "name": "Dark Goldenrod"
+    },
+    "#B87333": {
+        "group": "Copper",
+        "name": "Copper"
+    },
+    "#896d44": {
+        "group": "Wood",
+        "name": "Dark Wood"
+    },
+    "#966F33": {
+        "group": "Wood",
+        "name": "Wood"
+    },
+    "#806517": {
+        "group": "Wood",
+        "name": "Oak"
+    },
+    "#827839": {
+        "group": "Brown",
+        "name": "Moccasin"
+    },
+    "#827B60": {
+        "group": "Brown",
+        "name": "Army Brown"
+    },
+    "#786D5F": {
+        "group": "Gray",
+        "name": "Sandstone"
+    },
+    "#493D26": {
+        "group": "Brown",
+        "name": "Mocha"
+    },
+    "#483C32": {
+        "group": "Brown",
+        "name": "Taupe"
+    },
+    "#6F4E37": {
+        "group": "Brown",
+        "name": "Coffee"
+    },
+    "#835C3B": {
+        "group": "Brown",
+        "name": "Brown Bear"
+    },
+    "#7F5217": {
+        "group": "Red",
+        "name": "Red Dirt"
+    },
+    "#7F2222": {
+        "group": "Red",
+        "name": "Dark Red"
+    },
+    "#7F3333": {
+        "group": "Red",
+        "name": "Dark Red"
+    },
+    "#7F4646": {
+        "group": "Red",
+        "name": "Dark Red"
+    },
+    "#87483b": {
+        "group": "Red",
+        "name": "Dark Red"
+    },
+    "#7F462C": {
+        "group": "Sepia",
+        "name": "Sepia"
+    },
+    "#C47451": {
+        "group": "Orange",
+        "name": "Orange Salmon"
+    },
+    "#C36241": {
+        "group": "Orange",
+        "name": "Rust"
+    },
+    "#C35817": {
+        "group": "Orange",
+        "name": "Red Fox"
+    },
+    "#C85A17": {
+        "group": "Orange",
+        "name": "Chocolate"
+    },
+    "#CC6600": {
+        "group": "Orange",
+        "name": "Sedona"
+    },
+    "#E56717": {
+        "group": "Orange",
+        "name": "Papaya Orange"
+    },
+    "#E66C2C": {
+        "group": "Orange",
+        "name": "Halloween Orange"
+    },
+    "#F87217": {
+        "group": "Orange",
+        "name": "Pumpkin Orange"
+    },
+    "#F87431": {
+        "group": "Orange",
+        "name": "Construction Cone Orange"
+    },
+    "#E67451": {
+        "group": "Orange",
+        "name": "Sunrise Orange"
+    },
+    "#FF8040": {
+        "group": "Orange",
+        "name": "Mango Orange"
+    },
+    "#F88017": {
+        "group": "Orange",
+        "name": "Dark Orange"
+    },
+    "#FF7F50": {
+        "group": "Orange",
+        "name": "Coral"
+    },
+    "#F88158": {
+        "group": "Orange",
+        "name": "Basket Ball Orange"
+    },
+    "#F9966B": {
+        "group": "Orange",
+        "name": "Light Salmon"
+    },
+    "#E78A61": {
+        "group": "Orange",
+        "name": "Tangerine"
+    },
+    "#E18B6B": {
+        "group": "Orange",
+        "name": "Dark Salmon"
+    },
+    "#E77471": {
+        "group": "Red",
+        "name": "Light Coral"
+    },
+    "#F75D59": {
+        "group": "Red",
+        "name": "Bean Red"
+    },
+    "#E55451": {
+        "group": "Red",
+        "name": "Valentine Red"
+    },
+    "#E55B3C": {
+        "group": "Red",
+        "name": "Shocking Orange"
+    },
+    "#FF0000": {
+        "group": "Red",
+        "name": "Red"
+    },
+    "#FF2400": {
+        "group": "Red",
+        "name": "Scarlet"
+    },
+    "#F62217": {
+        "group": "Red",
+        "name": "Ruby Red"
+    },
+    "#F70D1A": {
+        "group": "Red",
+        "name": "Ferrari Red"
+    },
+    "#F62817": {
+        "group": "Red",
+        "name": "Fire Engine Red"
+    },
+    "#E42217": {
+        "group": "Red",
+        "name": "Lava Red"
+    },
+    "#E41B17": {
+        "group": "Red",
+        "name": "Love Red"
+    },
+    "#DC381F": {
+        "group": "Red",
+        "name": "Grapefruit"
+    },
+    "#C34A2C": {
+        "group": "Red",
+        "name": "Chestnut Red"
+    },
+    "#C24641": {
+        "group": "Red",
+        "name": "Cherry Red"
+    },
+    "#C04000": {
+        "group": "Red",
+        "name": "Mahogany"
+    },
+    "#C11B17": {
+        "group": "Red",
+        "name": "Chilli Pepper"
+    },
+    "#9F000F": {
+        "group": "Red",
+        "name": "Cranberry"
+    },
+    "#990012": {
+        "group": "Red",
+        "name": "Red Wine"
+    },
+    "#8C001A": {
+        "group": "Red",
+        "name": "Burgundy"
+    },
+    "#954535": {
+        "group": "Red",
+        "name": "Chestnut"
+    },
+    "#7E3517": {
+        "group": "Red",
+        "name": "Blood Red"
+    },
+    "#8A4117": {
+        "group": "Red",
+        "name": "Sienna"
+    },
+    "#7E3817": {
+        "group": "Red",
+        "name": "Sangria"
+    },
+    "#800517": {
+        "group": "Red",
+        "name": "Firebrick"
+    },
+    "#810541": {
+        "group": "Purple",
+        "name": "Maroon"
+    },
+    "#7D0541": {
+        "group": "Purple",
+        "name": "Plum Pie"
+    },
+    "#7E354D": {
+        "group": "Purple",
+        "name": "Velvet Maroon"
+    },
+    "#7D0552": {
+        "group": "Purple",
+        "name": "Plum Velvet"
+    },
+    "#7F4E52": {
+        "group": "Purple",
+        "name": "Rosy Finch"
+    },
+    "#7F5A58": {
+        "group": "Purple",
+        "name": "Puce"
+    },
+    "#7F525D": {
+        "group": "Purple",
+        "name": "Dull Purple"
+    },
+    "#B38481": {
+        "group": "Purple",
+        "name": "Rosy Brown"
+    },
+    "#C5908E": {
+        "group": "Purple",
+        "name": "Khaki Rose"
+    },
+    "#C48189": {
+        "group": "Pink",
+        "name": "Pink Bow"
+    },
+    "#C48793": {
+        "group": "Pink",
+        "name": "Lipstick Pink"
+    },
+    "#E8ADAA": {
+        "group": "Purple",
+        "name": "Rose"
+    },
+    "#ECC5C0": {
+        "group": "Purple",
+        "name": "Rose Gold"
+    },
+    "#EDC9AF": {
+        "group": "Orange",
+        "name": "Desert Sand"
+    },
+    "#9E496C": {
+        "group": "Purple",
+        "name": "Dark Purple"
+    },
+    "#FDD7E4": {
+        "group": "Pink",
+        "name": "Pig Pink"
+    },
+    "#FCDFFF": {
+        "group": "Pink",
+        "name": "Cotton Candy"
+    },
+    "#9e7382": {
+        "group": "Pink",
+        "name": "Gray Pink"
+    },
+    "#FFDFDD": {
+        "group": "Pink",
+        "name": "Pink Bubble Gum"
+    },
+    "#FBBBB9": {
+        "group": "Pink",
+        "name": "Misty Rose"
+    },
+    "#FAAFBE": {
+        "group": "Pink",
+        "name": "Pink"
+    },
+    "#FAAFBA": {
+        "group": "Pink",
+        "name": "Light Pink"
+    },
+    "#F9A7B0": {
+        "group": "Pink",
+        "name": "Flamingo Pink"
+    },
+    "#E7A1B0": {
+        "group": "Pink",
+        "name": "Pink Rose"
+    },
+    "#E799A3": {
+        "group": "Pink",
+        "name": "Pink Daisy"
+    },
+    "#E38AAE": {
+        "group": "Pink",
+        "name": "Cadillac Pink"
+    },
+    "#F778A1": {
+        "group": "Pink",
+        "name": "Carnation Pink"
+    },
+    "#E56E94": {
+        "group": "Pink",
+        "name": "Blush Red"
+    },
+    "#F660AB": {
+        "group": "Pink",
+        "name": "Hot Pink"
+    },
+    "#FC6C85": {
+        "group": "Pink",
+        "name": "Watermelon Pink"
+    },
+    "#F6358A": {
+        "group": "Pink",
+        "name": "Violet Red"
+    },
+    "#F52887": {
+        "group": "Pink",
+        "name": "Deep Pink"
+    },
+    "#E45E9D": {
+        "group": "Pink",
+        "name": "Pink Cupcake"
+    },
+    "#E4287C": {
+        "group": "Pink",
+        "name": "Pink Lemonade"
+    },
+    "#F535AA": {
+        "group": "Pink",
+        "name": "Neon Pink"
+    },
+    "#FF00FF": {
+        "group": "Pink",
+        "name": "Magenta"
+    },
+    "#E3319D": {
+        "group": "Pink",
+        "name": "Dimorphotheca Magenta"
+    },
+    "#F433FF": {
+        "group": "Pink",
+        "name": "Bright Neon Pink"
+    },
+    "#D16587": {
+        "group": "Pink",
+        "name": "Pale Violet Red"
+    },
+    "#C25A7C": {
+        "group": "Pink",
+        "name": "Tulip Pink"
+    },
+    "#CA226B": {
+        "group": "Pink",
+        "name": "Medium Violet Red"
+    },
+    "#C12869": {
+        "group": "Pink",
+        "name": "Rogue Pink"
+    },
+    "#C12267": {
+        "group": "Pink",
+        "name": "Burnt Pink"
+    },
+    "#C25283": {
+        "group": "Pink",
+        "name": "Bashful Pink"
+    },
+    "#C12283": {
+        "group": "Pink",
+        "name": "Dark Carnation Pink"
+    },
+    "#B93B8F": {
+        "group": "Pink",
+        "name": "Plum"
+    },
+    "#7E587E": {
+        "group": "Purple",
+        "name": "Viola Purple"
+    },
+    "#571B7E": {
+        "group": "Purple",
+        "name": "Purple Iris"
+    },
+    "#583759": {
+        "group": "Purple",
+        "name": "Plum Purple"
+    },
+    "#4B0082": {
+        "group": "Purple",
+        "name": "Indigo"
+    },
+    "#461B7E": {
+        "group": "Purple",
+        "name": "Purple Monster"
+    },
+    "#4E387E": {
+        "group": "Purple",
+        "name": "Purple Haze"
+    },
+    "#614051": {
+        "group": "Purple",
+        "name": "Eggplant"
+    },
+    "#5E5A80": {
+        "group": "Purple",
+        "name": "Grape"
+    },
+    "#6A287E": {
+        "group": "Purple",
+        "name": "Purple Jam"
+    },
+    "#7D1B7E": {
+        "group": "Purple",
+        "name": "Dark Orchid"
+    },
+    "#A74AC7": {
+        "group": "Purple",
+        "name": "Purple Flower"
+    },
+    "#B048B5": {
+        "group": "Purple",
+        "name": "Medium Orchid"
+    },
+    "#6C2DC7": {
+        "group": "Purple",
+        "name": "Purple Amethyst"
+    },
+    "#842DCE": {
+        "group": "Violet",
+        "name": "Dark Violet"
+    },
+    "#8D38C9": {
+        "group": "Violet",
+        "name": "Violet"
+    },
+    "#7A5DC7": {
+        "group": "Violet",
+        "name": "Purple Sage Bush"
+    },
+    "#7F38EC": {
+        "group": "Violet",
+        "name": "Lovely Purple"
+    },
+    "#8E35EF": {
+        "group": "Violet",
+        "name": "Purple"
+    },
+    "#893BFF": {
+        "group": "Violet",
+        "name": "Aztech Purple"
+    },
+    "#8467D7": {
+        "group": "Violet",
+        "name": "Medium Purple"
+    },
+    "#A23BEC": {
+        "group": "Violet",
+        "name": "Jasmine Purple"
+    },
+    "#B041FF": {
+        "group": "Violet",
+        "name": "Purple Daffodil"
+    },
+    "#C45AEC": {
+        "group": "Violet",
+        "name": "Tyrian Purple"
+    },
+    "#9172EC": {
+        "group": "Violet",
+        "name": "Crocus Purple"
+    },
+    "#9E7BFF": {
+        "group": "Violet",
+        "name": "Purple Mimosa"
+    },
+    "#D462FF": {
+        "group": "Purple",
+        "name": "Heliotrope Purple"
+    },
+    "#E238EC": {
+        "group": "Purple",
+        "name": "Crimson"
+    },
+    "#C38EC7": {
+        "group": "Purple",
+        "name": "Purple Dragon"
+    },
+    "#C8A2C8": {
+        "group": "Lilac",
+        "name": "Lilac"
+    },
+    "#E6A9EC": {
+        "group": "Pink",
+        "name": "Blush Pink"
+    },
+    "#E0B0FF": {
+        "group": "",
+        "name": "Mauve"
+    },
+    "#C6AEC7": {
+        "group": "Purple",
+        "name": "Wisteria Purple"
+    },
+    "#F9B7FF": {
+        "group": "Pink",
+        "name": "Blossom Pink"
+    },
+    "#D2B9D3": {
+        "group": "",
+        "name": "Thistle"
+    },
+    "#E9CFEC": {
+        "group": "",
+        "name": "Periwinkle"
+    },
+    "#EBDDE2": {
+        "group": "Green",
+        "name": "Lavender Pinocchio"
+    },
+    "#E3E4FA": {
+        "group": "Blue",
+        "name": "Lavender blue"
+    },
+    "#FDEEF4": {
+        "group": "White",
+        "name": "Pearl"
+    },
+    "#FFF5EE": {
+        "group": "White",
+        "name": "SeaShell"
+    },
+    "#FEFCFF": {
+        "group": "White",
+        "name": "Milk White"
+    },
+    "#FCFCFC": {
+        "group": "White",
+        "name": "White"
+    },
+    "#FEFEFE": {
+        "group": "White",
+        "name": "White"
+    },
+    "#FFFFFF": {
+        "group": "White",
+        "name": "White"
+    },
+    "#65272e": {
+        "group": "Red",
+        "name": "Dark Red"
+    },
+    "#5d282c": {
+        "group": "Red",
+        "name": "Dark Red"
+    },
+    "#324b4a": {
+        "group": "Green",
+        "name": "Blue Green"
+    },
+    "#375453": {
+        "group": "Green",
+        "name": "Blue Green"
+    },
+    "#334e4e": {
+        "group": "Green",
+        "name": "Dark Blue Green"
+    },
+    "#324d4e": {
+        "group": "Green",
+        "name": "Dark Blue Green"
+    },
+    "#c1cb81": {
+        "group": "Yellow",
+        "name": "Dark Yellow"
+    },
+    "#c3cb79": {
+        "group": "Yellow",
+        "name": "Dark Yellow"
+    },
+    "#c5cc72": {
+        "group": "Yellow",
+        "name": "Dark Yellow"
+    },
+    "#9fab50": {
+        "group": "Green",
+        "name": "Brown Green"
+    },
+    "#836c5d": {
+        "group": "Brown",
+        "name": "Light Brown"
+    },
+    "#443028": {
+        "group": "Wood",
+        "name": "Walnut"
+    },
+    "#f8dfa1": {
+        "group": "Wood",
+        "name": "Birch"
+    },
+    "#cdaa88": {
+        "group": "Wood",
+        "name": "Beech"
+    }
+}

@@ -28,8 +28,18 @@ void ObjectDetectorWorker::loadModel(const QString config, const QString model)
 
     QMutexLocker locker(&m_mutex);
 
+    qDebug() << "Configuration & Weights are" << m_config << m_model;
+
     try {
+        if (QFile::exists(m_config)==false)
+            throw std::invalid_argument("Model configuration not found");
+
+        if (QFile::exists(m_model)==false)
+            throw std::invalid_argument("Model weights not found");
+
         if (m_config.startsWith(":///")) {
+            qDebug() << "Loading model from resources / filesystem " << m_config << m_model;
+
             QFile config(m_config);
             if (config.open(QIODevice::ReadOnly)==false)
                 throw std::invalid_argument("Invalid model configuration");
@@ -41,9 +51,12 @@ void ObjectDetectorWorker::loadModel(const QString config, const QString model)
                 throw std::invalid_argument("Invalid model data");
 
             const QByteArray mdata=model.readAll();
-
+            // From memory
             m_net = cv::dnn::readNetFromDarknet(cdata, cdata.size(), mdata, mdata.size());
         } else {
+            qDebug() << "Loading model from filesystem " << m_config << m_model;
+
+            // From files
             m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
         }
 
@@ -104,7 +117,7 @@ void ObjectDetectorWorker::processOpenCVFrame()
 
     emit detectionStarted();
 
-    qDebug() << "Starting processing in thread...";
+    qDebug() << "Starting processing in thread, required confidece " << m_confidence;
 
     QElapsedTimer timer;
     timer.start();
@@ -196,5 +209,10 @@ bool ObjectDetectorWorker::setFrame(cv::Mat &frame)
     m_frame=frame.clone();
 
     return true;
+}
+
+void ObjectDetectorWorker::setConfidence(qreal confidence)
+{
+    m_confidence=confidence;
 }
 

@@ -30,11 +30,11 @@ int main(int argc, char *argv[])
 
     qDebug() << "External storage is" << android.getExternalStorage();
 
-    dnn_config=YOLO_CFG;
-    dnn_classes=YOLO_NAMES;
+    //dnn_config=YOLO_CFG;
+    //dnn_classes=YOLO_NAMES;
 
-    //dnn_config=android.getExternalStorage()+YOLO_CFG;
-    //dnn_classes=android.getExternalStorage()+YOLO_NAMES;
+    dnn_config=android.getExternalStorage()+YOLO_CFG;
+    dnn_classes=android.getExternalStorage()+YOLO_NAMES;
     dnn_model=android.getExternalStorage()+YOLO_WEIGHTS;    
 #else
     dnn_config=YOLO_CFG;

@@ -8,9 +8,9 @@ import org.tal 1.0
 
 ApplicationWindow {
     visible: true
-    width: 800
-    height: 480
-    title: qsTr("OpenCV QtQuick Test")
+    width: 1024
+    height: 768
+    title: qsTr("QtOpenCV Hello World")
     header: mainToolbar
 
     property bool inProgress: false
@@ -18,7 +18,7 @@ ApplicationWindow {
     ToolBar {
         id: mainToolbar
         RowLayout {
-            anchors.fill: parent            
+            anchors.fill: parent
             Text {
                 id: cnameText
                 text: "n/a"
@@ -49,18 +49,35 @@ ApplicationWindow {
             }
             ToolButton {
                 text: "Capture"
-                enabled: !inProgress
+                enabled: !inProgress && camera.cameraState==Camera.ActiveState
                 onClicked: {
                     camera.imageCapture.capture();
                 }
-            }            
+            }
+            ToolButton {
+                text: "Camera"
+                enabled: camera.cameraState!=Camera.ActiveState
+                onClicked: {
+                    camera.start();
+                }
+            }
+            ToolButton {
+                text: "Focus"
+                enabled: camera.cameraState==Camera.ActiveState
+                onClicked: {
+                    camera.searchAndLock();
+                }
+            }
         }
     }
 
     ImageGallerySelector {
         id: filesDialog
         onFileSelected: {
+            camera.stop();
+
             previewImage.source=src
+            previewImage.visible=true;
             cd.processImageFile(src);
             od.processImageFile(src);
         }
@@ -80,11 +97,17 @@ ApplicationWindow {
         }
     }
 
+    ListModel {
+        id: detectedItems
+    }
+
     ObjectDetector {
         id: od
         config: dnnConfig
         model: dnnWeights
         classes: dnnClasses
+
+        confidence: 0.60
 
         Component.onCompleted: {
             loadClasses();
@@ -95,25 +118,35 @@ ApplicationWindow {
         property point c;
 
         onObjectDetected: {
-            objectID.text=od.getClassName(cid);
-            objectConfidence.text=cid+":"+Math.round(confidence*100)+"%";
-
-            od.c=vc.mapNormalizedPointToItem(center);
-            od.o=vc.mapNormalizedRectToItem(rect);
-
-            previewImage.opacity=0.9;
+            detectedItems.append({"cid": cid,
+                                     "confidence": confidence,
+                                     "name":od.getClassName(cid),
+                                     "centerX": center.x,
+                                     "centerY": center.y,
+                                     "x": rect.x,
+                                     "y": rect.y,
+                                     "width": rect.width,
+                                     "height": rect.height
+                                 })
         }
 
         onNoObjectDetected: {
             console.debug("Nothing found!")
             objectID.text=""
             objectConfidence.text="-:---%"
-
             previewImage.visible=false;
         }
 
-        onDetectionEnded: inProgress=false;
-        onDetectionStarted: inProgress=true;
+        onDetectionEnded: {
+            inProgress=false;
+            previewImage.visible=true;
+            detectedItemsList.currentIndex=0;
+        }
+
+        onDetectionStarted: {
+            detectedItems.clear();
+            inProgress=true;
+        }
     }
 
     Camera {
@@ -139,6 +172,7 @@ ApplicationWindow {
                 console.debug(camera.imageCapture.capturedImagePath)
                 previewImage.source=preview
                 previewImage.visible=true;
+                camera.stop();
             }
             onCaptureFailed: {
                 console.debug("Capture failed")
@@ -168,97 +202,174 @@ ApplicationWindow {
         }
     }
 
-    VideoOutput {
-        id: vc
+    RowLayout {
+        id: mainRow
         anchors.fill: parent
-        source: camera
-        autoOrientation: true
-        fillMode: Image.PreserveAspectFit
 
-        filters: [ cvfilter ]
-
-        MouseArea {
-            anchors.fill: parent
-            onPressAndHold: {
-                console.debug(mouse.x)
-                console.debug(mouse.y)
-
-                console.debug(mouse.x/width)
-                console.debug(mouse.y/height)
-
-                // cd.setRoi();
-            }
-            onClicked: {
-                camera.searchAndLock();
-            }
-            onDoubleClicked: {
-                camera.imageCapture.capture();
-            }
-        }
-
-        Rectangle {
-            anchors.centerIn: parent
-            width: 33
-            height: 33
-            border.width: 4
-            border.color: "green"
-            color: "transparent"
-        }    
-
-        Image {
-            id: previewImage
-            anchors.fill: parent
+        VideoOutput {
+            id: vc
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            source: camera
+            autoOrientation: true
             fillMode: Image.PreserveAspectFit
-            opacity: 0.75
+
+            filters: [ cvfilter ]
+
             MouseArea {
                 anchors.fill: parent
-                onClicked: previewImage.visible=false;
+                onPressAndHold: {
+                    console.debug(mouse.x)
+                    console.debug(mouse.y)
+
+                    console.debug(mouse.x/width)
+                    console.debug(mouse.y/height)
+
+                    // cd.setRoi();
+                }
+                onClicked: {
+                    camera.searchAndLock();
+                }
+                onDoubleClicked: {
+                    camera.imageCapture.capture();
+                }
+            }
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: 33
+                height: 33
+                border.width: 4
+                border.color: "green"
+                color: "transparent"
+            }
+
+            Image {
+                id: previewImage
+                anchors.fill: parent
+                //fillMode: Image.PreserveAspectFit
+                fillMode: Image.Stretch
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: previewImage.visible=false;
+                }
+            }
+
+            Rectangle {
+                id: objectRect
+                color: "transparent"
+                width: detectedItemsList.o.width
+                height: detectedItemsList.o.height
+                x: detectedItemsList.o.x
+                y: detectedItemsList.o.y
+                border.width: 2
+                border.color: "red"
+                Text {
+                    id: objectID
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                }
+                Text {
+                    id: objectConfidence
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                }
+            }
+
+            Rectangle {
+                id: objectCenter
+                color: "transparent"
+                x: detectedItemsList.c.x-2
+                y: detectedItemsList.c.y-2
+                width: 4
+                height: 4
+                border.width: 2
+                border.color: "green"
+                visible: x>0 && y>0
+            }
+
+            BusyIndicator {
+                anchors.centerIn: parent
+                width: 128
+                height: 128
+                visible: inProgress
+                running: inProgress
             }
         }
 
-        Rectangle {
-            id: objectRect
-            color: "transparent"
-            width: od.o.width
-            height: od.o.height
-            x: od.o.x
-            y: od.o.y
-            border.width: 2
-            border.color: "red"
-            Text {
-                id: objectID
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                anchors.left: parent.left
-                anchors.bottom: parent.top
-            }
-            Text {
-                id: objectConfidence
-                text: ""
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-            }
-        }
+        ListView {
+            id: detectedItemsList
+            Layout.fillHeight: true
+            Layout.minimumWidth: 200
+            Layout.maximumWidth: 300
+            clip: true
 
-        Rectangle {
-            id: objectCenter
-            color: "transparent"
-            x: od.c.x-2
-            y: od.c.y-2
-            width: 4
-            height: 4
-            border.width: 2
-            border.color: "green"
-            visible: x>0 && y>0
-        }
+            model: detectedItems
+            delegate: detectedItemDelegate
+            highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
 
-        BusyIndicator {
-            anchors.centerIn: parent
-            width: 128
-            height: 128
-            visible: inProgress
-            running: inProgress
+            // Normalized position & center of the current item
+            property rect _o;
+            property point _c;
+
+            // Mapped position & center of the current item
+            property rect o: vc.mapNormalizedRectToItem(_o);
+            property point c: vc.mapNormalizedPointToItem(_c);
+
+            function clearItemPosition() {
+                _c.x=0;
+                _c.y=0;
+                _o.x=0;
+                _o.y=0;
+                _o.width=0;
+                _o.height=0;
+            }
+
+            onCurrentIndexChanged: {
+                var i=detectedItems.get(currentIndex)
+
+                clearItemPosition();
+
+                if (!i) {
+                    return;
+                }
+
+                _c.x=i.centerX;
+                _c.y=i.centerY;
+                //c=vc.mapNormalizedPointToItem(_c);
+
+                _o.x=i.x;
+                _o.y=i.y;
+                _o.width=i.width;
+                _o.height=i.height;
+
+                //o=vc.mapNormalizedRectToItem(_o);
+
+                objectID.text=od.getClassName(i.cid);
+                objectConfidence.text=Math.round(i.confidence*100)+"%";
+            }
+
+            Component {
+                id: detectedItemDelegate
+                Item {
+                    width: parent.width
+                    height: r.height
+                    Row {
+                        id: r
+                        spacing: 8
+                        width: parent.width
+                        Text { text: name }
+                        Text { text: Math.round(confidence*100)+"%" }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: detectedItemsList.currentIndex = index
+                    }
+                }
+            }
         }
     }
 

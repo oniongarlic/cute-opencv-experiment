@@ -89,8 +89,10 @@ android {
 
 contains(DEFINES,YOLOV2CUSTOM) {
     DEFINES+= YOLO_WEIGHTS=\\\"/yolov2-custom/yolov2-custom.weights\\\"
-    DEFINES+= YOLO_CFG=\\\":///yolo/obj-detect.cfg\\\"
-    DEFINES+= YOLO_NAMES=\\\":///yolo/obj.names\\\"
+    #DEFINES+= YOLO_CFG=\\\":///yolo/obj-detect.cfg\\\"
+    #DEFINES+= YOLO_NAMES=\\\":///yolo/obj.names\\\"
+    DEFINES+= YOLO_CFG=\\\"/yolov2-custom/obj-detect.cfg\\\"
+    DEFINES+= YOLO_NAMES=\\\"/yolov2-custom/obj.names\\\"
 }
 
 contains(DEFINES,YOLOV2) {
@@ -98,7 +100,6 @@ contains(DEFINES,YOLOV2) {
     DEFINES+= YOLO_CFG=\\\":///yolo2/yolo.cfg\\\"
     DEFINES+= YOLO_NAMES=\\\":///yolo2/obj.names\\\"
 }
-
 
 contains(DEFINES,YOLOV3) {
     DEFINES+= YOLO_WEIGHTS=\\\"assets:/yolov3.weights\\\"

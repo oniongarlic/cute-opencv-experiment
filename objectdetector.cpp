@@ -132,6 +132,8 @@ bool ObjectDetector::processOpenCVFrame(cv::Mat &frame)
     if (!w->setFrame(frame))
         return false;
 
+    w->setConfidence(m_confidence);
+
     emit processFrameInThread();
 
     return true;

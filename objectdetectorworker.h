@@ -38,6 +38,8 @@ public slots:
     void processOpenCVFrame();
     bool setFrame(cv::Mat &frame);    
 
+    void setConfidence(qreal confidence);
+
 private:
     QMutex m_mutex;
 
