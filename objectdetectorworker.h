@@ -19,6 +19,8 @@
 #include <QThread>
 #include <QMutex>
 
+#include "ocvobjectcolordetector.h"
+
 class ObjectDetectorWorker : public QObject
 {
     Q_OBJECT
@@ -30,7 +32,7 @@ signals:
     void detectionStarted();
     void detectionEnded();
     void noObjectDetected();
-    void objectDetected(int cid, double confidence, QPointF center, QRectF rect);
+    void objectDetected(int cid, double confidence, QPointF center, QRectF rect, QString rgb, QString color);
     void modelLoaded();    
 
 public slots:
@@ -58,6 +60,8 @@ private:
     cv::dnn::Net m_net;
     cv::Mat m_frame;
     std::vector<cv::String> getOutputsNames(const cv::dnn::Net &net);
+
+    OCVObjectColorDetector m_colordetector;
 };
 
 #endif // OBJECTDETECTORWORKER_H

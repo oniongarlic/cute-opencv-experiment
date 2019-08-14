@@ -1,9 +1,9 @@
-#include "objectdetectorworker.h"
-
 #include <QElapsedTimer>
 #include <QFile>
 #include <QDebug>
 #include <QMutexLocker>
+
+#include "objectdetectorworker.h"
 
 ObjectDetectorWorker::ObjectDetectorWorker(QObject *parent) :
     QObject(parent),
@@ -13,7 +13,8 @@ ObjectDetectorWorker::ObjectDetectorWorker(QObject *parent) :
     m_height(480),
     m_confidence(0.75),
     m_crop(false),
-    m_processing(false)
+    m_processing(false),
+    m_colordetector(parent)
 {
 
 }
@@ -182,7 +183,16 @@ void ObjectDetectorWorker::processOpenCVFrame()
             o.top = o.centerY - o.height / 2;
             o.confidence=confidence;
 #endif
-            emit objectDetected(id, confidence, center, relative);
+            QString rgb;
+            QString color;
+
+            m_colordetector.setROI(cxf, cyf);
+            if (m_colordetector.processOpenCVFrame(m_frame)==true) {
+                rgb=m_colordetector.getColorRGB();
+                color=m_colordetector.getColorGroup();
+            }
+
+            emit objectDetected(id, confidence, center, relative, rgb, color);
         }
     }
 

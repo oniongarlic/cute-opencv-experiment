@@ -1,4 +1,6 @@
 #include <QGuiApplication>
+#include <QStandardPaths>
+#include <QDebug>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
@@ -20,6 +22,8 @@ int main(int argc, char *argv[])
     app.setApplicationName("QtOpenCVHelloWorld");
     app.setOrganizationDomain("tal.org");
 
+    QString image_path;
+
     QString dnn_config;
     QString dnn_model;
     QString dnn_classes;
@@ -40,11 +44,17 @@ int main(int argc, char *argv[])
     dnn_config=YOLO_CFG;
     dnn_classes=YOLO_NAMES;
     dnn_model=YOLO_WEIGHTS;
-#endif
+#endif       
+
+    image_path=QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+
+    qDebug() << image_path;
 
     engine.rootContext()->setContextProperty("dnnConfig", dnn_config);
     engine.rootContext()->setContextProperty("dnnWeights", dnn_model);
     engine.rootContext()->setContextProperty("dnnClasses", dnn_classes);
+
+    engine.rootContext()->setContextProperty("imagePath", image_path);
 
     qmlRegisterType<OCVObjectColorDetector>("org.tal", 1,0, "ColorDetector");
     qmlRegisterType<ObjectDetector>("org.tal", 1,0, "ObjectDetector");

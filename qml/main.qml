@@ -4,6 +4,8 @@ import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
 import QtMultimedia 5.12
 
+import Qt.labs.folderlistmodel 2.12
+
 import org.tal 1.0
 
 ApplicationWindow {
@@ -41,7 +43,7 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent
             ToolButton {
-                text: "Image..."
+                text: "Image"
                 enabled: !inProgress
                 onClicked: {
                     filesDialog.startSelector();
@@ -71,15 +73,18 @@ ApplicationWindow {
         }
     }
 
+    function processImageFile(file) {
+        previewImage.source=file
+        previewImage.visible=true;
+        // cd.processImageFile(file);
+        od.processImageFile(file);
+    }
+
     ImageGallerySelector {
         id: filesDialog
         onFileSelected: {
             camera.stop();
-
-            previewImage.source=src
-            previewImage.visible=true;
-            cd.processImageFile(src);
-            od.processImageFile(src);
+            processImageFile(src)
         }
     }
 
@@ -121,6 +126,8 @@ ApplicationWindow {
             detectedItems.append({"cid": cid,
                                      "confidence": confidence,
                                      "name":od.getClassName(cid),
+                                     "rgb": od.rgb,
+                                     "color": od.color,
                                      "centerX": center.x,
                                      "centerY": center.y,
                                      "x": rect.x,
@@ -200,6 +207,15 @@ ApplicationWindow {
             cgroupText.text=cgroup;
             crect.color=chex;
         }
+    }
+
+    FolderListModel {
+        id: fileModel
+        folder: "file://"+imagePath
+        showDotAndDotDot: true
+        showDirsFirst: true
+
+        nameFilters: ["*.jpg"]
     }
 
     RowLayout {
@@ -339,17 +355,16 @@ ApplicationWindow {
 
                 _c.x=i.centerX;
                 _c.y=i.centerY;
-                //c=vc.mapNormalizedPointToItem(_c);
 
                 _o.x=i.x;
                 _o.y=i.y;
                 _o.width=i.width;
                 _o.height=i.height;
 
-                //o=vc.mapNormalizedRectToItem(_o);
-
                 objectID.text=od.getClassName(i.cid);
                 objectConfidence.text=Math.round(i.confidence*100)+"%";
+
+                crect.color=i.rgb;
             }
 
             Component {
@@ -371,9 +386,52 @@ ApplicationWindow {
                 }
             }
         }
+
+        ListView {
+            id: fileList
+            model: fileModel
+            delegate: fileDelegate
+
+            Layout.fillHeight: true
+            Layout.minimumWidth: 160
+            Layout.maximumWidth: 220
+            clip: true
+
+            highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
+
+            onCurrentIndexChanged: {
+                var f=fileModel.get(currentIndex, "fileURL")
+                if (fileModel.isFolder(currentIndex))
+                    fileModel.folder=f;
+                else
+                    processImageFile(f);
+            }
+
+            Component {
+                id: fileDelegate
+                Item {
+                    width: parent.width
+                    height: r.height
+                    Row {
+                        id: r
+                        spacing: 8
+                        width: parent.width
+                        Text { text: fileName }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: fileList.currentIndex=index
+                        onDoubleClicked: {
+
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     Component.onCompleted: {
-        camera.start();
+        // camera.start();
     }
 }

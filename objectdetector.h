@@ -24,7 +24,9 @@ struct DetectedObject
     int id;
     double confidence;
     QPointF center;    
-    QRectF relative;  
+    QRectF relative;
+    QString rgb;
+    QString color;
 };
 
 class ObjectDetector : public CuteOpenCVBase
@@ -74,7 +76,7 @@ signals:
 
     void noObjectDetected();
 
-    void objectDetected(int cid, double confidence, QPointF center, QRectF rect);
+    void objectDetected(int cid, double confidence, QPointF center, QRectF rect, QString rgb, QString color);
 
     void detectionStarted();
 
@@ -104,7 +106,7 @@ public slots:
 
     void dataLoaded(const QByteArray &data);
 
-    void objectDetectedByWorker(int cid, double confidence, QPointF center, QRectF rect);
+    void objectDetectedByWorker(int cid, double confidence, QPointF center, QRectF rect, QString rgb, QString color);
 
     void workerDetectionStarted();
     void workerDetectionEnded();

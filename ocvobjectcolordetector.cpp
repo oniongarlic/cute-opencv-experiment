@@ -116,13 +116,22 @@ bool OCVObjectColorDetector::findClosestMatch(const Scalar &lab, const double to
 
 void OCVObjectColorDetector::calculateRoi(Mat &frame, Rect &roi, int ox, int oy)
 {    
+    // Amount of m_bs sized blocks
     int wb=frame.size().width/m_bs;
     int hb=frame.size().height/m_bs;
 
-    roi.x = (m_bs/2*wb)+(ox*wb);
-    roi.y = (m_bs/2*hb)+(oy*hb);
-    roi.width = wb;
-    roi.height = hb;
+    int rwb=wb*m_roix;
+    int rhb=hb*m_roiy;
+
+    qDebug() << wb << hb << rwb << rhb;
+
+    // Calculate center ROI block coordinates to use
+    roi.x = MAX(0,(m_bs*rwb)+(ox*wb));
+    roi.y = MAX(0,(m_bs*rhb)+(oy*hb));
+    roi.width = m_bs;
+    roi.height = m_bs;
+
+    qDebug() << wb << hb << rwb << rhb << roi.x << roi.y;
 }
 
 Mat OCVObjectColorDetector::equalizeIntensity(const Mat& inputImage)

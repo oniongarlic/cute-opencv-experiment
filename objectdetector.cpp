@@ -50,7 +50,7 @@ void ObjectDetector::dataLoaded(const QByteArray &data)
 
 }
 
-void ObjectDetector::objectDetectedByWorker(int cid, double confidence, QPointF center, QRectF rect)
+void ObjectDetector::objectDetectedByWorker(int cid, double confidence, QPointF center, QRectF rect, QString rgb, QString color)
 {
     qDebug() << "Worker Reports: " << cid << confidence << center << rect;
 
@@ -59,9 +59,11 @@ void ObjectDetector::objectDetectedByWorker(int cid, double confidence, QPointF 
     o.center=center;
     o.relative=rect;
     o.confidence=confidence;
+    o.rgb=rgb;
+    o.color=color;
     m_objects.append(o);
 
-    emit objectDetected(cid, confidence, center, rect);
+    emit objectDetected(cid, confidence, center, rect, rgb, color);
 }
 
 void ObjectDetector::workerDetectionStarted()
