@@ -121,17 +121,13 @@ void OCVObjectColorDetector::calculateRoi(Mat &frame, Rect &roi, int ox, int oy)
     int hb=frame.size().height/m_bs;
 
     int rwb=wb*m_roix;
-    int rhb=hb*m_roiy;
-
-    qDebug() << wb << hb << rwb << rhb;
+    int rhb=hb*m_roiy;    
 
     // Calculate center ROI block coordinates to use
     roi.x = MAX(0,(m_bs*rwb)+(ox*wb));
     roi.y = MAX(0,(m_bs*rhb)+(oy*hb));
     roi.width = m_bs;
-    roi.height = m_bs;
-
-    qDebug() << wb << hb << rwb << rhb << roi.x << roi.y;
+    roi.height = m_bs;    
 }
 
 Mat OCVObjectColorDetector::equalizeIntensity(const Mat& inputImage)

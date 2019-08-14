@@ -15,7 +15,7 @@ ObjectDetector::ObjectDetector(QObject *parent) :
     m_height(480),
     m_crop(false)
 {
-    m_scaledown=true;
+    m_scaledown=false;
     m_scaleheight=480;
     m_scalewidth=480;
 }
@@ -52,7 +52,7 @@ void ObjectDetector::dataLoaded(const QByteArray &data)
 
 void ObjectDetector::objectDetectedByWorker(int cid, double confidence, QPointF center, QRectF rect, QString rgb, QString color)
 {
-    qDebug() << "Worker Reports: " << cid << confidence << center << rect;
+    qDebug() << "Worker Reports: " << cid << confidence << center << rect << rgb << color;
 
     DetectedObject o;
     o.id=cid;
@@ -79,7 +79,7 @@ void ObjectDetector::workerDetectionEnded()
 {
     qDebug() << "Worker workerDetectionEnded" << m_objects.size();
 
-    emit detectionEnded();
+    emit detectionEnded(m_objects.size());
 }
 
 bool ObjectDetector::startWorkerThread()

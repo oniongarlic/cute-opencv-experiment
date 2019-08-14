@@ -80,7 +80,7 @@ signals:
 
     void detectionStarted();
 
-    void detectionEnded();
+    void detectionEnded(int found);
 
     void processFrameInThread();
 

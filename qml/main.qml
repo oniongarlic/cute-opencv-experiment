@@ -126,8 +126,8 @@ ApplicationWindow {
             detectedItems.append({"cid": cid,
                                      "confidence": confidence,
                                      "name":od.getClassName(cid),
-                                     "rgb": od.rgb,
-                                     "color": od.color,
+                                     "rgb": rgb,
+                                     "color": color,
                                      "centerX": center.x,
                                      "centerY": center.y,
                                      "x": rect.x,
@@ -147,7 +147,10 @@ ApplicationWindow {
         onDetectionEnded: {
             inProgress=false;
             previewImage.visible=true;
-            detectedItemsList.currentIndex=0;
+            if (found>0)
+                detectedItemsList.currentIndex=0;
+            else
+                detectedItemsList.currentIndex=-1;
         }
 
         onDetectionStarted: {
@@ -186,7 +189,7 @@ ApplicationWindow {
             }
             onImageSaved: {
                 console.debug("Image saved: "+path)
-                cd.processImageFile(path);
+                //cd.processImageFile(path);
                 od.processImageFile(path);
             }
         }
@@ -263,48 +266,64 @@ ApplicationWindow {
             Image {
                 id: previewImage
                 anchors.fill: parent
-                //fillMode: Image.PreserveAspectFit
-                fillMode: Image.Stretch
+                fillMode: Image.PreserveAspectFit
+                Item {
+                    id: pvr
+                    x: parent.height==parent.paintedHeight ? parent.width/2-width/2 : 0
+                    y: parent.width==parent.paintedWidth ? parent.height/2-height/2 : 0
+                    width: parent.paintedWidth
+                    height: parent.paintedHeight
+
+                    Rectangle {
+                        id: objectCenter
+                        color: "transparent"
+                        x: detectedItemsList.c.x-2
+                        y: detectedItemsList.c.y-2
+                        width: 4
+                        height: 4
+                        border.width: 2
+                        border.color: "green"
+                        visible: x>0 && y>0
+                    }
+                    Rectangle {
+                        id: objectRect
+                        color: "transparent"
+                        width: detectedItemsList.o.width
+                        height: detectedItemsList.o.height
+                        x: detectedItemsList.o.x
+                        y: detectedItemsList.o.y
+                        border.width: 2
+                        border.color: "red"
+                        Text {
+                            id: objectID
+                            font.bold: true
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                        }
+                        Text {
+                            id: objectConfidence
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                        }
+                    }
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: previewImage.visible=false;
                 }
-            }
 
-            Rectangle {
-                id: objectRect
-                color: "transparent"
-                width: detectedItemsList.o.width
-                height: detectedItemsList.o.height
-                x: detectedItemsList.o.x
-                y: detectedItemsList.o.y
-                border.width: 2
-                border.color: "red"
-                Text {
-                    id: objectID
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    anchors.left: parent.left
-                    anchors.top: parent.top
+                function mapNormalizedRectToItem(r) {
+                    console.debug(r)
+                    return Qt.rect(r.x*pvr.width, r.y*pvr.height, r.width*pvr.width, r.height*pvr.height)
                 }
-                Text {
-                    id: objectConfidence
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                }
-            }
 
-            Rectangle {
-                id: objectCenter
-                color: "transparent"
-                x: detectedItemsList.c.x-2
-                y: detectedItemsList.c.y-2
-                width: 4
-                height: 4
-                border.width: 2
-                border.color: "green"
-                visible: x>0 && y>0
+                function mapNormalizedPointToItem(r) {
+                    console.debug(r)
+                    return Qt.point(r.x*pvr.width, r.y*pvr.height)
+                }
             }
 
             BusyIndicator {
@@ -332,8 +351,8 @@ ApplicationWindow {
             property point _c;
 
             // Mapped position & center of the current item
-            property rect o: vc.mapNormalizedRectToItem(_o);
-            property point c: vc.mapNormalizedPointToItem(_c);
+            property rect o: previewImage.mapNormalizedRectToItem(_o);
+            property point c: previewImage.mapNormalizedPointToItem(_c);
 
             function clearItemPosition() {
                 _c.x=0;
@@ -365,6 +384,7 @@ ApplicationWindow {
                 objectConfidence.text=Math.round(i.confidence*100)+"%";
 
                 crect.color=i.rgb;
+                cgroupText.text=i.color;
             }
 
             Component {
@@ -397,9 +417,10 @@ ApplicationWindow {
             Layout.maximumWidth: 220
             clip: true
 
-            highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
+            highlight: Rectangle { color: "lightsteelblue"; radius: 2 }            
 
-            onCurrentIndexChanged: {
+            function processItem(index) {
+                fileList.currentIndex=index
                 var f=fileModel.get(currentIndex, "fileURL")
                 if (fileModel.isFolder(currentIndex))
                     fileModel.folder=f;
@@ -420,7 +441,9 @@ ApplicationWindow {
                     }
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: fileList.currentIndex=index
+                        onClicked: {
+                            fileList.processItem(index);
+                        }
                         onDoubleClicked: {
 
                         }
