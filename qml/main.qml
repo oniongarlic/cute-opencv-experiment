@@ -92,7 +92,7 @@ ApplicationWindow {
         id: cd
 
         onColorFound: {
-            cnameText.text=getColorName();
+            //cnameText.text=getColorName();
             cgroupText.text=getColorGroup();
             crect.color=getColorRGB();
         }
@@ -122,18 +122,19 @@ ApplicationWindow {
         property rect o;
         property point c;
 
-        onObjectDetected: {
+        onObjectDetected: {            
             detectedItems.append({"cid": cid,
                                      "confidence": confidence,
                                      "name":od.getClassName(cid),
                                      "rgb": rgb,
                                      "color": color,
+                                     "center": center,
                                      "centerX": center.x,
-                                     "centerY": center.y,
-                                     "x": rect.x,
-                                     "y": rect.y,
-                                     "width": rect.width,
-                                     "height": rect.height
+                                     "centerY": center.y,                                     
+                                     "ox": rect.x,
+                                     "oy": rect.y,
+                                     "owidth": rect.width,
+                                     "oheight": rect.height
                                  })
         }
 
@@ -285,27 +286,19 @@ ApplicationWindow {
                         border.color: "green"
                         visible: x>0 && y>0
                     }
-                    Rectangle {
-                        id: objectRect
-                        color: "transparent"
-                        width: detectedItemsList.o.width
-                        height: detectedItemsList.o.height
-                        x: detectedItemsList.o.x
-                        y: detectedItemsList.o.y
-                        border.width: 2
-                        border.color: "red"
-                        Text {
-                            id: objectID
-                            font.bold: true
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            anchors.left: parent.left
-                            anchors.top: parent.top
-                        }
-                        Text {
-                            id: objectConfidence
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
+
+                    Repeater {
+                        model: detectedItems
+                        delegate: objectMarkerDelegate
+                    }
+
+                    Component {
+                        id: objectMarkerDelegate
+                        ObjectMarker {
+                            o: Qt.rect(ox, oy, owidth, oheight);
+                            objectConfidence: confidence
+                            objectName: name
+                            activated: index==detectedItemsList.currentIndex
                         }
                     }
                 }
@@ -316,12 +309,12 @@ ApplicationWindow {
                 }
 
                 function mapNormalizedRectToItem(r) {
-                    console.debug(r)
+                    //console.debug(r)
                     return Qt.rect(r.x*pvr.width, r.y*pvr.height, r.width*pvr.width, r.height*pvr.height)
                 }
 
                 function mapNormalizedPointToItem(r) {
-                    console.debug(r)
+                    //console.debug(r)
                     return Qt.point(r.x*pvr.width, r.y*pvr.height)
                 }
             }
@@ -380,8 +373,8 @@ ApplicationWindow {
                 _o.width=i.width;
                 _o.height=i.height;
 
-                objectID.text=od.getClassName(i.cid);
-                objectConfidence.text=Math.round(i.confidence*100)+"%";
+                //objectID.text=od.getClassName(i.cid);
+                //objectConfidence.text=Math.round(i.confidence*100)+"%";
 
                 crect.color=i.rgb;
                 cgroupText.text=i.color;
