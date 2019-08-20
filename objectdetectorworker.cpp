@@ -12,7 +12,7 @@ ObjectDetectorWorker::ObjectDetectorWorker(QObject *parent) :
     m_width(480),
     m_height(480),
     m_confidence(0.75),
-    m_crop(false),
+    m_crop(false),    
     m_processing(false),
     m_colordetector(parent)
 {
@@ -60,6 +60,9 @@ void ObjectDetectorWorker::loadModel(const QString config, const QString model)
             // From files
             m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
         }
+
+        //m_net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
+        //m_net.setPreferableTarget(cv::dnn::DNN_TARGET_OPENCL);
 
         qDebug() << "WorkerThread: Model loaded in " << timer.elapsed()/1000.0 << "s" << (m_net.empty() ? "Empty net" : "Net OK");
 
@@ -174,15 +177,6 @@ void ObjectDetectorWorker::processOpenCVFrame()
 
             relative.setRect(center.x()-wf/2.0, center.y()-hf/2.0, wf, hf);
 
-#if 0
-            o.centerX = (int)(data[0] * frame.cols);
-            o.centerY = (int)(data[1] * frame.rows);
-            o.width = (int)(data[2] * frame.cols);
-            o.height = (int)(data[3] * frame.rows);
-            o.left = o.centerX - o.width / 2;
-            o.top = o.centerY - o.height / 2;
-            o.confidence=confidence;
-#endif
             QString rgb;
             QString color;
 

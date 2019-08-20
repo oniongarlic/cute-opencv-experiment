@@ -9,6 +9,7 @@ Rectangle {
     property int num: 0;
     property bool activated: false;
     property alias objectName: objectID.text;
+    property alias objectColor: objectC.text;
     property double objectConfidence;
 
     x: _o.x
@@ -33,7 +34,7 @@ Rectangle {
         anchors.top: parent.top
     }
     Text {
-        id: objectColor
+        id: objectC
         text: ""
         anchors.left: parent.left
         anchors.bottom: parent.bottom

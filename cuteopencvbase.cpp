@@ -13,22 +13,25 @@ CuteOpenCVBase::CuteOpenCVBase(QObject *parent) :
 
 bool CuteOpenCVBase::processImageFile(QString path)
 {
-    QImage i;
-
     qDebug() << path;
     if (path.startsWith("file://")) {        
         path=path.remove(0,7);
         qDebug() << path;
     }
 
-    i.load(path);
+    m_image.load(path);
 
-    if (i.isNull()) {
+    if (m_image.isNull()) {
         qWarning() << "Failed to load image file " << path;
         return false;
     }
 
-    return processFrame(i);
+    return processFrame(m_image);
+}
+
+QImage CuteOpenCVBase::copy(const QRect &rectangle) const
+{
+    return m_image.copy(rectangle);
 }
 
 bool CuteOpenCVBase::processOpenCVFrame(cv::Mat &frame)
@@ -70,9 +73,15 @@ bool CuteOpenCVBase::processFrame(QImage &frame)
         cvtColor(view, view, cv::COLOR_RGB2BGR);
         return processOpenCVFrame(view);
     }
-    default:
+    case QImage::Format_ARGB32:
     {
         qDebug() << "Format_ARGB32";
+        cv::Mat view(frame.height(),frame.width(),CV_8UC4,(void *)frame.constBits(), frame.bytesPerLine());
+        cvtColor(view, view, cv::COLOR_RGBA2BGR);
+        return processOpenCVFrame(view);
+    }
+    default: {
+        qDebug() << "Converting to Format_ARGB32";
         QImage conv = frame.convertToFormat(QImage::Format_ARGB32);
         cv::Mat view(conv.height(),conv.width(),CV_8UC4,(void *)conv.constBits(), conv.bytesPerLine());
         cvtColor(view, view, cv::COLOR_RGBA2BGR);

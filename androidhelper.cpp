@@ -15,8 +15,10 @@ QString AndroidHelper::getExternalStorage()
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
     QAndroidJniObject package = activity.callObjectMethod("getPackageName", "()Ljava/lang/String;");
 
-    QAndroidJniEnvironment env; // Don't know what this is for ?
-    if (env->ExceptionCheck()) { env->ExceptionClear(); } // Or this...?
+    QAndroidJniEnvironment env;
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+    }
 
     return mediaPath.toString();
 }

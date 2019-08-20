@@ -18,6 +18,7 @@ public:
 
     Q_INVOKABLE bool processFrame(QImage &frame);
     Q_INVOKABLE bool processImageFile(QString path);
+    QImage copy(const QRect &rectangle = QRect()) const;
 
 signals:
 
@@ -27,6 +28,8 @@ protected:
     bool m_scaledown;
     int m_scalewidth;
     int m_scaleheight;
+
+    QImage m_image;
 
 public slots:
 };

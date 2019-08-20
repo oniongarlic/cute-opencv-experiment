@@ -127,7 +127,7 @@ ApplicationWindow {
                                      "confidence": confidence,
                                      "name":od.getClassName(cid),
                                      "rgb": rgb,
-                                     "color": color,
+                                     "ocolor": color,
                                      "center": center,
                                      "centerX": center.x,
                                      "centerY": center.y,                                     
@@ -298,6 +298,7 @@ ApplicationWindow {
                             o: Qt.rect(ox, oy, owidth, oheight);
                             objectConfidence: confidence
                             objectName: name
+                            objectColor: ocolor
                             activated: index==detectedItemsList.currentIndex
                         }
                     }
@@ -309,7 +310,7 @@ ApplicationWindow {
                 }
 
                 function mapNormalizedRectToItem(r) {
-                    //console.debug(r)
+                    console.debug(r)
                     return Qt.rect(r.x*pvr.width, r.y*pvr.height, r.width*pvr.width, r.height*pvr.height)
                 }
 
@@ -331,54 +332,13 @@ ApplicationWindow {
         ListView {
             id: detectedItemsList
             Layout.fillHeight: true
-            Layout.minimumWidth: 200
-            Layout.maximumWidth: 300
+            Layout.minimumWidth: 160
+            Layout.maximumWidth: 240
             clip: true
 
             model: detectedItems
             delegate: detectedItemDelegate
             highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
-
-            // Normalized position & center of the current item
-            property rect _o;
-            property point _c;
-
-            // Mapped position & center of the current item
-            property rect o: previewImage.mapNormalizedRectToItem(_o);
-            property point c: previewImage.mapNormalizedPointToItem(_c);
-
-            function clearItemPosition() {
-                _c.x=0;
-                _c.y=0;
-                _o.x=0;
-                _o.y=0;
-                _o.width=0;
-                _o.height=0;
-            }
-
-            onCurrentIndexChanged: {
-                var i=detectedItems.get(currentIndex)
-
-                clearItemPosition();
-
-                if (!i) {
-                    return;
-                }
-
-                _c.x=i.centerX;
-                _c.y=i.centerY;
-
-                _o.x=i.x;
-                _o.y=i.y;
-                _o.width=i.width;
-                _o.height=i.height;
-
-                //objectID.text=od.getClassName(i.cid);
-                //objectConfidence.text=Math.round(i.confidence*100)+"%";
-
-                crect.color=i.rgb;
-                cgroupText.text=i.color;
-            }
 
             Component {
                 id: detectedItemDelegate
@@ -407,7 +367,7 @@ ApplicationWindow {
 
             Layout.fillHeight: true
             Layout.minimumWidth: 160
-            Layout.maximumWidth: 220
+            Layout.maximumWidth: 240
             clip: true
 
             highlight: Rectangle { color: "lightsteelblue"; radius: 2 }            
