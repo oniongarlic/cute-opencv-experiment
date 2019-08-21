@@ -9,6 +9,8 @@
 #include "ocvobjectcolordetector.h"
 #include "objectdetector.h"
 
+#include "cuteimageprovider.h"
+
 #ifdef Q_OS_ANDROID
 #include "androidhelper.h"
 #endif
@@ -18,6 +20,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
+    CuteImageProvider cuteprovider;
 
     app.setApplicationName("QtOpenCVHelloWorld");
     app.setOrganizationDomain("tal.org");
@@ -56,6 +59,10 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("imagePath", image_path);
 
+    engine.rootContext()->setContextProperty("imp", &cuteprovider); // ImageManipulatorProvider (?)
+
+    engine.addImageProvider("cute", &cuteprovider);
+
     qmlRegisterType<OCVObjectColorDetector>("org.tal", 1,0, "ColorDetector");
     qmlRegisterType<ObjectDetector>("org.tal", 1,0, "ObjectDetector");
     qmlRegisterType<OvVideoFilter>("org.tal", 1,0, "OpenCVVideoFilter");
@@ -64,5 +71,9 @@ int main(int argc, char *argv[])
     if (engine.rootObjects().isEmpty())
         return -1;
 
-    return app.exec();
+    int r=app.exec();
+
+    engine.removeImageProvider("cute");
+
+    return r;
 }

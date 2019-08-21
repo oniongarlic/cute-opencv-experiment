@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
+
 import QtMultimedia 5.12
 
 import Qt.labs.folderlistmodel 2.12
@@ -78,6 +79,7 @@ ApplicationWindow {
         previewImage.visible=true;
         // cd.processImageFile(file);
         od.processImageFile(file);
+        imp.setImage(file);
     }
 
     ImageGallerySelector {
@@ -122,7 +124,7 @@ ApplicationWindow {
         property rect o;
         property point c;
 
-        onObjectDetected: {            
+        onObjectDetected: {
             detectedItems.append({"cid": cid,
                                      "confidence": confidence,
                                      "name":od.getClassName(cid),
@@ -130,7 +132,7 @@ ApplicationWindow {
                                      "ocolor": color,
                                      "center": center,
                                      "centerX": center.x,
-                                     "centerY": center.y,                                     
+                                     "centerY": center.y,
                                      "ox": rect.x,
                                      "oy": rect.y,
                                      "owidth": rect.width,
@@ -179,9 +181,9 @@ ApplicationWindow {
 
         imageCapture {
             onImageCaptured: {
-                console.debug("Image captured!")
+                console.debug(preview)
                 console.debug(camera.imageCapture.capturedImagePath)
-                previewImage.source=preview
+                previewImage.source=preview;
                 previewImage.visible=true;
                 camera.stop();
             }
@@ -354,7 +356,23 @@ ApplicationWindow {
                     }
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: detectedItemsList.currentIndex = index
+                        onClicked: {
+                            detectedItemsList.currentIndex = index
+                        }
+                        onDoubleClicked: {
+                            detectedItemsList.currentIndex = index
+                            var r=Qt.rect(ox, oy, owidth, oheight);
+                            console.debug(r);
+                            if (!imp.isEmpty()) {
+                                imp.cropNormalized(r);
+                                croppedImagePreview.source=""
+                                croppedImagePreview.source="image://cute/preview"
+                                croppedImagePopup.open();
+                                imp.save("/tmp/cropped-image.jpg");
+                            } else {
+                                console.debug("*** Image is NULL!");
+                            }
+                        }
                     }
                 }
             }
@@ -370,7 +388,7 @@ ApplicationWindow {
             Layout.maximumWidth: 240
             clip: true
 
-            highlight: Rectangle { color: "lightsteelblue"; radius: 2 }            
+            highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
 
             function processItem(index) {
                 fileList.currentIndex=index
@@ -404,6 +422,37 @@ ApplicationWindow {
                 }
             }
 
+        }
+    }
+
+    Popup {
+        id: croppedImagePopup
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+        width: parent.width/1.5
+        height: parent.height/1.5
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        ColumnLayout {
+            anchors.fill: parent
+            Image {
+                id: croppedImagePreview
+                cache: false
+                fillMode: Image.PreserveAspectFit
+                source: ""
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
+            ToolBar {
+                Layout.fillWidth: true
+                ToolButton {
+                    text: "Save"
+                    onClicked: {
+                        imp.save("cropped.jpg")
+                    }
+                }
+            }
         }
     }
 

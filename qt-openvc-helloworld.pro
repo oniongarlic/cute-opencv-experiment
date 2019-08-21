@@ -2,6 +2,7 @@ QT += quick multimedia
 CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
+    cuteimageprovider.cpp \
     main.cpp \
     ocvobjectcolordetector.cpp \
     objectdetector.cpp \
@@ -127,6 +128,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    cuteimageprovider.h \
     ocvobjectcolordetector.h \
     objectdetector.h \
     cuteopencv.h \

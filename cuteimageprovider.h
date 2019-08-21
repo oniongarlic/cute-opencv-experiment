@@ -1,0 +1,36 @@
+#ifndef CUTEIMAGEPROVIDER_H
+#define CUTEIMAGEPROVIDER_H
+
+#include <QObject>
+#include <QQuickImageProvider>
+#include <QMutexLocker>
+#include <QMutex>
+
+class CuteImageProvider : public QObject, public QQuickImageProvider
+{
+    Q_OBJECT
+public:
+    CuteImageProvider(QObject *parent=nullptr);
+    ~CuteImageProvider();
+
+    Q_INVOKABLE bool setImage(QString file);
+    Q_INVOKABLE bool setImage(QImage &image);
+    Q_INVOKABLE bool isEmpty() const;
+    Q_INVOKABLE void cropNormalized(QRectF rect);
+    Q_INVOKABLE void crop(QRect &rect);
+
+    Q_INVOKABLE bool save(const QString &fileName);
+
+    // QQuickImageProvider interface
+    QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
+
+signals:
+    void imageChanged();
+
+private:
+    QImage m_image;
+    QMutex mutex;
+
+};
+
+#endif // CUTEIMAGEPROVIDER_H
