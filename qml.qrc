@@ -6,5 +6,6 @@
         <file>qtquickcontrols2.conf</file>
         <file>colors.json</file>
         <file>qml/ObjectMarker.qml</file>
+        <file>qml/FileSaveDialog.qml</file>
     </qresource>
 </RCC>

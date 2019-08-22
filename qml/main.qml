@@ -10,6 +10,7 @@ import Qt.labs.folderlistmodel 2.12
 import org.tal 1.0
 
 ApplicationWindow {
+    id: root
     visible: true
     width: 1024
     height: 768
@@ -79,7 +80,12 @@ ApplicationWindow {
         previewImage.visible=true;
         // cd.processImageFile(file);
         od.processImageFile(file);
-        imp.setImage(file);
+        //imp.setImage(file);
+
+        var it=od.getImage();
+        console.debug(it)
+
+        imp.setImage(it);
     }
 
     ImageGallerySelector {
@@ -150,10 +156,12 @@ ApplicationWindow {
         onDetectionEnded: {
             inProgress=false;
             previewImage.visible=true;
-            if (found>0)
+            if (found>0) {
                 detectedItemsList.currentIndex=0;
-            else
+            } else {
                 detectedItemsList.currentIndex=-1;
+                messageDialog.show("Nothing found", "No objects where detected")
+            }
         }
 
         onDetectionStarted: {
@@ -224,7 +232,7 @@ ApplicationWindow {
         nameFilters: ["*.jpg"]
     }
 
-    RowLayout {
+    ColumnLayout {
         id: mainRow
         anchors.fill: parent
 
@@ -232,6 +240,9 @@ ApplicationWindow {
             id: vc
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.alignment: Qt.AlignTop
+            Layout.minimumHeight: 256
+            Layout.minimumWidth: parent.width
             source: camera
             autoOrientation: true
             fillMode: Image.PreserveAspectFit
@@ -308,7 +319,11 @@ ApplicationWindow {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: previewImage.visible=false;
+                    enabled: !inProgress
+                    onClicked: {
+                        previewImage.visible=false;
+                        detectedItems.clear();
+                    }
                 }
 
                 function mapNormalizedRectToItem(r) {
@@ -331,97 +346,119 @@ ApplicationWindow {
             }
         }
 
-        ListView {
-            id: detectedItemsList
+        RowLayout {
             Layout.fillHeight: true
-            Layout.minimumWidth: 160
-            Layout.maximumWidth: 240
-            clip: true
+            Layout.fillWidth: true
+            Layout.minimumHeight: root.height/5
+            Layout.maximumHeight: root.height/4
+            ListView {
+                id: detectedItemsList
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                clip: true
+                visible: detectedItems.count>0
+                model: detectedItems
+                delegate: detectedItemDelegate
+                highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
 
-            model: detectedItems
-            delegate: detectedItemDelegate
-            highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
-
-            Component {
-                id: detectedItemDelegate
-                Item {
-                    width: parent.width
-                    height: r.height
-                    Row {
-                        id: r
-                        spacing: 8
+                Component {
+                    id: detectedItemDelegate
+                    Item {
                         width: parent.width
-                        Text { text: name }
-                        Text { text: Math.round(confidence*100)+"%" }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            detectedItemsList.currentIndex = index
+                        height: r.height
+                        Row {
+                            id: r
+                            spacing: 8
+                            width: parent.width
+                            Text { text: name }
+                            Text { text: Math.round(confidence*100)+"%" }
                         }
-                        onDoubleClicked: {
-                            detectedItemsList.currentIndex = index
-                            var r=Qt.rect(ox, oy, owidth, oheight);
-                            console.debug(r);
-                            if (!imp.isEmpty()) {
-                                imp.cropNormalized(r);
-                                croppedImagePreview.source=""
-                                croppedImagePreview.source="image://cute/preview"
-                                croppedImagePopup.open();
-                                imp.save("/tmp/cropped-image.jpg");
-                            } else {
-                                console.debug("*** Image is NULL!");
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                detectedItemsList.currentIndex = index
+                            }
+                            onDoubleClicked: {
+                                detectedItemsList.currentIndex = index
+                                var r=Qt.rect(ox, oy, owidth, oheight);
+                                console.debug(r);
+                                if (!imp.isEmpty()) {
+                                    imp.cropNormalized(r);
+                                    croppedImagePreview.source=""
+                                    croppedImagePreview.source="image://cute/preview"
+                                    croppedImagePopup.open();
+                                    imp.save("/tmp/cropped-image.jpg");
+                                } else {
+                                    console.debug("*** Image is NULL!");
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        ListView {
-            id: fileList
-            model: fileModel
-            delegate: fileDelegate
+            ListView {
+                id: fileList
+                model: fileModel
+                delegate: fileDelegate
 
-            Layout.fillHeight: true
-            Layout.minimumWidth: 160
-            Layout.maximumWidth: 240
-            clip: true
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                clip: true
 
-            highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
+                highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
 
-            function processItem(index) {
-                fileList.currentIndex=index
-                var f=fileModel.get(currentIndex, "fileURL")
-                if (fileModel.isFolder(currentIndex))
-                    fileModel.folder=f;
-                else
-                    processImageFile(f);
-            }
+                function processItem(index) {
+                    fileList.currentIndex=index
+                    var f=fileModel.get(currentIndex, "fileURL")
+                    if (fileModel.isFolder(currentIndex))
+                        fileModel.folder=f;
+                    else
+                        processImageFile(f);
+                }
 
-            Component {
-                id: fileDelegate
-                Item {
-                    width: parent.width
-                    height: r.height
-                    Row {
-                        id: r
-                        spacing: 8
+                Component {
+                    id: fileDelegate
+                    Item {
                         width: parent.width
-                        Text { text: fileName }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            fileList.processItem(index);
+                        height: r.height
+                        Row {
+                            id: r
+                            spacing: 8
+                            width: parent.width
+                            Text { text: fileName }
                         }
-                        onDoubleClicked: {
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                fileList.processItem(index);
+                            }
+                            onDoubleClicked: {
 
+                            }
                         }
                     }
                 }
-            }
 
+            }
+        }
+    }
+
+    MessageDialog {
+        id: messageDialog
+        standardButtons: StandardButton.Ok
+        //icon: StandardIcon.Question
+        title: ""
+        text: ""
+
+        onAccepted: {
+            messageDialog.close();
+        }
+
+        function show(title, message) {
+            messageDialog.title=title;
+            messageDialog.text=message;
+            messageDialog.open();
         }
     }
 
@@ -433,7 +470,7 @@ ApplicationWindow {
         height: parent.height/1.5
         modal: true
         focus: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         ColumnLayout {
             anchors.fill: parent
             Image {
@@ -449,10 +486,19 @@ ApplicationWindow {
                 ToolButton {
                     text: "Save"
                     onClicked: {
-                        imp.save("cropped.jpg")
+                        fsd.open();
                     }
                 }
             }
+        }
+    }
+
+    FileSaveDialog {
+        id: fsd
+        onAccepted: {
+            console.debug("SaveAs: "+file)
+            if (!imp.save(file))
+                messageDialog.show("Save As", "Image save failed")
         }
     }
 

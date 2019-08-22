@@ -80,6 +80,9 @@ void ObjectDetector::workerDetectionEnded()
     qDebug() << "Worker workerDetectionEnded" << m_objects.size();
 
     emit detectionEnded(m_objects.size());
+
+    if (m_objects.size()==0)
+        emit noObjectDetected();
 }
 
 bool ObjectDetector::startWorkerThread()

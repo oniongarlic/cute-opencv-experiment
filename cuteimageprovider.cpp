@@ -21,15 +21,35 @@ bool CuteImageProvider::setImage(QString file)
     if (file.startsWith("file://"))
         file.remove(0,7);
 
+    qDebug() << "setImageQS" << file;
+
     return m_image.load(file);
 }
 
 bool CuteImageProvider::setImage(QImage &image)
 {
     QMutexLocker lock(&mutex);
+
+    qDebug() << "setImageQI" << image.format();
+
     m_image=image;
 
     return true;
+}
+
+bool CuteImageProvider::setImage(QVariant image)
+{
+    QMutexLocker lock(&mutex);
+
+    QImage tmp=image.value<QImage>();
+
+    qDebug() << "setImageQV" << image.typeName() << tmp.format();
+
+    // tmp.rgbSwapped();
+
+    m_image=tmp.rgbSwapped(); // XXX Why do we need this ?
+
+    return m_image.isNull();
 }
 
 bool CuteImageProvider::isEmpty() const

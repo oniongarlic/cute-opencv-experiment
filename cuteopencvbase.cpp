@@ -29,6 +29,11 @@ bool CuteOpenCVBase::processImageFile(QString path)
     return processFrame(m_image);
 }
 
+QImage CuteOpenCVBase::getImage()
+{
+    return m_image;
+}
+
 QImage CuteOpenCVBase::copy(const QRect &rectangle) const
 {
     return m_image.copy(rectangle);

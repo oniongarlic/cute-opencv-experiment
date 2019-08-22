@@ -18,7 +18,8 @@ public:
 
     Q_INVOKABLE bool processFrame(QImage &frame);
     Q_INVOKABLE bool processImageFile(QString path);
-    QImage copy(const QRect &rectangle = QRect()) const;
+    Q_INVOKABLE QImage getImage();
+    QImage copy(const QRect &rectangle = QRect()) const;    
 
 signals:
 

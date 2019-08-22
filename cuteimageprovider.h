@@ -15,6 +15,7 @@ public:
 
     Q_INVOKABLE bool setImage(QString file);
     Q_INVOKABLE bool setImage(QImage &image);
+    Q_INVOKABLE bool setImage(QVariant image);
     Q_INVOKABLE bool isEmpty() const;
     Q_INVOKABLE void cropNormalized(QRectF rect);
     Q_INVOKABLE void crop(QRect &rect);
