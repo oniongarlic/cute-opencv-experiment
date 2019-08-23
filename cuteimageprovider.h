@@ -17,10 +17,20 @@ public:
     Q_INVOKABLE bool setImage(QImage &image);
     Q_INVOKABLE bool setImage(QVariant image);
     Q_INVOKABLE bool isEmpty() const;
+
+    Q_INVOKABLE void clear();
+    Q_INVOKABLE void reset();
+
+    Q_INVOKABLE void commit();
+
     Q_INVOKABLE void cropNormalized(QRectF rect);
     Q_INVOKABLE void crop(QRect &rect);
 
-    Q_INVOKABLE bool save(const QString &fileName);
+    Q_INVOKABLE void adjustContrastBrightness(double contrast, double brightness);
+
+    Q_INVOKABLE void rotate(double angle);
+
+    Q_INVOKABLE bool save(QString fileName);
 
     // QQuickImageProvider interface
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
@@ -30,6 +40,7 @@ signals:
 
 private:
     QImage m_image;
+    QImage m_modified;
     QMutex mutex;
 
 };

@@ -382,12 +382,17 @@ ApplicationWindow {
                                 detectedItemsList.currentIndex = index
                                 var r=Qt.rect(ox, oy, owidth, oheight);
                                 console.debug(r);
+                                imp.setImage(od.getImage());
+                                console.debug("isEmpty")
                                 if (!imp.isEmpty()) {
+                                    console.debug("cropt")
                                     imp.cropNormalized(r);
-                                    croppedImagePreview.source=""
-                                    croppedImagePreview.source="image://cute/preview"
+
+                                    console.debug("commit")
+                                    imp.commit();
+
+                                    croppedImagePreview.updatePreview()
                                     croppedImagePopup.open();
-                                    imp.save("/tmp/cropped-image.jpg");
                                 } else {
                                     console.debug("*** Image is NULL!");
                                 }
@@ -466,8 +471,8 @@ ApplicationWindow {
         id: croppedImagePopup
         x: Math.round((parent.width - width) / 2)
         y: Math.round((parent.height - height) / 2)
-        width: parent.width/1.5
-        height: parent.height/1.5
+        width: parent.width/1.1
+        height: parent.height/1.1
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
@@ -480,22 +485,91 @@ ApplicationWindow {
                 source: ""
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+
+                function updatePreview() {
+                    croppedImagePreview.source=""
+                    croppedImagePreview.source="image://cute/preview"
+                }
             }
+            Slider {
+                id: adjustBrightnessSlider
+                from: -1.0
+                stepSize: 0.01
+                to: 1.0
+                value: 0.0
+                live: false
+                onValueChanged: {
+                    imp.adjustContrastBrightness(adjustContrastSlider.value,value);
+                    croppedImagePreview.updatePreview();
+                }
+                Layout.fillWidth: true
+            }
+            Slider {
+                id: adjustContrastSlider
+                from: 0.0
+                value: 0.0
+                to: 1.0
+                stepSize: 0.01;
+                live: false
+                onValueChanged: {
+                    imp.adjustContrastBrightness(value,adjustBrightnessSlider.value);
+                    croppedImagePreview.updatePreview();
+                }
+                Layout.fillWidth: true
+            }
+
+            Slider {
+                id: adjustRotate
+                from: 0.0
+                value: 0.0
+                to: 360.0
+                stepSize: 0.1;
+                live: false
+                onValueChanged: {
+                    imp.rotate(value)
+                    croppedImagePreview.updatePreview();
+                }
+                Layout.fillWidth: true
+            }
+
             ToolBar {
                 Layout.fillWidth: true
-                ToolButton {
-                    text: "Save"
-                    onClicked: {
-                        fsd.open();
+                RowLayout {
+                    anchors.fill: parent
+                    ToolButton {
+                        text: "Reset"
+                        onClicked: {
+                            imp.reset()
+                        }
+                    }
+                    ToolButton {
+                        text: "Save"
+                        onClicked: {
+                            fsd.open();
+                        }
                     }
                 }
             }
+        }
+
+        onClosed: {
+            croppedImagePreview.source=""
+        }
+
+    }
+
+    Connections {
+        target: imp
+        onImageChanged: {
+            console.debug("*** Image was modified")
+            croppedImagePreview.updatePreview();
         }
     }
 
     FileSaveDialog {
         id: fsd
         onAccepted: {
+            imp.commit();
             console.debug("SaveAs: "+file)
             if (!imp.save(file))
                 messageDialog.show("Save As", "Image save failed")
