@@ -131,7 +131,10 @@ void CuteImageProvider::adjustContrastBrightness(double contrast, double brightn
             double b=qBlue(p);
 
             // Contrast
-
+            double factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+            r=(factor * (r - 128)) + 128;
+            g=(factor * (g - 128)) + 128;
+            g=(factor * (b - 128)) + 128;
 
             // Brightness
             r+=r*brightness;
@@ -154,10 +157,12 @@ void CuteImageProvider::rotate(double angle)
     QMutexLocker lock(&mutex);
 
     QPoint center = m_image.rect().center();
+
     QMatrix matrix;
     matrix.translate(center.x(), center.y());
     matrix.rotate(angle);
-    m_modified = m_image.transformed(matrix);
+
+    m_modified = m_image.transformed(matrix, Qt::SmoothTransformation);
 }
 
 bool CuteImageProvider::save(QString fileName)

@@ -508,7 +508,7 @@ ApplicationWindow {
                 id: adjustContrastSlider
                 from: 0.0
                 value: 0.0
-                to: 1.0
+                to: 100.0
                 stepSize: 0.01;
                 live: false
                 onValueChanged: {
@@ -540,6 +540,12 @@ ApplicationWindow {
                         text: "Reset"
                         onClicked: {
                             imp.reset()
+                        }
+                    }
+                    ToolButton {
+                        text: "Commit"
+                        onClicked: {
+                            imp.commit()
                         }
                     }
                     ToolButton {
