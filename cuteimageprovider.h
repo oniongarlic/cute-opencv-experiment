@@ -35,6 +35,7 @@ public:
     // QQuickImageProvider interface
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
 
+    Q_INVOKABLE void gray();
 signals:
     void imageChanged();
 

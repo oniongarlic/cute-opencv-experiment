@@ -537,6 +537,13 @@ ApplicationWindow {
                 RowLayout {
                     anchors.fill: parent
                     ToolButton {
+                        text: "Gray"
+                        onClicked: {
+                            imp.gray()
+                            croppedImagePreview.updatePreview();
+                        }
+                    }
+                    ToolButton {
                         text: "Reset"
                         onClicked: {
                             imp.reset()

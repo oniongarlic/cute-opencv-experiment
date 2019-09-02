@@ -254,9 +254,6 @@ bool OvVideoFilterRunnable::frameToImage(const QVideoFrame &input)
     int h=input.height();
 
     switch (m_format) {
-    case QVideoFrame::Format_UYVY:
-        qWarning() << "Unhandled VideoFrame format";
-        break;
     case QVideoFrame::Format_RGB32:
         m_frame=cv::Mat(h, w, CV_8UC3, (void*) input.bits());
         return true;
@@ -293,8 +290,7 @@ bool OvVideoFilterRunnable::frameToImage(const QVideoFrame &input)
     }
     case QVideoFrame::Format_NV12: {
         m_result = QImage(input.width(), input.height(), QImage::Format_ARGB32);
-        qt_convert_NV12_to_ARGB32(input, m_result.bits());
-        //m_result=m_result.convertToFormat(QImage::Format_RGBA8888);
+        qt_convert_NV12_to_ARGB32(input, m_result.bits());        
         m_frame=cv::Mat(h, w, CV_8UC4, (void*) m_result.bits(), m_result.bytesPerLine());
         return true;
     }
@@ -316,8 +312,16 @@ bool OvVideoFilterRunnable::frameToImage(const QVideoFrame &input)
 #endif
         return true;
     }
+    case QVideoFrame::Format_YUYV: {
+        cv::Mat yuyv(h, w,CV_8UC2, (void*) input.bits());
+        cv::Mat rgb (h, w,CV_8UC3);
+
+        cvtColor(yuyv, rgb, CV_YUV2BGR_YUYV);
+        return true;
+    }
+    case QVideoFrame::Format_UYVY:
     default:;
-        qWarning() << "Unhandled VideoFrame format";
+        qWarning() << "Unhandled VideoFrame format: " << m_format;
     }
     return false;
 }

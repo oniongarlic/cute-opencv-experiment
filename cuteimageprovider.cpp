@@ -13,6 +13,7 @@ CuteImageProvider::~CuteImageProvider()
 {
     qDebug() << "~CuteImageProvider";
     m_image=QImage();
+    m_modified=QImage();
 }
 
 bool CuteImageProvider::setImage(QString file)
@@ -105,13 +106,15 @@ void CuteImageProvider::cropNormalized(QRectF rect)
 void CuteImageProvider::crop(QRect &rect)
 {
     QMutexLocker lock(&mutex);
-    m_modified=m_image.copy(rect);
+    m_modified=m_modified.copy(rect);
+
+    lock.unlock();
+    emit imageChanged();
 }
 
 void CuteImageProvider::adjustContrastBrightness(double contrast, double brightness)
 {
-    int width = m_image.width();
-    int height = m_image.height();
+    QMutexLocker lock(&mutex);
 
     if (m_image.format()!=QImage::Format_RGB32)
         m_modified=m_image.convertToFormat(QImage::Format_RGB32);
@@ -119,6 +122,9 @@ void CuteImageProvider::adjustContrastBrightness(double contrast, double brightn
         m_modified=m_image;
     }
     m_modified.detach();
+
+    int width = m_modified.width();
+    int height = m_modified.height();
 
     qDebug() << contrast << brightness;
 
@@ -131,23 +137,40 @@ void CuteImageProvider::adjustContrastBrightness(double contrast, double brightn
             double b=qBlue(p);
 
             // Contrast
-            double factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-            r=(factor * (r - 128)) + 128;
-            g=(factor * (g - 128)) + 128;
-            g=(factor * (b - 128)) + 128;
+            double factor = (259.0 * (contrast + 255.0)) / (255.0 * (259.0 - contrast));
+            r=(factor * (r - 128.0)) + 128.0;
+            g=(factor * (g - 128.0)) + 128.0;
+            g=(factor * (b - 128.0)) + 128.0;
 
             // Brightness
             r+=r*brightness;
             g+=g*brightness;
             b+=b*brightness;
 
-            r=qBound(0.0,r,255.0);
-            g=qBound(0.0,g,255.0);
-            b=qBound(0.0,b,255.0);
+            r=qBound(0.0, r, 255.0);
+            g=qBound(0.0, g, 255.0);
+            b=qBound(0.0, b, 255.0);
 
             p=qRgb(qRound(r),qRound(g),qRound(b));
 
             m_modified.setPixel(x,y,p);
+        }
+    }
+
+    lock.unlock();
+    emit imageChanged();
+}
+
+void CuteImageProvider::gray()
+{
+    int width = m_modified.width();
+    int height = m_modified.height();
+
+    for (int x=0;x<width;x++) {
+        for (int y=0;y<height;y++) {
+            QRgb p=m_modified.pixel(x,y);
+            int g=qGray(p);
+            m_modified.setPixel(x,y,qRgb(g,g,g));
         }
     }
 }
