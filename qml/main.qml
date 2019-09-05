@@ -66,6 +66,16 @@ ApplicationWindow {
                 }
             }
             ToolButton {
+                text: "Edit"
+                onClicked: {
+                    imp.setImage(previewImage.source);
+                    if (!imp.isEmpty()) {
+                        imageEditor.open();
+                    }
+                }
+            }
+
+            ToolButton {
                 text: "Focus"
                 enabled: camera.cameraState==Camera.ActiveState
                 onClicked: {
@@ -147,10 +157,9 @@ ApplicationWindow {
         }
 
         onNoObjectDetected: {
-            console.debug("Nothing found!")
-            objectID.text=""
+            console.debug("Nothing found!")            
             objectConfidence.text="-:---%"
-            previewImage.visible=false;
+            //previewImage.visible=false;
         }
 
         onDetectionEnded: {

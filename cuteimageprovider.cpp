@@ -44,14 +44,24 @@ bool CuteImageProvider::setImage(QVariant image)
 {
     QMutexLocker lock(&mutex);
 
-    QImage tmp=image.value<QImage>();
+    qDebug() << "setImageQV" << image.typeName() << image.type();
 
-    qDebug() << "setImageQV" << image.typeName() << tmp.format();
-
-    // tmp.rgbSwapped();
-
-    m_image=tmp.rgbSwapped(); // XXX Why do we need this ?
     m_modified=QImage();
+
+    switch ((QMetaType::Type)image.type()) {
+    case QMetaType::QUrl: {
+        QUrl tmp=image.value<QUrl>();
+        m_image.load(tmp.path());
+    }
+        break;
+    case QMetaType::QImage: {
+        QImage tmp=image.value<QImage>();
+        m_image=tmp.rgbSwapped(); // XXX Why do we need this ?
+    }
+        break;
+    default:
+        return false;
+    }
 
     return m_image.isNull();
 }
