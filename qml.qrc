@@ -8,5 +8,6 @@
         <file>qml/ObjectMarker.qml</file>
         <file>qml/FileSaveDialog.qml</file>
         <file>qml/ImageEditor.qml</file>
+        <file>qml/CropControl.qml</file>
     </qresource>
 </RCC>

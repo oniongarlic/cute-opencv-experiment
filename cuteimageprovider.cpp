@@ -100,13 +100,15 @@ void CuteImageProvider::cropNormalized(QRectF rect)
                  qRound(rect.width()*m_image.width()),
                  qRound(rect.height()*m_image.height()));
 
+    qDebug() << mapped;
+
     crop(mapped);
 }
 
 void CuteImageProvider::crop(QRect &rect)
 {
     QMutexLocker lock(&mutex);
-    m_modified=m_modified.copy(rect);
+    m_modified=m_image.copy(rect);
 
     lock.unlock();
     emit imageChanged();

@@ -39,6 +39,13 @@ Popup {
                         controlRotate.visible=true
                     }
                 }
+                ToolButton {
+                    text: "Crop"
+                    onClicked: {
+                        controlCrop.visible=!controlCrop.visible
+                        controlCrop.reset();
+                    }
+                }
             }
         }
 
@@ -133,7 +140,28 @@ Popup {
                 croppedImagePreview.source=""
                 croppedImagePreview.source="image://cute/preview"
             }
-        }        
+
+            // Contains the real image
+            Item {
+                id: pvr
+                x: parent.height==parent.paintedHeight ? parent.width/2-width/2 : 0
+                y: parent.width==parent.paintedWidth ? parent.height/2-height/2 : 0
+                width: parent.paintedWidth
+                height: parent.paintedHeight
+
+                CropControl {
+                    id: controlCrop
+                    visible: false
+                    onDoubleClicked: {
+                        var r=mapNormalizedRect();
+                        imp.cropNormalized(r)
+                        imp.commit();
+                        croppedImagePreview.updatePreview();
+                        reset();
+                    }
+                }
+            }
+        }
 
         ToolBar {
             Layout.fillWidth: true
@@ -142,16 +170,16 @@ Popup {
                 ToolButton {
                     text: "Gray"
                     onClicked: {
-                        imp.gray()
+                        imp.gray();
                         croppedImagePreview.updatePreview();
                     }
                 }
                 ToolButton {
                     text: "Reset"
                     onClicked: {
-                        imp.reset()
+                        imp.reset();
                     }
-                }                
+                }
                 ToolButton {
                     text: "Save"
                     onClicked: {
