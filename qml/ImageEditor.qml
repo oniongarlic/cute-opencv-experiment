@@ -46,6 +46,55 @@ Popup {
                         controlCrop.reset();
                     }
                 }
+                ToolButton {
+                    text: "Gray"
+                    onClicked: {
+                        imp.gray();
+                        croppedImagePreview.updatePreview();
+                    }
+                }
+                ToolButton {
+                    text: "Mirror"
+                    enabled: controlMirror.visible==false
+                    onClicked: {
+                        controlMirror.visible=true;
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            id: controlMirror
+            visible: false
+            Button {
+                text: "Cancel"
+                onClicked: {
+                    imp.reset();
+                    controlMirror.visible=false;
+                }
+            }
+
+            function updateMirror() {
+                imp.mirror(flipHorizontal.checked, flipVertical.checked)
+                croppedImagePreview.updatePreview();
+            }
+
+            Switch {
+                id: flipHorizontal
+                text: "Horizontal"
+                onCheckedChanged: controlMirror.updateMirror();
+            }
+            Switch {
+                id: flipVertical
+                text: "Vertical"
+                onCheckedChanged: controlMirror.updateMirror();
+            }
+            Button {
+                text: "OK"
+                onClicked: {
+                    imp.commit();
+                    controlMirror.visible=false;
+                }
             }
         }
 
@@ -166,14 +215,7 @@ Popup {
         ToolBar {
             Layout.fillWidth: true
             RowLayout {
-                anchors.fill: parent
-                ToolButton {
-                    text: "Gray"
-                    onClicked: {
-                        imp.gray();
-                        croppedImagePreview.updatePreview();
-                    }
-                }
+                anchors.fill: parent                
                 ToolButton {
                     text: "Reset"
                     onClicked: {

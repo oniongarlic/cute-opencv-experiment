@@ -23,6 +23,8 @@ public:
 
     Q_INVOKABLE void commit();
 
+    Q_INVOKABLE void mirror(bool horizontal, bool vertical);
+
     Q_INVOKABLE void cropNormalized(QRectF rect);
     Q_INVOKABLE void crop(QRect &rect);
 
@@ -40,6 +42,8 @@ signals:
     void imageChanged();
 
 private:
+    void prepareImage();
+
     QImage m_image;
     QImage m_modified;
     QMutex mutex;

@@ -365,7 +365,7 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 clip: true
-                visible: detectedItems.count>0
+                //visible: detectedItems.count>0
                 model: detectedItems
                 delegate: detectedItemDelegate
                 highlight: Rectangle { color: "lightsteelblue"; radius: 2 }

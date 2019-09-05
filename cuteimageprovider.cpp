@@ -103,6 +103,13 @@ void CuteImageProvider::commit()
     emit imageChanged();
 }
 
+void CuteImageProvider::mirror(bool horizontal, bool vertical)
+{
+    QMutexLocker lock(&mutex);
+
+    m_modified=m_image.mirrored(horizontal, vertical);
+}
+
 void CuteImageProvider::cropNormalized(QRectF rect)
 {
     QRect mapped(qRound(rect.x()*m_image.width()),
@@ -128,12 +135,7 @@ void CuteImageProvider::adjustContrastBrightness(double contrast, double brightn
 {
     QMutexLocker lock(&mutex);
 
-    if (m_image.format()!=QImage::Format_RGB32)
-        m_modified=m_image.convertToFormat(QImage::Format_RGB32);
-    else {
-        m_modified=m_image;
-    }
-    m_modified.detach();
+    prepareImage();
 
     int width = m_modified.width();
     int height = m_modified.height();
@@ -175,6 +177,10 @@ void CuteImageProvider::adjustContrastBrightness(double contrast, double brightn
 
 void CuteImageProvider::gray()
 {
+    QMutexLocker lock(&mutex);
+
+    prepareImage();
+
     int width = m_modified.width();
     int height = m_modified.height();
 
@@ -185,6 +191,16 @@ void CuteImageProvider::gray()
             m_modified.setPixel(x,y,qRgb(g,g,g));
         }
     }
+}
+
+void CuteImageProvider::prepareImage()
+{
+    if (m_image.format()!=QImage::Format_RGB32)
+        m_modified=m_image.convertToFormat(QImage::Format_RGB32);
+    else {
+        m_modified=m_image;
+    }
+    m_modified.detach();
 }
 
 void CuteImageProvider::rotate(double angle)
