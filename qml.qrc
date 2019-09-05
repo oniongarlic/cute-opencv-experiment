@@ -7,5 +7,6 @@
         <file>colors.json</file>
         <file>qml/ObjectMarker.qml</file>
         <file>qml/FileSaveDialog.qml</file>
+        <file>qml/ImageEditor.qml</file>
     </qresource>
 </RCC>

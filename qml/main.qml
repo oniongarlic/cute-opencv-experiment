@@ -291,8 +291,8 @@ ApplicationWindow {
                     Rectangle {
                         id: objectCenter
                         color: "transparent"
-                        x: detectedItemsList.c.x-2
-                        y: detectedItemsList.c.y-2
+                        x: detectedItemsList.c ? detectedItemsList.c.x-2 : 0
+                        y: detectedItemsList.c ? detectedItemsList.c.y-2 : 0
                         width: 4
                         height: 4
                         border.width: 2
@@ -384,15 +384,11 @@ ApplicationWindow {
                                 console.debug(r);
                                 imp.setImage(od.getImage());
                                 console.debug("isEmpty")
-                                if (!imp.isEmpty()) {
-                                    console.debug("cropt")
+                                if (!imp.isEmpty()) {                                    
                                     imp.cropNormalized(r);
-
-                                    console.debug("commit")
                                     imp.commit();
 
-                                    croppedImagePreview.updatePreview()
-                                    croppedImagePopup.open();
+                                    imageEditor.open();
                                 } else {
                                     console.debug("*** Image is NULL!");
                                 }
@@ -467,116 +463,8 @@ ApplicationWindow {
         }
     }
 
-    Popup {
-        id: croppedImagePopup
-        x: Math.round((parent.width - width) / 2)
-        y: Math.round((parent.height - height) / 2)
-        width: parent.width/1.1
-        height: parent.height/1.1
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        ColumnLayout {
-            anchors.fill: parent
-            Image {
-                id: croppedImagePreview
-                cache: false
-                fillMode: Image.PreserveAspectFit
-                source: ""
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-
-                function updatePreview() {
-                    croppedImagePreview.source=""
-                    croppedImagePreview.source="image://cute/preview"
-                }
-            }
-            Slider {
-                id: adjustBrightnessSlider
-                from: -1.0
-                stepSize: 0.01
-                to: 1.0
-                value: 0.0
-                live: false
-                onValueChanged: {
-                    imp.adjustContrastBrightness(adjustContrastSlider.value,value);
-                    croppedImagePreview.updatePreview();
-                }
-                Layout.fillWidth: true
-            }
-            Slider {
-                id: adjustContrastSlider
-                from: 0.0
-                value: 0.0
-                to: 100.0
-                stepSize: 0.01;
-                live: false
-                onValueChanged: {
-                    imp.adjustContrastBrightness(value,adjustBrightnessSlider.value);
-                    croppedImagePreview.updatePreview();
-                }
-                Layout.fillWidth: true
-            }
-
-            Slider {
-                id: adjustRotate
-                from: 0.0
-                value: 0.0
-                to: 360.0
-                stepSize: 0.1;
-                live: false
-                onValueChanged: {
-                    imp.rotate(value)
-                    croppedImagePreview.updatePreview();
-                }
-                Layout.fillWidth: true
-            }
-
-            ToolBar {
-                Layout.fillWidth: true
-                RowLayout {
-                    anchors.fill: parent
-                    ToolButton {
-                        text: "Gray"
-                        onClicked: {
-                            imp.gray()
-                            croppedImagePreview.updatePreview();
-                        }
-                    }
-                    ToolButton {
-                        text: "Reset"
-                        onClicked: {
-                            imp.reset()
-                        }
-                    }
-                    ToolButton {
-                        text: "Commit"
-                        onClicked: {
-                            imp.commit()
-                        }
-                    }
-                    ToolButton {
-                        text: "Save"
-                        onClicked: {
-                            fsd.open();
-                        }
-                    }
-                }
-            }
-        }
-
-        onClosed: {
-            croppedImagePreview.source=""
-        }
-
-    }
-
-    Connections {
-        target: imp
-        onImageChanged: {
-            console.debug("*** Image was modified")
-            croppedImagePreview.updatePreview();
-        }
+    ImageEditor {
+        id: imageEditor
     }
 
     FileSaveDialog {
