@@ -23,6 +23,104 @@ Popup {
 
     ColumnLayout {
         anchors.fill: parent
+        ToolBar {
+            RowLayout {
+                ToolButton {
+                    text: "Brightness/Contrast"
+                    enabled: controlBrightnessContrast.visible==false
+                    onClicked: {
+                        controlBrightnessContrast.visible=true
+                    }
+                }
+                ToolButton {
+                    text: "Rotate"
+                    enabled: controlRotate.visible==false
+                    onClicked: {
+                        controlRotate.visible=true
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            id: controlBrightnessContrast
+            visible: false
+            Button {
+                text: "Cancel"
+                onClicked: {
+                    imp.reset();
+                    controlBrightnessContrast.visible=false;
+                }
+            }
+            Slider {
+                id: adjustBrightnessSlider
+                from: -1.0
+                stepSize: 0.01
+                to: 1.0
+                value: 0.0
+                live: false
+                onValueChanged: {
+                    imp.adjustContrastBrightness(adjustContrastSlider.value,value);
+                    croppedImagePreview.updatePreview();
+                }
+                Layout.fillWidth: true
+            }
+            Slider {
+                id: adjustContrastSlider
+                from: 0.0
+                value: 0.0
+                to: 100.0
+                stepSize: 0.01;
+                live: false
+                onValueChanged: {
+                    imp.adjustContrastBrightness(value,adjustBrightnessSlider.value);
+                    croppedImagePreview.updatePreview();
+                }
+                Layout.fillWidth: true
+            }
+            Button {
+                text: "OK"
+                onClicked: {
+                    imp.commit();
+                    controlBrightnessContrast.visible=false;
+                }
+            }
+        }
+
+        RowLayout {
+            id: controlRotate
+            visible: false
+            Button {
+                text: "Cancel"
+                onClicked: {
+                    imp.reset()
+                    controlRotate.visible=false;
+                }
+            }
+
+            Slider {
+                id: adjustRotate
+                from: 0.0
+                value: 0.0
+                to: 360.0
+                stepSize: 0.1;
+                live: false
+                onValueChanged: {
+                    imp.rotate(value)
+                    croppedImagePreview.updatePreview();
+                }
+                Layout.fillWidth: true
+            }
+
+            Button {
+                text: "OK"
+                onClicked: {
+                    imp.commit();
+                    controlRotate.visible=false;
+                }
+            }
+        }
+
         Image {
             id: croppedImagePreview
             cache: false
@@ -35,47 +133,7 @@ Popup {
                 croppedImagePreview.source=""
                 croppedImagePreview.source="image://cute/preview"
             }
-        }
-        Slider {
-            id: adjustBrightnessSlider
-            from: -1.0
-            stepSize: 0.01
-            to: 1.0
-            value: 0.0
-            live: false
-            onValueChanged: {
-                imp.adjustContrastBrightness(adjustContrastSlider.value,value);
-                croppedImagePreview.updatePreview();
-            }
-            Layout.fillWidth: true
-        }
-        Slider {
-            id: adjustContrastSlider
-            from: 0.0
-            value: 0.0
-            to: 100.0
-            stepSize: 0.01;
-            live: false
-            onValueChanged: {
-                imp.adjustContrastBrightness(value,adjustBrightnessSlider.value);
-                croppedImagePreview.updatePreview();
-            }
-            Layout.fillWidth: true
-        }
-
-        Slider {
-            id: adjustRotate
-            from: 0.0
-            value: 0.0
-            to: 360.0
-            stepSize: 0.1;
-            live: false
-            onValueChanged: {
-                imp.rotate(value)
-                croppedImagePreview.updatePreview();
-            }
-            Layout.fillWidth: true
-        }
+        }        
 
         ToolBar {
             Layout.fillWidth: true
@@ -93,13 +151,7 @@ Popup {
                     onClicked: {
                         imp.reset()
                     }
-                }
-                ToolButton {
-                    text: "Commit"
-                    onClicked: {
-                        imp.commit()
-                    }
-                }
+                }                
                 ToolButton {
                     text: "Save"
                     onClicked: {
