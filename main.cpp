@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
-    CuteImageProvider cuteprovider;
+    CuteImageProvider *cuteprovider=new CuteImageProvider(&app);
 
     app.setApplicationName("QtOpenCVHelloWorld");
     app.setOrganizationDomain("tal.org");
@@ -59,9 +59,9 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("imagePath", image_path);
 
-    engine.rootContext()->setContextProperty("imp", &cuteprovider); // ImageManipulatorProvider (?)
+    engine.rootContext()->setContextProperty("imp", cuteprovider); // ImageManipulatorProvider (?)
 
-    engine.addImageProvider("cute", &cuteprovider);
+    engine.addImageProvider("cute", cuteprovider);
 
     qmlRegisterType<OCVObjectColorDetector>("org.tal", 1,0, "ColorDetector");
     qmlRegisterType<ObjectDetector>("org.tal", 1,0, "ObjectDetector");
