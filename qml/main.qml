@@ -70,7 +70,9 @@ ApplicationWindow {
                 onClicked: {
                     imp.setImage(previewImage.source);
                     if (!imp.isEmpty()) {
-                        imageEditor.open();
+                        rootStack.push(imageEditor);
+                    } else {
+                        messageDialog.show("Operation failed", "Failed to set image for editing")
                     }
                 }
             }
@@ -157,8 +159,8 @@ ApplicationWindow {
         }
 
         onNoObjectDetected: {
-            console.debug("Nothing found!")            
-            objectConfidence.text="-:---%"
+            console.debug("Nothing found!")
+            //objectConfidence.text="-:---%"
             //previewImage.visible=false;
         }
 
@@ -241,9 +243,15 @@ ApplicationWindow {
         nameFilters: ["*.jpg"]
     }
 
+    StackView {
+        id: rootStack
+        initialItem: mainRow
+        anchors.fill: parent
+    }
+
     ColumnLayout {
         id: mainRow
-        anchors.fill: parent
+        //anchors.fill: parent
 
         VideoOutput {
             id: vc
@@ -393,13 +401,13 @@ ApplicationWindow {
                                 console.debug(r);
                                 imp.setImage(od.getImage());
                                 console.debug("isEmpty")
-                                if (!imp.isEmpty()) {                                    
+                                if (!imp.isEmpty()) {
                                     imp.cropNormalized(r);
                                     imp.commit();
-
-                                    imageEditor.open();
+                                    rootStack.push(imageEditor)
                                 } else {
                                     console.debug("*** Image is NULL!");
+                                    messageDialog.show("Operation failed", "Failed to set image for editing")
                                 }
                             }
                         }
@@ -472,8 +480,11 @@ ApplicationWindow {
         }
     }
 
-    ImageEditor {
+    Component {
         id: imageEditor
+        ImageEditor {
+
+        }
     }
 
     FileSaveDialog {

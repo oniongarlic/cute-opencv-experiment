@@ -3,65 +3,95 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Dialogs 1.2
 
-Popup {
+Page {
     id: imageEditor
-    x: Math.round((parent.width - width) / 2)
-    y: Math.round((parent.height - height) / 2)
-    width: parent.width/1.1
-    height: parent.height/1.1
-    modal: true
-    focus: true
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+    title: "Image editor"
+    Keys.onReleased: {
+        if (event.key === Qt.Key_Back) {
+            console.log("*** Back button")
+            event.accepted = true;
+            rootStack.pop()
+        }
+    }
 
     Connections {
         target: imp
         onImageChanged: {
-            console.debug("*** Image was modified")
+            console.debug("*** Image changed, updating preview")
             croppedImagePreview.updatePreview();
         }
     }
 
-    ColumnLayout {
-        anchors.fill: parent
-        ToolBar {
-            RowLayout {
-                ToolButton {
-                    text: "Brightness/Contrast"
-                    enabled: controlBrightnessContrast.visible==false
-                    onClicked: {
-                        controlBrightnessContrast.visible=true
-                    }
+    header: ToolBar {
+        RowLayout {
+            anchors.fill: parent
+            ToolButton {
+                id: backButton
+                text: "Back"
+                onClicked: {
+                    rootStack.pop()
                 }
-                ToolButton {
-                    text: "Rotate"
-                    enabled: controlRotate.visible==false
-                    onClicked: {
-                        controlRotate.visible=true
-                    }
+            }
+            ToolButton {
+                text: "B/C"
+                enabled: controlBrightnessContrast.visible==false
+                onClicked: {
+                    controlBrightnessContrast.visible=true
                 }
-                ToolButton {
-                    text: "Crop"
-                    onClicked: {
-                        controlCrop.visible=!controlCrop.visible
-                        controlCrop.reset();
-                    }
+            }
+            ToolButton {
+                text: "Rot"
+                enabled: controlRotate.visible==false
+                onClicked: {
+                    controlRotate.visible=true
                 }
-                ToolButton {
-                    text: "Gray"
-                    onClicked: {
-                        imp.gray();
-                        croppedImagePreview.updatePreview();
-                    }
+            }
+            ToolButton {
+                text: "Crop"
+                onClicked: {
+                    controlCrop.visible=!controlCrop.visible
+                    controlCrop.reset();
                 }
-                ToolButton {
-                    text: "Mirror"
-                    enabled: controlMirror.visible==false
-                    onClicked: {
-                        controlMirror.visible=true;
-                    }
+            }
+            ToolButton {
+                text: "Gray"
+                onClicked: {
+                    imp.gray();
+                    croppedImagePreview.updatePreview();
+                }
+            }
+            ToolButton {
+                text: "Mirror"
+                enabled: controlMirror.visible==false
+                onClicked: {
+                    controlMirror.visible=true;
                 }
             }
         }
+    }
+
+    footer: ToolBar {
+        Layout.fillWidth: true
+        RowLayout {
+            anchors.fill: parent
+            ToolButton {
+                text: "Reset"
+                onClicked: {
+                    imp.reset();
+                }
+            }
+            ToolButton {
+                text: "Save"
+                onClicked: {
+                    fsd.open();
+                }
+            }
+        }
+    }
+
+    ColumnLayout {
+        id: imageEditorContainer
+        anchors.fill: parent
 
         RowLayout {
             id: controlMirror
@@ -212,32 +242,8 @@ Popup {
             }
         }
 
-        ToolBar {
-            Layout.fillWidth: true
-            RowLayout {
-                anchors.fill: parent                
-                ToolButton {
-                    text: "Reset"
-                    onClicked: {
-                        imp.reset();
-                    }
-                }
-                ToolButton {
-                    text: "Save"
-                    onClicked: {
-                        fsd.open();
-                    }
-                }
-            }
-        }
-    }
 
-    onClosed: {
-        croppedImagePreview.source=""
     }
-
-    onOpened: {
-        croppedImagePreview.updatePreview()
-    }
-
 }
+
+
