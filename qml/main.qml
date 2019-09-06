@@ -41,51 +41,7 @@ ApplicationWindow {
         }
     }
 
-    footer: ToolBar {
-        RowLayout {
-            anchors.fill: parent
-            ToolButton {
-                text: "Image"
-                enabled: !inProgress
-                onClicked: {
-                    filesDialog.startSelector();
-                }
-            }
-            ToolButton {
-                text: "Capture"
-                enabled: !inProgress && camera.cameraState==Camera.ActiveState
-                onClicked: {
-                    camera.imageCapture.capture();
-                }
-            }
-            ToolButton {
-                text: "Camera"
-                enabled: camera.cameraState!=Camera.ActiveState
-                onClicked: {
-                    camera.start();
-                }
-            }
-            ToolButton {
-                text: "Edit"
-                onClicked: {
-                    imp.setImage(previewImage.source);
-                    if (!imp.isEmpty()) {
-                        rootStack.push(imageEditor);
-                    } else {
-                        messageDialog.show("Operation failed", "Failed to set image for editing")
-                    }
-                }
-            }
 
-            ToolButton {
-                text: "Focus"
-                enabled: camera.cameraState==Camera.ActiveState
-                onClicked: {
-                    camera.searchAndLock();
-                }
-            }
-        }
-    }
 
     function processImageFile(file) {
         previewImage.source=file
@@ -245,221 +201,273 @@ ApplicationWindow {
 
     StackView {
         id: rootStack
-        initialItem: mainRow
+        initialItem: mainView
         anchors.fill: parent
     }
 
-    ColumnLayout {
-        id: mainRow
-        //anchors.fill: parent
+    Page {
+        id: mainView
 
-        VideoOutput {
-            id: vc
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignTop
-            Layout.minimumHeight: 256
-            Layout.minimumWidth: parent.width
-            source: camera
-            autoOrientation: true
-            fillMode: Image.PreserveAspectFit
-
-            filters: [ cvfilter ]
-
-            MouseArea {
+        footer: ToolBar {
+            RowLayout {
                 anchors.fill: parent
-                onPressAndHold: {
-                    console.debug(mouse.x)
-                    console.debug(mouse.y)
-
-                    console.debug(mouse.x/width)
-                    console.debug(mouse.y/height)
-
-                    // cd.setRoi();
-                }
-                onClicked: {
-                    camera.searchAndLock();
-                }
-                onDoubleClicked: {
-                    camera.imageCapture.capture();
-                }
-            }
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: 33
-                height: 33
-                border.width: 4
-                border.color: "green"
-                color: "transparent"
-            }
-
-            Image {
-                id: previewImage
-                anchors.fill: parent
-                fillMode: Image.PreserveAspectFit
-                Item {
-                    id: pvr
-                    x: parent.height==parent.paintedHeight ? parent.width/2-width/2 : 0
-                    y: parent.width==parent.paintedWidth ? parent.height/2-height/2 : 0
-                    width: parent.paintedWidth
-                    height: parent.paintedHeight
-
-                    Rectangle {
-                        id: objectCenter
-                        color: "transparent"
-                        x: detectedItemsList.c ? detectedItemsList.c.x-2 : 0
-                        y: detectedItemsList.c ? detectedItemsList.c.y-2 : 0
-                        width: 4
-                        height: 4
-                        border.width: 2
-                        border.color: "green"
-                        visible: x>0 && y>0
+                ToolButton {
+                    text: "Image"
+                    enabled: !inProgress
+                    onClicked: {
+                        filesDialog.startSelector();
                     }
-
-                    Repeater {
-                        model: detectedItems
-                        delegate: objectMarkerDelegate
+                }
+                ToolButton {
+                    text: "Capture"
+                    enabled: !inProgress && camera.cameraState==Camera.ActiveState
+                    onClicked: {
+                        camera.imageCapture.capture();
                     }
-
-                    Component {
-                        id: objectMarkerDelegate
-                        ObjectMarker {
-                            o: Qt.rect(ox, oy, owidth, oheight);
-                            objectConfidence: confidence
-                            objectName: name
-                            objectColor: ocolor
-                            activated: index==detectedItemsList.currentIndex
+                }
+                ToolButton {
+                    text: "Camera"
+                    enabled: camera.cameraState!=Camera.ActiveState
+                    onClicked: {
+                        camera.start();
+                    }
+                }
+                ToolButton {
+                    text: "Edit"
+                    onClicked: {
+                        imp.setImage(previewImage.source);
+                        if (!imp.isEmpty()) {
+                            rootStack.push(imageEditor);
+                        } else {
+                            messageDialog.show("Operation failed", "Failed to set image for editing")
                         }
                     }
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    enabled: !inProgress
+                ToolButton {
+                    text: "Focus"
+                    enabled: camera.cameraState==Camera.ActiveState
                     onClicked: {
-                        previewImage.visible=false;
-                        detectedItems.clear();
+                        camera.searchAndLock();
                     }
                 }
-
-                function mapNormalizedRectToItem(r) {
-                    console.debug(r)
-                    return Qt.rect(r.x*pvr.width, r.y*pvr.height, r.width*pvr.width, r.height*pvr.height)
-                }
-
-                function mapNormalizedPointToItem(r) {
-                    //console.debug(r)
-                    return Qt.point(r.x*pvr.width, r.y*pvr.height)
-                }
-            }
-
-            BusyIndicator {
-                anchors.centerIn: parent
-                width: 128
-                height: 128
-                visible: inProgress
-                running: inProgress
             }
         }
 
-        RowLayout {
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            Layout.minimumHeight: root.height/5
-            Layout.maximumHeight: root.height/4
-            ListView {
-                id: detectedItemsList
+
+        ColumnLayout {
+            id: mainRow
+            anchors.fill: parent
+
+            VideoOutput {
+                id: vc
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                clip: true
-                //visible: detectedItems.count>0
-                model: detectedItems
-                delegate: detectedItemDelegate
-                highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
+                Layout.alignment: Qt.AlignTop
+                Layout.minimumHeight: 256
+                Layout.minimumWidth: parent.width
+                source: camera
+                autoOrientation: true
+                fillMode: Image.PreserveAspectFit
 
-                Component {
-                    id: detectedItemDelegate
+                filters: [ cvfilter ]
+
+                MouseArea {
+                    anchors.fill: parent
+                    onPressAndHold: {
+                        console.debug(mouse.x)
+                        console.debug(mouse.y)
+
+                        console.debug(mouse.x/width)
+                        console.debug(mouse.y/height)
+
+                        // cd.setRoi();
+                    }
+                    onClicked: {
+                        camera.searchAndLock();
+                    }
+                    onDoubleClicked: {
+                        camera.imageCapture.capture();
+                    }
+                }
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 33
+                    height: 33
+                    border.width: 4
+                    border.color: "green"
+                    color: "transparent"
+                }
+
+                Image {
+                    id: previewImage
+                    anchors.fill: parent
+                    fillMode: Image.PreserveAspectFit
                     Item {
-                        width: parent.width
-                        height: r.height
-                        Row {
-                            id: r
-                            spacing: 8
-                            width: parent.width
-                            Text { text: name }
-                            Text { text: Math.round(confidence*100)+"%" }
+                        id: pvr
+                        x: parent.height==parent.paintedHeight ? parent.width/2-width/2 : 0
+                        y: parent.width==parent.paintedWidth ? parent.height/2-height/2 : 0
+                        width: parent.paintedWidth
+                        height: parent.paintedHeight
+
+                        Rectangle {
+                            id: objectCenter
+                            color: "transparent"
+                            x: detectedItemsList.c ? detectedItemsList.c.x-2 : 0
+                            y: detectedItemsList.c ? detectedItemsList.c.y-2 : 0
+                            width: 4
+                            height: 4
+                            border.width: 2
+                            border.color: "green"
+                            visible: x>0 && y>0
                         }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                detectedItemsList.currentIndex = index
+
+                        Repeater {
+                            model: detectedItems
+                            delegate: objectMarkerDelegate
+                        }
+
+                        Component {
+                            id: objectMarkerDelegate
+                            ObjectMarker {
+                                o: Qt.rect(ox, oy, owidth, oheight);
+                                objectConfidence: confidence
+                                objectName: name
+                                objectColor: ocolor
+                                activated: index==detectedItemsList.currentIndex
                             }
-                            onDoubleClicked: {
-                                detectedItemsList.currentIndex = index
-                                var r=Qt.rect(ox, oy, owidth, oheight);
-                                console.debug(r);
-                                imp.setImage(od.getImage());
-                                console.debug("isEmpty")
-                                if (!imp.isEmpty()) {
-                                    imp.cropNormalized(r);
-                                    imp.commit();
-                                    rootStack.push(imageEditor)
-                                } else {
-                                    console.debug("*** Image is NULL!");
-                                    messageDialog.show("Operation failed", "Failed to set image for editing")
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: !inProgress
+                        onClicked: {
+                            previewImage.visible=false;
+                            detectedItems.clear();
+                        }
+                    }
+
+                    function mapNormalizedRectToItem(r) {
+                        console.debug(r)
+                        return Qt.rect(r.x*pvr.width, r.y*pvr.height, r.width*pvr.width, r.height*pvr.height)
+                    }
+
+                    function mapNormalizedPointToItem(r) {
+                        //console.debug(r)
+                        return Qt.point(r.x*pvr.width, r.y*pvr.height)
+                    }
+                }
+
+                BusyIndicator {
+                    anchors.centerIn: parent
+                    width: 128
+                    height: 128
+                    visible: inProgress
+                    running: inProgress
+                }
+            }
+
+            RowLayout {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.minimumHeight: root.height/5
+                Layout.maximumHeight: root.height/4
+                ListView {
+                    id: detectedItemsList
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    clip: true
+                    //visible: detectedItems.count>0
+                    model: detectedItems
+                    delegate: detectedItemDelegate
+                    highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
+
+                    Component {
+                        id: detectedItemDelegate
+                        Item {
+                            width: parent.width
+                            height: r.height
+                            Row {
+                                id: r
+                                spacing: 8
+                                width: parent.width
+                                Text { text: name }
+                                Text { text: Math.round(confidence*100)+"%" }
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    detectedItemsList.currentIndex = index
+                                }
+                                onDoubleClicked: {
+                                    detectedItemsList.currentIndex = index
+                                    var r=Qt.rect(ox, oy, owidth, oheight);
+                                    console.debug(r);
+                                    imp.setImage(od.getImage());
+                                    console.debug("isEmpty")
+                                    if (!imp.isEmpty()) {
+                                        imp.cropNormalized(r);
+                                        imp.commit();
+                                        rootStack.push(imageEditor)
+                                    } else {
+                                        console.debug("*** Image is NULL!");
+                                        messageDialog.show("Operation failed", "Failed to set image for editing")
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            ListView {
-                id: fileList
-                model: fileModel
-                delegate: fileDelegate
+                ListView {
+                    id: fileList
+                    model: fileModel
+                    delegate: fileDelegate
 
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                clip: true
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    clip: true
 
-                highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
+                    highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
 
-                function processItem(index) {
-                    fileList.currentIndex=index
-                    var f=fileModel.get(currentIndex, "fileURL")
-                    if (fileModel.isFolder(currentIndex))
-                        fileModel.folder=f;
-                    else
-                        processImageFile(f);
-                }
+                    function processItem(index) {
+                        fileList.currentIndex=index
+                        var f=fileModel.get(currentIndex, "fileURL")
+                        if (fileModel.isFolder(currentIndex))
+                            fileModel.folder=f;
+                        else
+                            processImageFile(f);
+                    }
 
-                Component {
-                    id: fileDelegate
-                    Item {
-                        width: parent.width
-                        height: r.height
-                        Row {
-                            id: r
-                            spacing: 8
+                    Component {
+                        id: fileDelegate
+                        Item {
                             width: parent.width
-                            Text { text: fileName }
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                fileList.processItem(index);
+                            height: r.height
+                            Row {
+                                id: r
+                                spacing: 8
+                                width: parent.width
+                                Text { text: fileName }
                             }
-                            onDoubleClicked: {
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    fileList.processItem(index);
+                                }
+                                onDoubleClicked: {
 
+                                }
                             }
                         }
                     }
-                }
 
+                }
             }
         }
+
     }
 
     MessageDialog {

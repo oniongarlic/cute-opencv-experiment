@@ -156,6 +156,10 @@ void CuteImageProvider::adjustContrastBrightness(double contrast, double brightn
             g=(factor * (g - 128.0)) + 128.0;
             g=(factor * (b - 128.0)) + 128.0;
 
+            r=qBound(0.0, r, 255.0);
+            g=qBound(0.0, g, 255.0);
+            b=qBound(0.0, b, 255.0);
+
             // Brightness
             r+=r*brightness;
             g+=g*brightness;
@@ -184,11 +188,12 @@ void CuteImageProvider::gray()
     int width = m_modified.width();
     int height = m_modified.height();
 
-    for (int x=0;x<width;x++) {
-        for (int y=0;y<height;y++) {
-            QRgb p=m_modified.pixel(x,y);
-            int g=qGray(p);
-            m_modified.setPixel(x,y,qRgb(g,g,g));
+    for (int y=0;y<height;y++) {
+        uchar *sl=m_modified.scanLine(y);
+        for (int x=0;x<width;x++) {
+            QRgb* p = reinterpret_cast<QRgb*>(sl+x*4);
+            int g=qGray(*p);
+            *p=qRgb(g,g,g);
         }
     }
 }
@@ -203,7 +208,7 @@ void CuteImageProvider::prepareImage()
     m_modified.detach();
 }
 
-void CuteImageProvider::rotate(double angle)
+void CuteImageProvider::rotate(double angle, bool smooth)
 {
     QMutexLocker lock(&mutex);
 
@@ -213,7 +218,7 @@ void CuteImageProvider::rotate(double angle)
     matrix.translate(center.x(), center.y());
     matrix.rotate(angle);
 
-    m_modified = m_image.transformed(matrix, Qt::SmoothTransformation);
+    m_modified = m_image.transformed(matrix, smooth ? Qt::SmoothTransformation : Qt::FastTransformation);
 }
 
 bool CuteImageProvider::save(QString fileName)

@@ -22,6 +22,10 @@ Page {
         }
     }
 
+    Component.onCompleted: {
+        croppedImagePreview.updatePreview();
+    }
+
     header: ToolBar {
         RowLayout {
             anchors.fill: parent

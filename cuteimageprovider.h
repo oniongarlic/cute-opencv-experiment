@@ -30,7 +30,7 @@ public:
 
     Q_INVOKABLE void adjustContrastBrightness(double contrast, double brightness);
 
-    Q_INVOKABLE void rotate(double angle);
+    Q_INVOKABLE void rotate(double angle, bool smooth=true);
 
     Q_INVOKABLE bool save(QString fileName);
 
