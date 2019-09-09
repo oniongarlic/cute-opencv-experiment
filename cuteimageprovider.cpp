@@ -51,12 +51,13 @@ bool CuteImageProvider::setImage(QVariant image)
     switch ((QMetaType::Type)image.type()) {
     case QMetaType::QUrl: {
         QUrl tmp=image.value<QUrl>();
+        qDebug() << "QUrl" << tmp << tmp.path();
         m_image.load(tmp.path());
     }
         break;
     case QMetaType::QImage: {
         QImage tmp=image.value<QImage>();
-        m_image=tmp.rgbSwapped(); // XXX Why do we need this ?
+        m_image=tmp.rgbSwapped(); // XXX Why do we need this ?        
     }
         break;
     default:
@@ -134,31 +135,40 @@ void CuteImageProvider::crop(QRect &rect)
 void CuteImageProvider::adjustContrastBrightness(double contrast, double brightness)
 {
     QMutexLocker lock(&mutex);
+    unsigned char lut[256];
 
     prepareImage();
 
     int width = m_modified.width();
     int height = m_modified.height();
 
-    qDebug() << contrast << brightness;
+    double factor = (255.0 + contrast) / 255.0;
 
-    for (int x=0;x<width;x++) {
-        for (int y=0;y<height;y++) {
-            QRgb p=m_modified.pixel(x,y);
+    for (int i=0;i<256;i++) {
+        double l=(factor * (i - 128.0)) + 128.0;
+        l+=l*brightness;
+        lut[i]=qRound(qBound(0.0, l, 255.0));
+    }
 
-            double r=qRed(p);
-            double g=qGreen(p);
-            double b=qBlue(p);
+    for (int y=0;y<height;y++) {
+        uchar *sl=m_modified.scanLine(y);
+        for (int x=0;x<width;x++) {
+            QRgb* p = reinterpret_cast<QRgb*>(sl+x*4);
+
+            int r=qRed(*p);
+            int g=qGreen(*p);
+            int b=qBlue(*p);
+
+            *p=qRgb(lut[r], lut[g], lut[b]);
+#if 0
+            double r=qRed(*p);
+            double g=qGreen(*p);
+            double b=qBlue(*p);
 
             // Contrast
-            double factor = (259.0 * (contrast + 255.0)) / (255.0 * (259.0 - contrast));
             r=(factor * (r - 128.0)) + 128.0;
             g=(factor * (g - 128.0)) + 128.0;
-            g=(factor * (b - 128.0)) + 128.0;
-
-            r=qBound(0.0, r, 255.0);
-            g=qBound(0.0, g, 255.0);
-            b=qBound(0.0, b, 255.0);
+            b=(factor * (b - 128.0)) + 128.0;
 
             // Brightness
             r+=r*brightness;
@@ -169,9 +179,8 @@ void CuteImageProvider::adjustContrastBrightness(double contrast, double brightn
             g=qBound(0.0, g, 255.0);
             b=qBound(0.0, b, 255.0);
 
-            p=qRgb(qRound(r),qRound(g),qRound(b));
-
-            m_modified.setPixel(x,y,p);
+            *p=qRgb(qRound(r),qRound(g),qRound(b));
+#endif
         }
     }
 
