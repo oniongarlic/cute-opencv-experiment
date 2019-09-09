@@ -28,7 +28,9 @@ public:
     Q_INVOKABLE void cropNormalized(QRectF rect);
     Q_INVOKABLE void crop(QRect &rect);
 
-    Q_INVOKABLE void adjustContrastBrightness(double contrast, double brightness);
+    Q_INVOKABLE void adjustContrastBrightness(double contrast, double brightness);        
+    Q_INVOKABLE void gamma(double gamma);
+    Q_INVOKABLE void gray();
 
     Q_INVOKABLE void rotate(double angle, bool smooth=true);
 
@@ -37,7 +39,6 @@ public:
     // QQuickImageProvider interface
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
 
-    Q_INVOKABLE void gray();
 signals:
     void imageChanged();
 

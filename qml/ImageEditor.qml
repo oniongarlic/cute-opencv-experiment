@@ -59,14 +59,21 @@ Page {
                 }
             }
             ToolButton {
-                text: "Gray"
+                text: "BW"
                 onClicked: {
                     imp.gray();
                     croppedImagePreview.updatePreview();
                 }
             }
             ToolButton {
-                text: "Mirror"
+                text: "Gam"
+                enabled: controlGamma.visible==false
+                onClicked: {
+                    controlGamma.visible=true
+                }
+            }
+            ToolButton {
+                text: "M"
                 enabled: controlMirror.visible==false
                 onClicked: {
                     controlMirror.visible=true;
@@ -94,12 +101,51 @@ Page {
         }
     }
 
+    Image {
+        id: croppedImagePreview
+        anchors.fill: parent
+        cache: false
+        fillMode: Image.PreserveAspectFit
+        source: ""
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+
+        function updatePreview() {
+            croppedImagePreview.source=""
+            croppedImagePreview.source="image://cute/preview"
+        }
+
+        // Contains the real image
+        Item {
+            id: pvr
+            x: parent.height==parent.paintedHeight ? parent.width/2-width/2 : 0
+            y: parent.width==parent.paintedWidth ? parent.height/2-height/2 : 0
+            width: parent.paintedWidth
+            height: parent.paintedHeight
+
+            CropControl {
+                id: controlCrop
+                visible: false
+                onDoubleClicked: {
+                    var r=mapNormalizedRect();
+                    imp.cropNormalized(r)
+                    imp.commit();
+                    croppedImagePreview.updatePreview();
+                    reset();
+                }
+            }
+        }
+    }
+
     ColumnLayout {
         id: imageEditorContainer
         anchors.fill: parent
+        Layout.alignment: Qt.AlignTop
 
         RowLayout {
             id: controlMirror
+            Layout.alignment: Qt.AlignTop
+            Layout.fillWidth: true
             visible: false
             Button {
                 text: "Cancel"
@@ -135,6 +181,7 @@ Page {
 
         RowLayout {
             id: controlBrightnessContrast
+            Layout.alignment: Qt.AlignTop
             visible: false
 
             function reset() {
@@ -149,32 +196,36 @@ Page {
                     controlBrightnessContrast.visible=false;
                 }
             }
-            Slider {
-                id: adjustBrightnessSlider
-                from: -1.0
-                stepSize: 0.01
-                to: 1.0
-                value: 0.0
-                live: false
-                onValueChanged: {
-                    imp.adjustContrastBrightness(adjustContrastSlider.value, value);
-                    croppedImagePreview.updatePreview();
+            ColumnLayout {
+                Layout.alignment: Qt.AlignTop
+                Slider {
+                    id: adjustBrightnessSlider
+                    from: -1.0
+                    stepSize: 0.01
+                    to: 1.0
+                    value: 0.0
+                    live: false
+                    onValueChanged: {
+                        imp.adjustContrastBrightness(adjustContrastSlider.value, value);
+                        croppedImagePreview.updatePreview();
+                    }
+                    Layout.fillWidth: true
                 }
-                Layout.fillWidth: true
-            }
-            Slider {
-                id: adjustContrastSlider
-                from: 0.0
-                value: 0.0
-                to: 100.0
-                stepSize: 0.01;
-                live: false
-                onValueChanged: {
-                    imp.adjustContrastBrightness(value, adjustBrightnessSlider.value);
-                    croppedImagePreview.updatePreview();
+                Slider {
+                    id: adjustContrastSlider
+                    from: 0.0
+                    value: 0.0
+                    to: 100.0
+                    stepSize: 0.01;
+                    live: false
+                    onValueChanged: {
+                        imp.adjustContrastBrightness(value, adjustBrightnessSlider.value);
+                        croppedImagePreview.updatePreview();
+                    }
+                    Layout.fillWidth: true
                 }
-                Layout.fillWidth: true
             }
+
             Button {
                 text: "OK"
                 onClicked: {
@@ -186,6 +237,7 @@ Page {
 
         RowLayout {
             id: controlRotate
+            Layout.alignment: Qt.AlignTop
             visible: false
             Button {
                 text: "Cancel"
@@ -218,37 +270,37 @@ Page {
             }
         }
 
-        Image {
-            id: croppedImagePreview
-            cache: false
-            fillMode: Image.PreserveAspectFit
-            source: ""
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-
-            function updatePreview() {
-                croppedImagePreview.source=""
-                croppedImagePreview.source="image://cute/preview"
+        RowLayout {
+            id: controlGamma
+            Layout.alignment: Qt.AlignTop
+            visible: false
+            Button {
+                text: "Cancel"
+                onClicked: {
+                    imp.reset()
+                    controlGamma.visible=false;
+                }
             }
 
-            // Contains the real image
-            Item {
-                id: pvr
-                x: parent.height==parent.paintedHeight ? parent.width/2-width/2 : 0
-                y: parent.width==parent.paintedWidth ? parent.height/2-height/2 : 0
-                width: parent.paintedWidth
-                height: parent.paintedHeight
+            Slider {
+                id: adjustGamma
+                from: 0.0
+                value: 1.0
+                to: 2.0
+                stepSize: 0.01;
+                live: false
+                onValueChanged: {
+                    imp.gamma(value)
+                    croppedImagePreview.updatePreview();
+                }
+                Layout.fillWidth: true
+            }
 
-                CropControl {
-                    id: controlCrop
-                    visible: false
-                    onDoubleClicked: {
-                        var r=mapNormalizedRect();
-                        imp.cropNormalized(r)
-                        imp.commit();
-                        croppedImagePreview.updatePreview();
-                        reset();
-                    }
+            Button {
+                text: "OK"
+                onClicked: {
+                    imp.commit();
+                    controlGamma.visible=false;
                 }
             }
         }

@@ -188,6 +188,35 @@ void CuteImageProvider::adjustContrastBrightness(double contrast, double brightn
     emit imageChanged();
 }
 
+void CuteImageProvider::gamma(double gamma)
+{
+    QMutexLocker lock(&mutex);
+    unsigned char lut[256];
+
+    prepareImage();
+
+    int width = m_modified.width();
+    int height = m_modified.height();
+
+    for( int i = 0; i < 256; ++i)
+        lut[i]=qRound(qBound(0.0, pow(i / 255.0, gamma) * 255.0, 255.0));
+
+    for (int y=0;y<height;y++) {
+        uchar *sl=m_modified.scanLine(y);
+        for (int x=0;x<width;x++) {
+            QRgb* p = reinterpret_cast<QRgb*>(sl+x*4);
+
+            int r=qRed(*p);
+            int g=qGreen(*p);
+            int b=qBlue(*p);
+
+            *p=qRgb(lut[r], lut[g], lut[b]);
+        }
+    }
+    lock.unlock();
+    emit imageChanged();
+}
+
 void CuteImageProvider::gray()
 {
     QMutexLocker lock(&mutex);
