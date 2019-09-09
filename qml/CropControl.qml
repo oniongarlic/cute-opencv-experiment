@@ -73,7 +73,8 @@ Item {
         anchors.horizontalCenter: cropRect.left
         anchors.verticalCenter: cropRect.top
         color: "#4c57d4e1"
-        opacity: 0.7
+        border.color: "#8c57d4e1"
+        border.width: 2
         width: dragMargin
         height: dragMargin
         radius: dragMargin/2
@@ -114,7 +115,8 @@ Item {
         anchors.horizontalCenter: cropRect.right
         anchors.verticalCenter: cropRect.bottom
         color: "#4c57d4e1"
-        opacity: 0.7
+        border.color: "#8c57d4e1"
+        border.width: 2
         width: dragMargin
         height: dragMargin
         radius: dragMargin/2

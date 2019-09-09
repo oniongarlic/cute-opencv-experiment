@@ -2,6 +2,8 @@
 
 #include <QDebug>
 
+#include <cmath>
+
 CuteImageProvider::CuteImageProvider(QObject *parent) :
     QObject (parent),
     QQuickImageProvider(QQuickImageProvider::Image)
@@ -199,7 +201,7 @@ void CuteImageProvider::gamma(double gamma)
     int height = m_modified.height();
 
     for( int i = 0; i < 256; ++i)
-        lut[i]=qRound(qBound(0.0, pow(i / 255.0, gamma) * 255.0, 255.0));
+        lut[i]=qRound(qBound(0.0, std::pow(i / 255.0, gamma) * 255.0, 255.0));
 
     for (int y=0;y<height;y++) {
         uchar *sl=m_modified.scanLine(y);

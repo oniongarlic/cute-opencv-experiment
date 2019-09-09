@@ -132,6 +132,7 @@ Page {
                     imp.commit();
                     croppedImagePreview.updatePreview();
                     reset();
+                    controlCrop.visible=false;
                 }
             }
         }
