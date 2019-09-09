@@ -40,6 +40,7 @@ Page {
                 text: "B/C"
                 enabled: controlBrightnessContrast.visible==false
                 onClicked: {
+                    controlBrightnessContrast.reset();
                     controlBrightnessContrast.visible=true
                 }
             }
@@ -135,6 +136,12 @@ Page {
         RowLayout {
             id: controlBrightnessContrast
             visible: false
+
+            function reset() {
+                adjustBrightnessSlider.value=0.0;
+                adjustContrastSlider.value=0.0;
+            }
+
             Button {
                 text: "Cancel"
                 onClicked: {
@@ -150,7 +157,7 @@ Page {
                 value: 0.0
                 live: false
                 onValueChanged: {
-                    imp.adjustContrastBrightness(adjustContrastSlider.value,value);
+                    imp.adjustContrastBrightness(adjustContrastSlider.value, value);
                     croppedImagePreview.updatePreview();
                 }
                 Layout.fillWidth: true
@@ -163,7 +170,7 @@ Page {
                 stepSize: 0.01;
                 live: false
                 onValueChanged: {
-                    imp.adjustContrastBrightness(value,adjustBrightnessSlider.value);
+                    imp.adjustContrastBrightness(value, adjustBrightnessSlider.value);
                     croppedImagePreview.updatePreview();
                 }
                 Layout.fillWidth: true
