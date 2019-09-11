@@ -39,7 +39,7 @@ public:
     // QQuickImageProvider interface
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
 
-signals:
+signals:    
     void imageChanged();
 
 private:

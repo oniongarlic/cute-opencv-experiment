@@ -8,12 +8,11 @@ CuteImageProvider::CuteImageProvider(QObject *parent) :
     QObject (parent),
     QQuickImageProvider(QQuickImageProvider::Image)
 {
-    qDebug() << "CuteImageProvider";
+
 }
 
 CuteImageProvider::~CuteImageProvider()
 {
-    qDebug() << "~CuteImageProvider";
     m_image=QImage();
     m_modified=QImage();
 }
@@ -53,12 +52,20 @@ bool CuteImageProvider::setImage(QVariant image)
     switch ((QMetaType::Type)image.type()) {
     case QMetaType::QUrl: {
         QUrl tmp=image.value<QUrl>();
+
         qDebug() << "QUrl" << tmp << tmp.path();
-        m_image.load(tmp.path());
+
+        if (tmp.scheme()=="" || tmp.scheme()=="file") { // File or absolute path
+            m_image.load(tmp.path());
+        //} else if (tmp.scheme()=="image") { // image provider
+        //    m_image.load(tmp.toString());
+        } else {
+            qDebug() << "Unhandled QUrl scheme" << tmp.scheme();
+        }
     }
         break;
     case QMetaType::QImage: {
-        QImage tmp=image.value<QImage>();
+        QImage tmp=image.value<QImage>();        
         m_image=tmp.rgbSwapped(); // XXX Why do we need this ?        
     }
         break;
@@ -200,7 +207,7 @@ void CuteImageProvider::gamma(double gamma)
     int width = m_modified.width();
     int height = m_modified.height();
 
-    for( int i = 0; i < 256; ++i)
+    for (int i=0;i<256;i++)
         lut[i]=qRound(qBound(0.0, std::pow(i / 255.0, gamma) * 255.0, 255.0));
 
     for (int y=0;y<height;y++) {
@@ -236,16 +243,9 @@ void CuteImageProvider::gray()
             *p=qRgb(g,g,g);
         }
     }
-}
 
-void CuteImageProvider::prepareImage()
-{
-    if (m_image.format()!=QImage::Format_RGB32)
-        m_modified=m_image.convertToFormat(QImage::Format_RGB32);
-    else {
-        m_modified=m_image;
-    }
-    m_modified.detach();
+    lock.unlock();
+    emit imageChanged();
 }
 
 void CuteImageProvider::rotate(double angle, bool smooth)
@@ -259,6 +259,9 @@ void CuteImageProvider::rotate(double angle, bool smooth)
     matrix.rotate(angle);
 
     m_modified = m_image.transformed(matrix, smooth ? Qt::SmoothTransformation : Qt::FastTransformation);
+
+    lock.unlock();
+    emit imageChanged();
 }
 
 bool CuteImageProvider::save(QString fileName)
@@ -269,6 +272,16 @@ bool CuteImageProvider::save(QString fileName)
         fileName.remove(0,7);
 
     return m_image.save(fileName);
+}
+
+void CuteImageProvider::prepareImage()
+{
+    if (m_image.format()!=QImage::Format_RGB32)
+        m_modified=m_image.convertToFormat(QImage::Format_RGB32);
+    else {
+        m_modified=m_image;
+    }
+    m_modified.detach();
 }
 
 QImage CuteImageProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)

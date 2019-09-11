@@ -23,7 +23,13 @@ Page {
     }
 
     Component.onCompleted: {
+        console.debug("*** onCompleted")
         croppedImagePreview.updatePreview();
+    }
+
+    Component.onDestruction: {
+        console.debug("*** onDestruction")
+        imp.clear();
     }
 
     header: ToolBar {
@@ -61,8 +67,7 @@ Page {
             ToolButton {
                 text: "BW"
                 onClicked: {
-                    imp.gray();
-                    croppedImagePreview.updatePreview();
+                    imp.gray();                    
                 }
             }
             ToolButton {
@@ -129,8 +134,7 @@ Page {
                 onDoubleClicked: {
                     var r=mapNormalizedRect();
                     imp.cropNormalized(r)
-                    imp.commit();
-                    croppedImagePreview.updatePreview();
+                    imp.commit();                    
                     reset();
                     controlCrop.visible=false;
                 }
@@ -157,8 +161,7 @@ Page {
             }
 
             function updateMirror() {
-                imp.mirror(flipHorizontal.checked, flipVertical.checked)
-                croppedImagePreview.updatePreview();
+                imp.mirror(flipHorizontal.checked, flipVertical.checked)                
             }
 
             Switch {
@@ -207,8 +210,7 @@ Page {
                     value: 0.0
                     live: false
                     onValueChanged: {
-                        imp.adjustContrastBrightness(adjustContrastSlider.value, value);
-                        croppedImagePreview.updatePreview();
+                        imp.adjustContrastBrightness(adjustContrastSlider.value, value);                        
                     }
                     Layout.fillWidth: true
                 }
@@ -220,8 +222,7 @@ Page {
                     stepSize: 0.01;
                     live: false
                     onValueChanged: {
-                        imp.adjustContrastBrightness(value, adjustBrightnessSlider.value);
-                        croppedImagePreview.updatePreview();
+                        imp.adjustContrastBrightness(value, adjustBrightnessSlider.value);                        
                     }
                     Layout.fillWidth: true
                 }
@@ -254,10 +255,9 @@ Page {
                 value: 0.0
                 to: 360.0
                 stepSize: 0.1;
-                live: false
+                live: true
                 onValueChanged: {
-                    imp.rotate(value)
-                    croppedImagePreview.updatePreview();
+                    imp.rotate(value, !pressed)
                 }
                 Layout.fillWidth: true
             }
@@ -291,8 +291,7 @@ Page {
                 stepSize: 0.01;
                 live: false
                 onValueChanged: {
-                    imp.gamma(value)
-                    croppedImagePreview.updatePreview();
+                    imp.gamma(value)                    
                 }
                 Layout.fillWidth: true
             }
