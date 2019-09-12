@@ -1,7 +1,7 @@
 #include "cuteimageprovider.h"
 
 #include <QDebug>
-
+#include <QFile>
 #include <cmath>
 
 CuteImageProvider::CuteImageProvider(QObject *parent) :
@@ -20,13 +20,21 @@ CuteImageProvider::~CuteImageProvider()
 bool CuteImageProvider::setImage(QString file)
 {
     QMutexLocker lock(&mutex);
+    bool r;
+
     if (file.startsWith("file://"))
         file.remove(0,7);
 
     qDebug() << "setImageQS" << file;
     m_modified=QImage();
 
-    return m_image.load(file);
+    r=m_image.load(file);
+
+    lock.unlock();
+    if (r)
+        emit imageLoaded();
+
+    return r;
 }
 
 bool CuteImageProvider::setImage(QImage &image)
@@ -136,6 +144,43 @@ void CuteImageProvider::crop(QRect &rect)
 {
     QMutexLocker lock(&mutex);
     m_modified=m_image.copy(rect);
+
+    lock.unlock();
+    emit imageChanged();
+}
+
+void CuteImageProvider::scale(QSize &size, bool aspect, bool smooth)
+{
+    QMutexLocker lock(&mutex);
+    m_modified=m_image.scaled(size.height(),
+                              size.width(),
+                              aspect ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio,
+                              smooth ? Qt::SmoothTransformation : Qt::FastTransformation);
+
+    lock.unlock();
+    emit imageChanged();
+}
+
+void CuteImageProvider::scale(int width, int height, bool aspect, bool smooth)
+{
+    QSize tmp(width, height);
+
+    scale(tmp, aspect, smooth);
+}
+
+void CuteImageProvider::scaleToHeight(int height, bool smooth)
+{
+    QMutexLocker lock(&mutex);
+    m_modified=m_image.scaledToHeight(height, smooth ? Qt::SmoothTransformation : Qt::FastTransformation);
+
+    lock.unlock();
+    emit imageChanged();
+}
+
+void CuteImageProvider::scaleToWidth(int width, bool smooth)
+{
+    QMutexLocker lock(&mutex);
+    m_modified=m_image.scaledToWidth(width, smooth ? Qt::SmoothTransformation : Qt::FastTransformation);
 
     lock.unlock();
     emit imageChanged();
@@ -264,14 +309,22 @@ void CuteImageProvider::rotate(double angle, bool smooth)
     emit imageChanged();
 }
 
-bool CuteImageProvider::save(QString fileName)
+bool CuteImageProvider::save(QString fileName, bool overwrite)
 {
     QMutexLocker lock(&mutex);
+    bool r;
 
     if (fileName.startsWith("file://"))
         fileName.remove(0,7);
 
-    return m_image.save(fileName);
+    if (QFile::exists(fileName) && !overwrite)
+        return false;
+
+    r=m_image.save(fileName);
+    if (r)
+        emit imageSaved();
+
+    return r;
 }
 
 void CuteImageProvider::prepareImage()

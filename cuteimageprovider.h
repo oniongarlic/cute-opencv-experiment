@@ -28,19 +28,27 @@ public:
     Q_INVOKABLE void cropNormalized(QRectF rect);
     Q_INVOKABLE void crop(QRect &rect);
 
+    Q_INVOKABLE void scale(QSize &size, bool aspect=true, bool smooth=true);
+    Q_INVOKABLE void scale(int width, int height, bool aspect=true, bool smooth=true);
+
+    Q_INVOKABLE void scaleToHeight(int height, bool smooth=true);
+    Q_INVOKABLE void scaleToWidth(int width, bool smooth=true);
+
     Q_INVOKABLE void adjustContrastBrightness(double contrast, double brightness);        
     Q_INVOKABLE void gamma(double gamma);
     Q_INVOKABLE void gray();
 
     Q_INVOKABLE void rotate(double angle, bool smooth=true);
 
-    Q_INVOKABLE bool save(QString fileName);
+    Q_INVOKABLE bool save(QString fileName, bool overwrite=true);
 
     // QQuickImageProvider interface
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
 
 signals:    
     void imageChanged();
+    void imageLoaded();
+    void imageSaved();
 
 private:
     void prepareImage();
