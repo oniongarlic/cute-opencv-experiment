@@ -327,6 +327,16 @@ bool CuteImageProvider::save(QString fileName, bool overwrite)
     return r;
 }
 
+int CuteImageProvider::getHeight() const
+{
+    return m_image.height();
+}
+
+int CuteImageProvider::getWidth() const
+{
+    return m_image.width();
+}
+
 void CuteImageProvider::prepareImage()
 {
     if (m_image.format()!=QImage::Format_RGB32)

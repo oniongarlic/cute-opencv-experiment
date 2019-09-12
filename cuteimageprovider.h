@@ -42,6 +42,9 @@ public:
 
     Q_INVOKABLE bool save(QString fileName, bool overwrite=true);
 
+    Q_INVOKABLE int getHeight() const;
+    Q_INVOKABLE int getWidth() const;
+
     // QQuickImageProvider interface
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize);
 

@@ -32,6 +32,58 @@ Page {
         imp.clear();
     }
 
+    Popup {
+        id: imageScale
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
+        ColumnLayout {
+            Label {
+                text: "Scale image"
+            }
+            TextInput {
+                id: scaleWidth
+                text: imp.getWidth()
+                inputMethodHints: Qt.ImhDigitsOnly
+                validator: IntValidator{bottom: 1; top: imp.getWidth();}
+            }
+            TextInput {
+                id: scaleHeight
+                text: imp.getHeight()
+                validator: IntValidator{bottom: 1; top: imp.getHeight();}
+            }
+            Switch {
+                id: imageScaleAspect
+                text: "Keep aspect ratio"
+                checked: true
+            }
+            Switch {
+                id: imageScaleSmooth
+                text: "Smooth scaling"
+                checked: true
+            }
+
+            RowLayout {
+                Button {
+                    text: "OK"
+                    enabled: scaleHeight.acceptableInput && scaleWidth.acceptableInput
+                    onClicked: {
+                        imp.scale(scaleWidth.text, scaleHeight.text, imageScaleAspect.checked, imageScaleSmooth.checked)
+                        imp.commit();
+                        imageScale.close();
+                    }
+                }
+                Button {
+                    text: "Cancel"
+                    onClicked: imageScale.close();
+
+                }
+            }
+        }
+    }
+
     header: ToolBar {
         RowLayout {
             anchors.fill: parent
@@ -64,6 +116,13 @@ Page {
                     controlCrop.reset();
                 }
             }
+            ToolButton {
+                text: "Sc"
+                onClicked: {
+                    imageScale.open();
+                }
+            }
+
             ToolButton {
                 text: "BW"
                 onClicked: {
