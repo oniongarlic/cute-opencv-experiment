@@ -172,7 +172,7 @@ bool OCVObjectColorDetector::processOpenCVFrame(Mat &frame)
     Size blr(4,4);
 
     if (frame.channels()<3) {
-        qDebug() << "Frame should have 3 or more channels.";
+        qDebug() << "Frame should have 3 or more channels, has " << frame.channels();
         return false;
     }
 

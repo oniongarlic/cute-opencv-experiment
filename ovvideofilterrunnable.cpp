@@ -34,7 +34,7 @@ QVideoFrame OvVideoFilterRunnable::run(QVideoFrame *input, const QVideoSurfaceFo
     }
 
     if (!once) {
-        qDebug() << "Frame format: " << input->pixelFormat() << surfaceFormat.frameRate();
+        qDebug() << "Frame format: " << input->pixelFormat() << " FPS: " << surfaceFormat.frameRate();
         once=true;
     }
 
@@ -314,9 +314,9 @@ bool OvVideoFilterRunnable::frameToImage(const QVideoFrame &input)
     }
     case QVideoFrame::Format_YUYV: {
         cv::Mat yuyv(h, w,CV_8UC2, (void*) input.bits());
-        cv::Mat rgb (h, w,CV_8UC3);
+        m_frame=cv::Mat(h, w,CV_8UC3);
 
-        cvtColor(yuyv, rgb, CV_YUV2BGR_YUYV);
+        cvtColor(yuyv, m_frame, CV_YUV2BGR_YUYV);
         return true;
     }
     case QVideoFrame::Format_UYVY:
