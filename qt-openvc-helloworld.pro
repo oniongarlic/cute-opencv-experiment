@@ -64,7 +64,7 @@ contains(ANDROID_TARGET_ARCH,arm64-v8a) {
         $$PWD/3rdparty/opencv-armv8/libopencv_dnn.so \
         $$PWD/3rdparty/opencv-armv8/libtbb.so
 
-    INCLUDEPATH = /opt/Android/opencv-4.1.1/build-armv8/install/sdk/native/jni/include
+    INCLUDEPATH = /opt/Android/opencv-4.5.1/android-armv8/native/jni/include
 
     LIBS += -L$$PWD/3rdparty/opencv-armv8/ -ltbb -lopencv_core -lopencv_imgproc -lopencv_dnn
 }
@@ -79,7 +79,7 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
         $$PWD/3rdparty/opencv-armv7/libopencv_dnn.so \
         $$PWD/3rdparty/opencv-armv7/libtbb.so
 
-    INCLUDEPATH = /opt/Android/opencv-4.1.1/build-armv7/install/sdk/native/jni/include
+    INCLUDEPATH = /opt/Android/opencv-4.5.1/android-armv7/native/jni/include
 
     # Order is important, linker in old droids (4.2) are dumb
     LIBS += -L$$PWD/3rdparty/opencv-armv7/ -ltbb -lopencv_core -lopencv_imgproc -lopencv_dnn
@@ -139,8 +139,16 @@ HEADERS += \
 
 DISTFILES += \
     android/AndroidManifest.xml \
+    android/AndroidManifest.xml \
+    android/build.gradle \
+    android/gradle.properties \
     android/gradle/wrapper/gradle-wrapper.jar \
+    android/gradle/wrapper/gradle-wrapper.jar \
+    android/gradle/wrapper/gradle-wrapper.properties \
     android/gradlew \
+    android/gradlew \
+    android/gradlew.bat \
+    android/res/values/libs.xml \
     android/res/values/libs.xml \
     android/build.gradle \
     android/gradle/wrapper/gradle-wrapper.properties \

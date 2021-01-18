@@ -13,6 +13,19 @@
 
 #ifdef Q_OS_ANDROID
 #include "androidhelper.h"
+#include <QtAndroidExtras/QtAndroid>
+
+const QVector<QString> required_permissions(
+{
+            "android.permission.ACCESS_COARSE_LOCATION",
+            "android.permission.ACCESS_FINE_LOCATION",
+            "android.permission.CAMERA",
+            "android.permission.INTERNET",
+            "android.permission.ACCESS_NETWORK_STATE",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.READ_EXTERNAL_STORAGE"
+});
+static QVariantMap checked_permissions;
 #endif
 
 int main(int argc, char *argv[])
@@ -22,7 +35,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     CuteImageProvider *cuteprovider=new CuteImageProvider(&app);
 
-    app.setApplicationName("QtOpenCVHelloWorld");
+    app.setApplicationName("CuteOpenCVHelloWorld");
     app.setOrganizationDomain("tal.org");
 
     QString image_path;
@@ -34,6 +47,25 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_ANDROID
     AndroidHelper android;
     engine.rootContext()->setContextProperty("android", &android);
+
+    for (const QString &permission : required_permissions) {
+        auto result = QtAndroid::checkPermission(permission);
+
+        qDebug() << "AndroidPermissionCheck" << permission << (result==QtAndroid::PermissionResult::Granted ? "Granted" : "Denied");
+
+        if (result == QtAndroid::PermissionResult::Denied) {
+            auto resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
+            if (resultHash[permission] == QtAndroid::PermissionResult::Denied) {
+                checked_permissions.insert(permission, false);
+            } else {
+                checked_permissions.insert(permission, true);
+            }
+        } else {
+            checked_permissions.insert(permission, true);
+        }
+    }
+    qDebug() << "Android permissions" << checked_permissions;
+    engine.rootContext()->setContextProperty("permissions", checked_permissions);
 
     qDebug() << "External storage is" << android.getExternalStorage();
 

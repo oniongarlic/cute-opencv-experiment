@@ -267,6 +267,7 @@ bool OvVideoFilterRunnable::frameToImage(const QVideoFrame &input)
         cvtColor(m_frame, m_frame, CV_RGB2BGR555, 3);
         return true;
     }
+    case QVideoFrame::Format_ABGR32:
     case QVideoFrame::Format_BGR32: { // 0xBBGGRRff
 #if 0
         m_result = QImage(input.width(), input.height(), QImage::Format_ARGB32);
