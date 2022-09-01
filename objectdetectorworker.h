@@ -36,6 +36,7 @@ signals:
     void modelLoaded();    
 
 public slots:
+    void setSize(int width, int height);
     void loadModel(const QString config, const QString model);
     void processOpenCVFrame();
     bool setFrame(cv::Mat &frame);    

@@ -19,6 +19,12 @@ ObjectDetectorWorker::ObjectDetectorWorker(QObject *parent) :
 
 }
 
+void ObjectDetectorWorker::setSize(int width, int height)
+{
+    m_width=width;
+    m_height=height;
+}
+
 void ObjectDetectorWorker::loadModel(const QString config, const QString model)
 {
     m_config=config;
@@ -59,6 +65,8 @@ void ObjectDetectorWorker::loadModel(const QString config, const QString model)
 
             // From files
             m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
+            if (m_net.empty())
+                throw std::invalid_argument("Net is empty");
         }
 
         //m_net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
@@ -121,7 +129,7 @@ void ObjectDetectorWorker::processOpenCVFrame()
 
     emit detectionStarted();
 
-    qDebug() << "Starting processing in thread, required confidece " << m_confidence;
+    qDebug() << "Starting processing in thread, required confidence " << m_confidence;
 
     QElapsedTimer timer;
     timer.start();
@@ -146,6 +154,7 @@ void ObjectDetectorWorker::processOpenCVFrame()
     std::string outLayerType = m_net.getLayer(outLayers[0])->type;
 
     bool found=false;
+    int outside=0;
 
     for (size_t i = 0; i < outs.size(); ++i) {
         // Network produces output blob with a shape NxC where N is a number of
@@ -159,8 +168,10 @@ void ObjectDetectorWorker::processOpenCVFrame()
 
             minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
 
-            if (confidence < m_confidence)
+            if (confidence < m_confidence) {
+                outside++;
                 continue;
+            }
 
             found=true;
             QPointF center;
@@ -191,7 +202,7 @@ void ObjectDetectorWorker::processOpenCVFrame()
     }
 
     m_frametime=timer.elapsed()/1000.0;
-    qDebug() << "Detection done in " << m_frametime << "s";
+    qDebug() << "Detection done in " << m_frametime << "s" << "Outside confidence" << outside;
 
     if (!found)
         emit noObjectDetected();

@@ -14,39 +14,25 @@ SOURCES += \
 
 RESOURCES += qml.qrc
 
-DEFINES += YOLOV2CUSTOM
-# DEFINES += YOLOV2
-# DEFINES += YOLOV3
-# DEFINES += YOLOV3TINY
-
-RESOURCES += yolo.qrc
-#RESOURCES += yolo-v2.qrc
-#RESOURCES += yolo-v3.qrc
-#RESOURCES += yolo-v3-tiny.qrc
+DEFINES += YOLO_CUSTOM
+# DEFINES += YOLO_OLD
+# RESOURCES += yolo.qrc
 
 unix:!qnx:!android {
     CONFIG +=link_pkgconfig
     packagesExist(opencv4) {
         PKGCONFIG += opencv4
     }
-contains(DEFINES,YOLOV2CUSTOM) {
-    DEFINES+= YOLO_WEIGHTS=\\\"/opt/yolo/yolov2-custom.weights\\\"
-    DEFINES+= YOLO_CFG=\\\":///yolo/obj-detect.cfg\\\"
-    DEFINES+= YOLO_NAMES=\\\":///yolo/obj.names\\\"
-}
-
-contains(DEFINES,YOLOV3) {
-    DEFINES+= YOLO_WEIGHTS=\\\"/opt/yolo/yolov3.weights\\\"
-    DEFINES+= YOLO_CFG=\\\":///yolo3/yolov3.cfg\\\"
-    DEFINES+= YOLO_NAMES=\\\":///yolo3/coco.names\\\"
-}
-
-contains(DEFINES,YOLOV3TINY) {
-    DEFINES+= YOLO_WEIGHTS=\\\"/opt/yolo/yolov3-tiny.weights\\\"
-    DEFINES+= YOLO_CFG=\\\":///yolo3tiny/yolov3-tiny.cfg\\\"
-    DEFINES+= YOLO_NAMES=\\\":///yolo3tiny/coco.names\\\"
-}
-
+    contains(DEFINES,YOLO_CUSTOM) {
+        DEFINES+= YOLO_WEIGHTS=\\\"/data/AI/tk/tk320_last.weights\\\"
+        DEFINES+= YOLO_CFG=\\\"/data/AI//tk/tk320test.cfg\\\"
+        DEFINES+= YOLO_NAMES=\\\"/data/AI/tk//tk.names\\\"
+    }
+    contains(DEFINES,YOLO_OLD) {
+        DEFINES+= YOLO_WEIGHTS=\\\"/data/repos/yolo-data/yolo/obj_last.weights\\\"
+        DEFINES+= YOLO_CFG=\\\"/data/repos/yolo-data/yolo/obj-detect.cfg\\\"
+        DEFINES+= YOLO_NAMES=\\\"/data/repos/yolo-data/yolo/obj.names\\\"
+    }
 }
 
 # Android extras
@@ -88,30 +74,10 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 
 android {
 
-contains(DEFINES,YOLOV2CUSTOM) {
+contains(DEFINES,YOLO_CUSTOM) {
     DEFINES+= YOLO_WEIGHTS=\\\"/yolov2-custom/yolov2-custom.weights\\\"
-    #DEFINES+= YOLO_CFG=\\\":///yolo/obj-detect.cfg\\\"
-    #DEFINES+= YOLO_NAMES=\\\":///yolo/obj.names\\\"
     DEFINES+= YOLO_CFG=\\\"/yolov2-custom/obj-detect.cfg\\\"
     DEFINES+= YOLO_NAMES=\\\"/yolov2-custom/obj.names\\\"
-}
-
-contains(DEFINES,YOLOV2) {
-    DEFINES+= YOLO_WEIGHTS=\\\"assets:/yolov2.weights\\\"
-    DEFINES+= YOLO_CFG=\\\":///yolo2/yolo.cfg\\\"
-    DEFINES+= YOLO_NAMES=\\\":///yolo2/obj.names\\\"
-}
-
-contains(DEFINES,YOLOV3) {
-    DEFINES+= YOLO_WEIGHTS=\\\"assets:/yolov3.weights\\\"
-    DEFINES+= YOLO_CFG=\\\":///yolo3/yolov3.cfg\\\"
-    DEFINES+= YOLO_NAMES=\\\":///yolo3/coco.names\\\"
-}
-
-contains(DEFINES,YOLOV3TINY) {
-    DEFINES+= YOLO_WEIGHTS=\\\"assets:/yolov3-tiny.weights\\\"
-    DEFINES+= YOLO_CFG=\\\":///yolo3/yolov3-tiny.cfg\\\"
-    DEFINES+= YOLO_NAMES=\\\":///yolo3/coco.names\\\"
 }
 
 }

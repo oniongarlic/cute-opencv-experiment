@@ -41,8 +41,6 @@ ApplicationWindow {
         }
     }
 
-
-
     function processImageFile(file) {
         previewImage.source=file
         previewImage.visible=true;
@@ -87,8 +85,9 @@ ApplicationWindow {
         config: dnnConfig
         model: dnnWeights
         classes: dnnClasses
-
-        confidence: 0.60
+        width: 320
+        height: 320
+        confidence: 0.50
 
         Component.onCompleted: {
             loadClasses();
@@ -127,7 +126,8 @@ ApplicationWindow {
                 detectedItemsList.currentIndex=0;
             } else {
                 detectedItemsList.currentIndex=-1;
-                messageDialog.show("Nothing found", "No objects where detected")
+                //messageDialog.show("Nothing found", "No objects where detected")
+                console.debug("No objects where detected")
             }
         }
 
@@ -444,7 +444,7 @@ ApplicationWindow {
                     Component {
                         id: fileDelegate
                         Item {
-                            width: parent.width
+                            width: ListView.view.width
                             height: r.height
                             Row {
                                 id: r

@@ -11,8 +11,8 @@ ObjectDetector::ObjectDetector(QObject *parent) :
     CuteOpenCVBase(parent),    
     m_confidence(0.75),
     m_darknet_scale(0.00392),
-    m_width(480),
-    m_height(480),
+    m_width(32),
+    m_height(320),
     m_crop(false)
 {
     m_scaledown=false;
@@ -88,6 +88,7 @@ void ObjectDetector::workerDetectionEnded()
 bool ObjectDetector::startWorkerThread()
 {
     w=new ObjectDetectorWorker();
+    w->setSize(m_width, m_height);
     w->loadModel(m_config, m_model);
     w->moveToThread(&m_thread);
     connect(&m_thread, &QThread::finished, w, &QObject::deleteLater);

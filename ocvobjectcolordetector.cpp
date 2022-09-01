@@ -15,6 +15,11 @@ void cv::error(int _code, const std::string& _err, const char* _func, const char
 }
 #endif
 
+static bool sortbysec(const std::pair<int,int> &a, const std::pair<int,int> &b)
+{
+    return (a.second > b.second);
+}
+
 OCVObjectColorDetector::OCVObjectColorDetector(QObject *parent) :
     CuteOpenCVBase(parent),
     m_tolerance(20.0),
@@ -182,39 +187,55 @@ bool OCVObjectColorDetector::processOpenCVFrame(Mat &frame)
         cvtColor(frame, frame, CV_BGRA2BGR);
     }
 #endif
-
     calculateRoi(frame, roi, 0, 0);
     rc=frame(roi);
 
-    Scalar bgrm;
+    //blur(rc,rc,Size(8,8));
+    //equalizeIntensity(rc);
 
-    if (m_avg) {
-        calculateRoi(frame, roiL, -m_br, 0);
-        calculateRoi(frame, roiR, m_br, 0);
-        calculateRoi(frame, roiU, 0, -m_br);
-        calculateRoi(frame, roiD, 0, m_br);
+    Mat sdata;
+    rc.convertTo(sdata, CV_32F);
+    sdata = sdata.reshape(1, sdata.total());
 
-        rl=frame(roiL);
-        rr=frame(roiR);
-        rd=frame(roiD);
-        ru=frame(roiU);
-#ifdef ROI_BLUR
-        blur(rc, rc, blr);
-        blur(rl, rl, blr);
-        blur(rr, rr, blr);
-        blur(rd, rd, blr);
-        blur(ru, ru, blr);
-#endif
-        // Average, double weight center of image
-        Scalar tmp=mean(rc)+mean(rc)+mean(rr)+mean(rl)+mean(ru)+mean(rd);
-        Scalar mtmp(tmp[0]/6, tmp[1]/6, tmp[2]/6);
-        bgrm=mtmp;
-    } else {
-#ifdef ROI_BLUR
-        blur(rc, rc, blr);
-#endif
-        bgrm=mean(rc);
+    int k=8,indx=0,id;
+    Mat labels, centers;
+    kmeans(sdata, 8, labels, TermCriteria(TermCriteria::MAX_ITER | TermCriteria::EPS, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
+
+    // Count the clusters
+    std::vector<int> clusters(k,0);
+    for (int i = 0; i < labels.rows; i++) {
+        id=labels.at<int>(i,0);
+        clusters[id]++;
     }
+
+    // Make index - count top list
+    std::vector<std::pair<int,int>>top;
+    for (size_t r=0;r<clusters.size();r++) {
+        top.push_back(std::make_pair(r, clusters[r]));
+    }
+    std::sort(top.begin(), top.end(), sortbysec);
+
+    indx=top[0].first;
+#if 0
+    for (int r=0;r<3;r++) {
+        float cr,cg,cb;
+        int dx=top[r].first;
+
+        cr=centers.at<float>(dx, 0);
+        cg=centers.at<float>(dx, 1);
+        cb=centers.at<float>(dx, 2);
+
+        // printNearestColor(ic, cr, cg, cb);
+    }
+#endif
+
+    float cr,cg,cb;
+
+    cr=centers.at<float>(indx, 0);
+    cg=centers.at<float>(indx, 1);
+    cb=centers.at<float>(indx, 2);
+
+    Scalar bgrm(cr,cg,cb);
 
     // Convert to Lab color for easy comparission
     Mat ctmp(Size(1,1), CV_8UC3, bgrm);
