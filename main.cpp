@@ -4,12 +4,18 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include "ovvideofilter.h"
+#else
+#include "ovvideofiltersink.h"
+#endif
 
 #include "ocvobjectcolordetector.h"
 #include "objectdetector.h"
 
 #include "cuteimageprovider.h"
+
+#include "decklinksink.h"
 
 #ifdef Q_OS_ANDROID
 #include "androidhelper.h"
@@ -29,11 +35,10 @@ static QVariantMap checked_permissions;
 #endif
 
 int main(int argc, char *argv[])
-{
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+{    
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
-    CuteImageProvider *cuteprovider=new CuteImageProvider(&app);
+    CuteImageProvider *cuteprovider=new CuteImageProvider(&app);    
 
     app.setApplicationName("CuteOpenCVHelloWorld");
     app.setOrganizationDomain("tal.org");
@@ -79,7 +84,7 @@ int main(int argc, char *argv[])
     dnn_config=YOLO_CFG;
     dnn_classes=YOLO_NAMES;
     dnn_model=YOLO_WEIGHTS;
-#endif       
+#endif
 
     image_path=QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
 
@@ -89,7 +94,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("dnnWeights", dnn_model);
     engine.rootContext()->setContextProperty("dnnClasses", dnn_classes);
 
-    engine.rootContext()->setContextProperty("imagePath", image_path);
+    engine.rootContext()->setContextProperty("imagePath", image_path);    
 
     engine.rootContext()->setContextProperty("imp", cuteprovider); // ImageManipulatorProvider (?)
 
@@ -97,7 +102,13 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<OCVObjectColorDetector>("org.tal", 1,0, "ColorDetector");
     qmlRegisterType<ObjectDetector>("org.tal", 1,0, "ObjectDetector");
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     qmlRegisterType<OvVideoFilter>("org.tal", 1,0, "OpenCVVideoFilter");
+#else
+    qmlRegisterType<OvVideoFilterSink>("org.tal", 1,0, "OpenCVVideoFilter");
+#endif
+
+    qmlRegisterType<Decklinksink>("org.tal.decklink", 1,0, "DeckLinkSink");
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
     if (engine.rootObjects().isEmpty())

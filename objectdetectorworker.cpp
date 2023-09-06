@@ -7,12 +7,14 @@
 
 ObjectDetectorWorker::ObjectDetectorWorker(QObject *parent) :
     QObject(parent),
-    m_mutex(QMutex::NonRecursive),
-    m_darknet_scale(0.00392),
+    m_mutex(),
+    m_darknet_scale(1.0/255.0),
     m_width(480),
     m_height(480),
     m_confidence(0.75),
-    m_crop(false),    
+    m_crop(false),
+    m_scale(true),
+    m_nms(true),
     m_processing(false),
     m_colordetector(parent)
 {
@@ -51,7 +53,7 @@ void ObjectDetectorWorker::loadModel(const QString config, const QString model)
             if (config.open(QIODevice::ReadOnly)==false)
                 throw std::invalid_argument("Invalid model configuration");
 
-            const QByteArray cdata=config.readAll();           
+            const QByteArray cdata=config.readAll();
 
             QFile model(m_model);
             if (model.open(QIODevice::ReadOnly)==false)
@@ -89,15 +91,16 @@ std::vector<cv::String> ObjectDetectorWorker::getOutputsNames(const cv::dnn::Net
         std::vector<int> outLayers = net.getUnconnectedOutLayers();
         std::vector<cv::String> layersNames = net.getLayerNames();
         names.resize(outLayers.size());
-        for (size_t i = 0; i < outLayers.size(); ++i)
+        for (size_t i = 0; i < outLayers.size(); ++i) {
             names[i] = layersNames[outLayers[i] - 1];
+        }
     }
     return names;
 }
 
 void ObjectDetectorWorker::processOpenCVFrame()
 {
-    cv::Mat blob, f;
+    cv::Mat blob, f, frame;
 
     QMutexLocker locker(&m_mutex);
 
@@ -112,21 +115,19 @@ void ObjectDetectorWorker::processOpenCVFrame()
         return;
     }
 
-    m_processing=true;
-    const cv::Mat frame=m_frame;
-
-    if (frame.empty()) {
+    if (m_frame.empty()) {
         qWarning() << "Empty frame";
         emit error(3);
         return;
     }
 
-    if (frame.channels()!=3) {
+    if (m_frame.channels()!=3) {
         qWarning() << "Image must have 3 channels, got " << frame.channels();
         emit error(4);
         return;
     }
 
+    m_processing=true;
     emit detectionStarted();
 
     qDebug() << "Starting processing in thread, required confidence " << m_confidence;
@@ -134,71 +135,157 @@ void ObjectDetectorWorker::processOpenCVFrame()
     QElapsedTimer timer;
     timer.start();
 
-    cv::dnn::blobFromImage(frame, blob, m_darknet_scale, cv::Size(m_width, m_height), cv::Scalar(), true, m_crop);
+    if (m_scale && m_width!=m_frame.rows && m_height!=m_frame.cols) {
+        qDebug() << "Scaling frame to match network size from " << m_frame.rows << m_frame.cols;
+        cv::Size netsize(m_width, m_height);
+        cv::resize(m_frame, frame, netsize, cv::INTER_NEAREST);
+        qDebug() << "resize" << timer.elapsed()/1000.0 << "s";
+    } else {
+        qDebug() << "Using frame as-is: " << m_frame.rows << m_frame.cols;
+        frame=m_frame;
+    }
+
+    qDebug() << "Final frame size: " << frame.rows << frame.cols;
+
+    cv::dnn::blobFromImage(frame, blob, m_darknet_scale, cv::Size(m_width, m_height), cv::Scalar(), true, false);
     qDebug() << "blobFromImage" << timer.elapsed()/1000.0 << "s";
 
     m_net.setInput(blob);
     std::vector<cv::Mat> outs;
+    std::vector<std::vector<cv::Mat>> outs2;
 
     try {
         const cv::String a;
-        m_net.forward(outs, getOutputsNames(m_net));
+        m_net.forward(outs2, getOutputsNames(m_net));
     } catch (const std::exception& e) {
-        qWarning() << e.what();
+        qWarning() << "OpenCV DNN failed: " << e.what();
         return;
     }
 
-    qDebug() << "Frame processed in " << timer.elapsed()/1000.0 << "s";
+    qDebug() << "Network processed in " << timer.elapsed()/1000.0 << "s" << outs2.size();
 
     std::vector<int> outLayers = m_net.getUnconnectedOutLayers();
     std::string outLayerType = m_net.getLayer(outLayers[0])->type;
 
+    std::vector<float> confidences;
+    std::vector<int> classes;
+    std::vector<cv::Rect2d> boxes;
+    std::vector<cv::Point2f> centers;
+
     bool found=false;
     int outside=0;
 
-    for (size_t i = 0; i < outs.size(); ++i) {
+    // Loop over the yolo layer vectors, 3 for yolov7
+
+    for (size_t i = 0; i < outs2.size(); i++) {
         // Network produces output blob with a shape NxC where N is a number of
         // detected objects and C is a number of classes + 4 where the first 4
         // numbers are [center_x, center_y, width, height]
-        float* data = (float*)outs[i].data;
-        for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols) {
-            cv::Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
+
+        // Get the output matrix for current layer
+        cv::Mat & output = outs2[i][0];
+        int nclasses=output.cols-5;
+
+        qDebug() << "Classes" << nclasses;
+
+        for (int j=0; j<output.rows; j++) {
+            cv::Mat scores = output.row(j).colRange(5, output.cols);
             cv::Point classIdPoint;
             double confidence;
 
-            minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
+            const float * const data = output.ptr<float>(j);
 
+            // Skip if
+            if (data[4]<0.01f) {
+                continue;
+            }
+
+            minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
+            // qDebug() << "cv::minMaxLoc" << i << j << confidence << scores.depth() << scores.channels();
+
+            // Skip if outside confidence
             if (confidence < m_confidence) {
                 outside++;
                 continue;
             }
 
             found=true;
-            QPointF center;
-            QRectF relative;
             int id=classIdPoint.x;
 
             float cxf=data[0];
             float cyf=data[1];
             float wf=data[2];
             float hf=data[3];
+            float ob=data[4];
 
-            center.setX(cxf);
-            center.setY(cyf);
+            cv::Rect2d r(cxf-wf/2.0f,cyf-hf/2.0f,wf,hf);
 
-            relative.setRect(center.x()-wf/2.0, center.y()-hf/2.0, wf, hf);
+            const cv::Point2f c(cxf, cyf);
 
-            QString rgb;
-            QString color;
+            boxes.push_back(r);
+            centers.push_back(c);
+            classes.push_back(id);
+            confidences.push_back(confidence);
 
-            m_colordetector.setROI(cxf, cyf);
-            if (m_colordetector.processOpenCVFrame(m_frame)==true) {
-                rgb=m_colordetector.getColorRGB();
-                color=m_colordetector.getColorGroup();
+            if (!m_nms) {
+                QPointF center;
+                QRectF relative;
+                QString rgb;
+                QString color;
+
+                center.setX(cxf);
+                center.setY(cyf);
+
+                relative.setRect(center.x()-wf/2.0, center.y()-hf/2.0, wf, hf);
+
+                m_colordetector.setROI(cxf, cyf);
+                if (m_colordetector.processOpenCVFrame(m_frame)==true) {
+                    rgb=m_colordetector.getColorRGB();
+                    color=m_colordetector.getColorGroup();
+                }
+
+                emit objectDetected(id, confidence, center, relative, rgb, color);
             }
-
-            emit objectDetected(id, confidence, center, relative, rgb, color);
         }
+    }
+
+    qDebug() << "Result processed in " << timer.elapsed()/1000.0;
+
+    std::vector<int> indices;
+    cv::dnn::NMSBoxes(boxes, confidences, 0.0, 0.4, indices);
+    qDebug() << "indices" << indices.size();
+
+    for (const auto & ind : indices) {
+        QPointF center;
+        QRectF relative;
+        QString rgb;
+        QString color;
+
+        float cxf=centers[ind].x;
+        float cyf=centers[ind].y;
+
+        float x,y,w,h;
+
+        x=boxes[ind].x;
+        y=boxes[ind].y;
+        w=boxes[ind].width;
+        h=boxes[ind].height;
+
+        center.setX(cxf);
+        center.setY(cyf);
+
+        relative.setRect(qBound(0.0f, x, 1.0f),
+                         qBound(0.0f, y, 1.0f),
+                         qBound(0.0f, w, 1.0f),
+                         qBound(0.0f, h, 1.0f));
+
+        m_colordetector.setROI(cxf, cyf);
+        if (m_colordetector.processOpenCVFrame(m_frame)==true) {
+            rgb=m_colordetector.getColorRGB();
+            color=m_colordetector.getColorGroup();
+        }
+
+        emit objectDetected(classes[ind], confidences[ind], center, relative, rgb, color);
     }
 
     m_frametime=timer.elapsed()/1000.0;
@@ -207,7 +294,7 @@ void ObjectDetectorWorker::processOpenCVFrame()
     if (!found)
         emit noObjectDetected();
 
-    emit detectionEnded();  
+    emit detectionEnded();
 
     m_processing=false;
 }

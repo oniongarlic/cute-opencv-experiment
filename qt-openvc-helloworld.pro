@@ -3,14 +3,22 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     cuteimageprovider.cpp \
+    decklinksink.cpp \
     main.cpp \
     ocvobjectcolordetector.cpp \
     objectdetector.cpp \
     cuteopencv.cpp \
     cuteopencvbase.cpp \
-    objectdetectorworker.cpp \
-    ovvideofilter.cpp \
-    ovvideofilterrunnable.cpp
+    objectdetectorworker.cpp
+
+HEADERS += \
+    cuteimageprovider.h \
+    decklinksink.h \
+    ocvobjectcolordetector.h \
+    objectdetector.h \
+    cuteopencv.h \
+    cuteopencvbase.h \
+    objectdetectorworker.h
 
 RESOURCES += qml.qrc
 
@@ -18,21 +26,37 @@ DEFINES += YOLO_CUSTOM
 # DEFINES += YOLO_OLD
 # RESOURCES += yolo.qrc
 
+DECKLINK_SDK_PATH=/opt/decklink/include
+
+lessThan(QT_VERSION, 6.2) {
+    HEADERS += ovvideofilter.h ovvideofilterrunnable.h
+    SOURCES += ovvideofilter.cpp ovvideofilterrunnable.cpp
+}
+greaterThan(QT_VERSION, 6.1) {
+    QT += concurrent
+    HEADERS += ovvideofiltersink.h
+    SOURCES += ovvideofiltersink.cpp
+}
+
 unix:!qnx:!android {
     CONFIG +=link_pkgconfig
     packagesExist(opencv4) {
         PKGCONFIG += opencv4
     }
     contains(DEFINES,YOLO_CUSTOM) {
-        DEFINES+= YOLO_WEIGHTS=\\\"/data/AI/tk/tk320_last.weights\\\"
-        DEFINES+= YOLO_CFG=\\\"/data/AI//tk/tk320test.cfg\\\"
-        DEFINES+= YOLO_NAMES=\\\"/data/AI/tk//tk.names\\\"
+        DEFINES+= YOLO_WEIGHTS=\\\"/data/AI/rw/tk_final_416.weights\\\"
+        DEFINES+= YOLO_CFG=\\\"/data/AI//rw/tk-416.cfg\\\"
+        DEFINES+= YOLO_NAMES=\\\"/data/AI/rw/tk.names\\\"
     }
     contains(DEFINES,YOLO_OLD) {
-        DEFINES+= YOLO_WEIGHTS=\\\"/data/repos/yolo-data/yolo/obj_last.weights\\\"
-        DEFINES+= YOLO_CFG=\\\"/data/repos/yolo-data/yolo/obj-detect.cfg\\\"
-        DEFINES+= YOLO_NAMES=\\\"/data/repos/yolo-data/yolo/obj.names\\\"
+        DEFINES+= YOLO_WEIGHTS=\\\"/data/repos/yolo-data/yolov3/obj_last.weights\\\"
+        DEFINES+= YOLO_CFG=\\\"/data/repos/yolo-data/yolov3/obj-detect.cfg\\\"
+        DEFINES+= YOLO_NAMES=\\\"/data/repos/yolo-data/yolov3/obj.names\\\"
     }
+
+    INCLUDEPATH += $$DECKLINK_SDK_PATH
+    SOURCES += $${DECKLINK_SDK_PATH}/DeckLinkAPIDispatch.cpp
+    LIBS += -ldl
 }
 
 # Android extras
@@ -93,15 +117,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-HEADERS += \
-    cuteimageprovider.h \
-    ocvobjectcolordetector.h \
-    objectdetector.h \
-    cuteopencv.h \
-    cuteopencvbase.h \
-    objectdetectorworker.h \
-    ovvideofilter.h \
-    ovvideofilterrunnable.h
+
 
 DISTFILES += \
     android/AndroidManifest.xml \

@@ -3,9 +3,9 @@
 #include <QDebug>
 #include <QFile>
 #include <cmath>
+#include <QTransform>
 
-CuteImageProvider::CuteImageProvider(QObject *parent) :
-    QObject (parent),
+CuteImageProvider::CuteImageProvider(QObject *parent) :    
     QQuickImageProvider(QQuickImageProvider::Image)
 {
 
@@ -299,7 +299,7 @@ void CuteImageProvider::rotate(double angle, bool smooth)
 
     QPoint center = m_image.rect().center();
 
-    QMatrix matrix;
+    QTransform matrix;
     matrix.translate(center.x(), center.y());
     matrix.rotate(angle);
 

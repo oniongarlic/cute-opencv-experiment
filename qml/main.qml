@@ -1,13 +1,14 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Dialogs 1.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Dialogs
 
-import QtMultimedia 5.12
+import QtMultimedia
 
-import Qt.labs.folderlistmodel 2.12
+import Qt.labs.folderlistmodel
 
-import org.tal 1.0
+import org.tal
+import org.tal.decklink
 
 ApplicationWindow {
     id: root
@@ -52,6 +53,7 @@ ApplicationWindow {
         console.debug(it)
 
         imp.setImage(it);
+        dls.displayImage(it)
     }
 
     ImageGallerySelector {
@@ -85,8 +87,8 @@ ApplicationWindow {
         config: dnnConfig
         model: dnnWeights
         classes: dnnClasses
-        width: 320
-        height: 320
+        width: 416
+        height: 416
         confidence: 0.50
 
         Component.onCompleted: {
@@ -137,50 +139,34 @@ ApplicationWindow {
         }
     }
 
+    MediaDevices {
+        id: mediaDevices
+    }
+
+    CaptureSession {
+        id: videoCaptureSession
+        camera: camera
+        videoOutput: vc
+    }
+
     Camera {
         id: camera
-        //deviceId: "/dev/video0" // XXX
-        captureMode: Camera.CaptureStillImage;
-        onErrorStringChanged: console.debug("Error: "+errorString)
-        onCameraStateChanged: {
-            console.debug("State: "+cameraState)
-        }
-        onCameraStatusChanged: console.debug("Status: "+cameraStatus)
-
-        focus {
-            focusMode: Camera.FocusContinuous
-            focusPointMode: Camera.FocusPointCenter
-        }
-
-        metaData.subject: "QtOpenCVHelloWorld"
-
-        imageCapture {
-            onImageCaptured: {
-                console.debug(preview)
-                console.debug(camera.imageCapture.capturedImagePath)
-                previewImage.source=preview;
-                previewImage.visible=true;
-                camera.stop();
-            }
-            onCaptureFailed: {
-                console.debug("Capture failed")
-            }
-            onImageSaved: {
-                console.debug("Image saved: "+path)
-                //cd.processImageFile(path);
-                od.processImageFile(path);
-            }
-        }
-
-        flash.mode: Camera.FlashAuto
-
+        cameraDevice: mediaDevices.defaultVideoInput
+        onErrorOccurred: console.debug("CameraError: "+errorString)
+        onActiveChanged: console.debug("CameraActive:"+active)
         Component.onCompleted: {
 
         }
     }
 
+    DeckLinkSink {
+        id: dls
+        videoSink: vc.videoSink
+    }
+
     OpenCVVideoFilter {
         id: cvfilter
+        videoSink: vc.videoSink
 
         onColorFound: {
             console.debug(cgroup+":"+cname)
@@ -195,8 +181,7 @@ ApplicationWindow {
         folder: "file://"+imagePath
         showDotAndDotDot: true
         showDirsFirst: true
-
-        nameFilters: ["*.jpg"]
+        nameFilters: ["*.jpg", "*.png", "*.jpeg"]
     }
 
     StackView {
@@ -220,14 +205,14 @@ ApplicationWindow {
                 }
                 ToolButton {
                     text: "Capture"
-                    enabled: !inProgress && camera.cameraState==Camera.ActiveState
+                    enabled: !inProgress && camera.active
                     onClicked: {
-                        camera.imageCapture.capture();
+                        videoInput.imageCapture.capture();
                     }
                 }
                 ToolButton {
                     text: "Camera"
-                    enabled: camera.cameraState!=Camera.ActiveState
+                    enabled: !camera.active
                     onClicked: {
                         camera.start();
                     }
@@ -245,15 +230,25 @@ ApplicationWindow {
                 }
 
                 ToolButton {
-                    text: "Focus"
-                    enabled: camera.cameraState==Camera.ActiveState
+                    text: "Enable"
                     onClicked: {
-                        camera.searchAndLock();
+                        dls.enableOutput();
+                    }
+                }
+                ToolButton {
+                    text: "Disable"
+                    onClicked: {
+                        dls.disableOutput();
+                    }
+                }
+                ToolButton {
+                    text: "Clear"
+                    onClicked: {
+                        dls.clearBuffer();
                     }
                 }
             }
         }
-
 
         ColumnLayout {
             id: mainRow
@@ -266,11 +261,7 @@ ApplicationWindow {
                 Layout.alignment: Qt.AlignTop
                 Layout.minimumHeight: 256
                 Layout.minimumWidth: parent.width
-                source: camera
-                autoOrientation: true
                 fillMode: Image.PreserveAspectFit
-
-                filters: [ cvfilter ]
 
                 MouseArea {
                     anchors.fill: parent
@@ -472,8 +463,6 @@ ApplicationWindow {
 
     MessageDialog {
         id: messageDialog
-        standardButtons: StandardButton.Ok
-        //icon: StandardIcon.Question
         title: ""
         text: ""
 

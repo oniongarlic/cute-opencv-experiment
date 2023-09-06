@@ -6,7 +6,7 @@
 #include <QMutexLocker>
 #include <QMutex>
 
-class CuteImageProvider : public QObject, public QQuickImageProvider
+class CuteImageProvider : public QQuickImageProvider
 {
     Q_OBJECT
 public:

@@ -1,7 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Dialogs 1.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import QtQuick.Dialogs
 
 Item {
     id: igs
@@ -14,12 +14,8 @@ Item {
 
     FileDialog {
         id: filesDialog
-        folder: shortcuts.pictures
         nameFilters: [ "*.jpg" ]
         title: qsTr("Select image file")
-        selectExisting: true
-        selectFolder: false
-        selectMultiple: false
         onAccepted: {
             // XXX: Need to convert to string, otherwise sucka
             var f=""+fileUrl

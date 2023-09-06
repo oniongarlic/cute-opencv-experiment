@@ -54,7 +54,9 @@ private:
     int m_height;
     double m_confidence;
     bool m_crop;
-    bool m_processing;
+    bool m_scale;
+    bool m_nms;
+    bool m_processing;    
 
     double m_frametime;
 
