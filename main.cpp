@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QCameraDevice>
+#include <QMediaDevices>
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include "ovvideofilter.h"
@@ -89,6 +91,15 @@ int main(int argc, char *argv[])
     image_path=QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
 
     qDebug() << image_path;
+
+    const QList<QCameraDevice> cameras = QMediaDevices::videoInputs();
+    for (const QCameraDevice &cameraDevice : cameras) {
+        qDebug() << cameraDevice.description();
+        const QList<QCameraFormat> formats = cameraDevice.videoFormats();
+        for (const QCameraFormat &format : formats) {
+            qDebug() << format.resolution() << format.pixelFormat() << format.minFrameRate() << format.maxFrameRate();
+        }
+    }
 
     engine.rootContext()->setContextProperty("dnnConfig", dnn_config);
     engine.rootContext()->setContextProperty("dnnWeights", dnn_model);
