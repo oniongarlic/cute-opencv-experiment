@@ -180,8 +180,6 @@ void Decklinksink::imageToBuffer(const QImage &frame)
         return;
     }
 
-    qDebug() << frame.width() << frame.height() << frame.bytesPerLine();
-
     for (int i=0;i<frame.height(); i++) {
         memcpy(deckLinkBuffer, frame.constScanLine(i), frame.bytesPerLine());
         deckLinkBuffer += m_frame->GetRowBytes();
@@ -222,7 +220,7 @@ void Decklinksink::enableOutput()
         qWarning("No output");
         return;
     }
-    if (m_output->EnableVideoOutput(bmdModeHD1080p6000, 0)!=S_OK)
+    if (m_output->EnableVideoOutput(bmdModeHD1080p30 /* bmdModeHD1080p6000 */, 0)!=S_OK)
         qWarning("Failed to enable output");
 }
 
