@@ -15,15 +15,23 @@ class Decklinksink : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(QObject* videoSink WRITE setVideoSink)
+    Q_PROPERTY(QObject* videoSink WRITE setVideoSink FINAL)
     Q_PROPERTY(bool haveDeckLink READ haveDeckLink NOTIFY haveDeckLinkChanged FINAL)
+    Q_PROPERTY(int devices READ devices NOTIFY devicesChanged FINAL)
 public:
     explicit Decklinksink(QObject *parent = nullptr);
     bool haveDeckLink() const;
 
-signals:
+    Q_INVOKABLE void setFramebufferSize(QSize size);
+    Q_INVOKABLE void setVideoSink(QObject *videosink);
 
+    Q_INVOKABLE bool setOutput(uint index);
+
+    int devices() const;
+
+signals:
     void haveDeckLinkChanged();
+    void devicesChanged();
 
 public slots:
     void displayFrame(const QVideoFrame &frame);
@@ -43,9 +51,12 @@ private:
     QSize m_fbsize;
     QVariantList m_deviceList;
 
-    void setVideoSink(QObject *videosink);
     QVideoSink *m_videosink=nullptr;
 
+    // Available outputs
+    QList<IDeckLinkOutput *> m_outputs;
+
+    // Active output and frame
     IDeckLinkOutput *m_output=nullptr;
     IDeckLinkMutableVideoFrame* m_frame=nullptr;
 };

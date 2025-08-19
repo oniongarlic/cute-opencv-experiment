@@ -24,7 +24,7 @@ Decklinksink::Decklinksink(QObject *parent)
 
     /* Look for devices */
     while ((deckLinkIterator->Next(&deckLink))==S_OK) {
-        const char *model, *name;
+        const char *model, *name, *handle;
         IDeckLinkProfileAttributes* deckLinkAttributes = NULL;
         int64_t value;
 
@@ -49,19 +49,16 @@ Decklinksink::Decklinksink(QObject *parent)
 
         switch(value) {
         case bmdDeviceInterfacePCI:
-            qDebug() << "PCI";
             dev["interface"]="PCI";
             break;
         case bmdDeviceInterfaceUSB:
-            qDebug() << "USB";
             dev["interface"]="USB";
             break;
         case bmdDeviceInterfaceThunderbolt:
-            qDebug() << "Thunderbolt";
             dev["interface"]="Thunderbolt";
             break;
         default:
-            qDebug() << "Unknown interface?";            
+            qDebug() << "Unknown interface?";
         }
 
         if (deckLinkAttributes->GetInt(BMDDeckLinkVideoIOSupport, &value) != S_OK) {
@@ -70,11 +67,72 @@ Decklinksink::Decklinksink(QObject *parent)
         }
 
         if ((value & bmdDeviceSupportsPlayback) != 0) {
+            IDeckLinkDisplayModeIterator *dmi;
+            IDeckLinkDisplayMode *dm;
+            QVariantList modes;
+
             result = deckLink->QueryInterface(IID_IDeckLinkOutput, (void**)&m_output);
+            m_output->GetDisplayModeIterator(&dmi);
+            while ((dmi->Next(&dm))==S_OK) {
+                const char *mname;
+                int w,h,m;
+
+                QVariantMap mode;
+
+                dm->GetName(&mname);
+                h=dm->GetHeight();
+                w=dm->GetWidth();
+                m=dm->GetDisplayMode();
+
+                // qDebug() << m << mname << w << h;
+
+                mode["name"]=QVariant(mname);
+                mode["width"]=w;
+                mode["height"]=h;
+                mode["mode"]=m;
+                modes.append(mode);
+            }
+            m_outputs.append(m_output);
+            dev["playback"]=true;
+            dev["modes"]=modes;
         } else {
             qDebug("No playback support, skipping");
             goto out;
         }
+
+        result = deckLinkAttributes->GetInt(BMDDeckLinkNumberOfSubDevices, &value);
+        if (result != S_OK) {
+            qWarning("Failed to get decklink device interface attribute");
+            goto out;
+        } else {
+            dev["subdevices"]=(qint64)value;
+        }
+
+        result = deckLinkAttributes->GetInt(BMDDeckLinkSubDeviceIndex, &value);
+        if (result != S_OK) {
+            qWarning("Failed to get decklink device interface attribute");
+            goto out;
+        } else {
+            dev["subindex"]=(qint64)value;
+        }
+
+        result = deckLinkAttributes->GetInt(BMDDeckLinkVideoOutputConnections, &value);
+        if (result != S_OK) {
+            qWarning("Failed to get decklink device interface attribute");
+            goto out;
+        } else {
+            dev["outputs"]=(qint64)value;
+        }
+
+        result = deckLinkAttributes->GetInt(BMDDeckLinkVideoInputConnections, &value);
+        if (result != S_OK) {
+            qWarning("Failed to get decklink device interface attribute");
+            goto out;
+        } else {
+            dev["inputs"]=(qint64)value;
+        }
+
+        qDebug() << "Device" << dev;
 
         m_devices++;
         m_deviceList.append(dev);
@@ -85,7 +143,7 @@ Decklinksink::Decklinksink(QObject *parent)
         deckLink->Release();
     }
 
-    qDebug() << "Found devices" << m_deviceList;
+    qDebug() << "Found devices" << m_devices << m_deviceList;
 
     if (m_output) {
         result = m_output->CreateVideoFrame(m_fbsize.width(), m_fbsize.height(), m_fbsize.width()*4, bmdFormat8BitBGRA, bmdFrameFlagDefault, &m_frame);
@@ -94,6 +152,8 @@ Decklinksink::Decklinksink(QObject *parent)
     } else {
         qWarning("!!! No output set ?");
     }
+
+    emit haveDeckLinkChanged();
 }
 
 void Decklinksink::setVideoSink(QObject *videosink)
@@ -108,6 +168,15 @@ void Decklinksink::setVideoSink(QObject *videosink)
     m_videosink = qobject_cast<QVideoSink*>(videosink);
 
     connect(m_videosink, &QVideoSink::videoFrameChanged, this, &Decklinksink::displayFrame);
+}
+
+bool Decklinksink::setOutput(uint index)
+{
+    if (index>m_outputs.count())
+        return false;
+    m_output=m_outputs.at(index);
+
+    return true;
 }
 
 void Decklinksink::displayFrame(const QVideoFrame &frame)
@@ -144,12 +213,12 @@ void Decklinksink::displayImage(const QImage &frame)
     if (!m_haveDeckLink)
         return;
 
-    if (frame.width()==1920 && frame.height()==1080 && frame.format()==QImage::Format_ARGB32) {
+    if (frame.size()==m_fbsize && frame.format()==QImage::Format_ARGB32) {
         f=frame;
-    } else if (frame.width()==1920 && frame.height()==1080) {
+    } else if (frame.size()==m_fbsize) {
         f=frame.convertToFormat(QImage::Format_ARGB32);
     } else {
-        f=frame.scaled(1920, 1080, Qt::KeepAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
+        f=frame.scaled(m_fbsize.width(), m_fbsize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
     }
 
     imageToBuffer(f);
@@ -166,7 +235,7 @@ void Decklinksink::clearBuffer()
         return;
     }
 
-    memset(deckLinkBuffer, 0, 1920*1080*4);
+    memset(deckLinkBuffer, 0, m_fbsize.width()*m_fbsize.height()*4);
 
     m_output->DisplayVideoFrameSync(m_frame);
 }
@@ -220,7 +289,10 @@ void Decklinksink::enableOutput()
         qWarning("No output");
         return;
     }
-    if (m_output->EnableVideoOutput(bmdModeHD1080p30 /* bmdModeHD1080p6000 */, 0)!=S_OK)
+
+    BMDDisplayMode m=bmdModeHD1080p6000; // bmdModeHD1080p30
+
+    if (m_output->EnableVideoOutput(m, bmdVideoOutputFlagDefault)!=S_OK)
         qWarning("Failed to enable output");
 }
 
@@ -238,4 +310,14 @@ void Decklinksink::disableOutput()
 bool Decklinksink::haveDeckLink() const
 {
     return m_haveDeckLink;
+}
+
+void Decklinksink::setFramebufferSize(QSize size)
+{
+    m_fbsize=size;
+}
+
+int Decklinksink::devices() const
+{
+    return m_devices;
 }
