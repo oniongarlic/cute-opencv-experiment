@@ -179,6 +179,13 @@ bool Decklinksink::setOutput(uint index)
     return true;
 }
 
+bool Decklinksink::setMode(qint32 mode)
+{
+    m_mode=mode;
+
+    return true;
+}
+
 void Decklinksink::displayFrame(const QVideoFrame &frame)
 {
     if (!m_haveDeckLink)
@@ -288,11 +295,9 @@ void Decklinksink::enableOutput()
     if (m_output==nullptr) {
         qWarning("No output");
         return;
-    }
+    }    
 
-    BMDDisplayMode m=bmdModeHD1080p6000; // bmdModeHD1080p30
-
-    if (m_output->EnableVideoOutput(m, bmdVideoOutputFlagDefault)!=S_OK)
+    if (m_output->EnableVideoOutput(m_mode, bmdVideoOutputFlagDefault)!=S_OK)
         qWarning("Failed to enable output");
 }
 

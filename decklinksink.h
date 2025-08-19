@@ -27,6 +27,8 @@ public:
 
     Q_INVOKABLE bool setOutput(uint index);
 
+    Q_INVOKABLE bool setMode(qint32 mode);
+
     int devices() const;
 
 signals:
@@ -59,6 +61,8 @@ private:
     // Active output and frame
     IDeckLinkOutput *m_output=nullptr;
     IDeckLinkMutableVideoFrame* m_frame=nullptr;
+
+    BMDDisplayMode m_mode=bmdModeHD1080p6000; // bmdModeHD1080p30
 };
 
 #endif // DECKLINKSINK_H
