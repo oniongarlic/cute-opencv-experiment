@@ -49,6 +49,8 @@ ApplicationWindow {
         od.processImageFile(file);
         //imp.setImage(file);
 
+        odface.processImageFile(file)
+
         var it=od.getImage();
         console.debug(it)
 
@@ -80,6 +82,43 @@ ApplicationWindow {
 
     ListModel {
         id: detectedItems
+    }
+
+    ObjectDetector {
+        id: odface
+        config: ""
+        model: "/data/repos/yolov8-face-landmarks-opencv-dnn/weights/yolov8n-face.onnx"
+        //classes: dnnClasses
+        width: 640
+        height: 640
+        confidence: 0.50
+
+        onObjectDetected: {
+            console.debug("FACE-FOUND")
+            detectedItems.append({"cid": cid,
+                                     "confidence": confidence,
+                                     "name":od.getClassName(cid),
+                                     "rgb": rgb,
+                                     "ocolor": color,
+                                     "center": center,
+                                     "centerX": center.x,
+                                     "centerY": center.y,
+                                     "ox": rect.x,
+                                     "oy": rect.y,
+                                     "owidth": rect.width,
+                                     "oheight": rect.height
+                                 })
+        }
+        onDetectionStarted: {
+            console.debug("FACE-START")
+        }
+        onDetectionEnded: {
+            console.debug("FACE-END")
+        }
+
+        Component.onCompleted: {
+            start();
+        }
     }
 
     ObjectDetector {
@@ -152,6 +191,7 @@ ApplicationWindow {
     Camera {
         id: camera
         cameraDevice: mediaDevices.defaultVideoInput
+        focusMode: Camera.FocusModeAuto
         onErrorOccurred: console.debug("CameraError: "+errorString)
         onActiveChanged: console.debug("CameraActive:"+active)
         Component.onCompleted: {
@@ -166,7 +206,7 @@ ApplicationWindow {
 
     OpenCVVideoFilter {
         id: cvfilter
-        videoSink: vc.videoSink
+        //videoSink: vc.videoSink
 
         onColorFound: {
             console.debug(cgroup+":"+cname)

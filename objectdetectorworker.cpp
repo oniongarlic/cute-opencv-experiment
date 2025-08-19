@@ -39,46 +39,62 @@ void ObjectDetectorWorker::loadModel(const QString config, const QString model)
 
     qDebug() << "Configuration & Weights are" << m_config << m_model;
 
-    try {
-        if (QFile::exists(m_config)==false)
-            throw std::invalid_argument("Model configuration not found");
-
-        if (QFile::exists(m_model)==false)
-            throw std::invalid_argument("Model weights not found");
-
-        if (m_config.startsWith(":///")) {
-            qDebug() << "Loading model from resources / filesystem " << m_config << m_model;
-
-            QFile config(m_config);
-            if (config.open(QIODevice::ReadOnly)==false)
-                throw std::invalid_argument("Invalid model configuration");
-
-            const QByteArray cdata=config.readAll();
-
-            QFile model(m_model);
-            if (model.open(QIODevice::ReadOnly)==false)
-                throw std::invalid_argument("Invalid model data");
-
-            const QByteArray mdata=model.readAll();
-            // From memory
-            m_net = cv::dnn::readNetFromDarknet(cdata, cdata.size(), mdata, mdata.size());
-        } else {
-            qDebug() << "Loading model from filesystem " << m_config << m_model;
-
-            // From files
-            m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
+    if (config.isEmpty() && model.endsWith("onnx")) {
+        try {
+            m_net = cv::dnn::readNet(m_model.toStdString());
             if (m_net.empty())
                 throw std::invalid_argument("Net is empty");
+        } catch (const std::exception& e) {
+            qWarning() << "Loading model failed with error" << e.what();
         }
+    } else {
+        try {
+            if (QFile::exists(m_config)==false)
+                throw std::invalid_argument("Model configuration not found");
 
-        //m_net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
-        //m_net.setPreferableTarget(cv::dnn::DNN_TARGET_OPENCL);
+            if (QFile::exists(m_model)==false)
+                throw std::invalid_argument("Model weights not found");
 
-        qDebug() << "WorkerThread: Model loaded in " << timer.elapsed()/1000.0 << "s" << (m_net.empty() ? "Empty net" : "Net OK");
+            if (m_config.startsWith(":///")) {
+                qDebug() << "Loading model from resources / filesystem " << m_config << m_model;
 
-        emit modelLoaded();
-    } catch (const std::exception& e) {
-        qWarning() << "Loading model failed with error" << e.what();
+                QFile config(m_config);
+                if (config.open(QIODevice::ReadOnly)==false)
+                    throw std::invalid_argument("Invalid model configuration");
+
+                const QByteArray cdata=config.readAll();
+
+                QFile model(m_model);
+                if (model.open(QIODevice::ReadOnly)==false)
+                    throw std::invalid_argument("Invalid model data");
+
+                const QByteArray mdata=model.readAll();
+                // From memory
+                m_net = cv::dnn::readNetFromDarknet(cdata, cdata.size(), mdata, mdata.size());
+            } else {
+                qDebug() << "Loading model from filesystem " << m_config << m_model;
+
+                // From files
+                m_net = cv::dnn::readNetFromDarknet(m_config.toStdString(), m_model.toStdString());
+                if (m_net.empty())
+                    throw std::invalid_argument("Net is empty");
+            }
+
+#if 1 \
+            //m_net.setPreferableTarget(cv::dnn::DNN_TARGET_CPU); \
+            //m_net.setPreferableTarget(cv::dnn::DNN_TARGET_OPENCL);
+#else \
+            // Make sure OpenCV is built with CUDA
+            m_net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
+            m_net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
+#endif
+
+            qDebug() << "WorkerThread: Model loaded in " << timer.elapsed()/1000.0 << "s" << (m_net.empty() ? "Empty net" : "Net OK");
+
+            emit modelLoaded();
+        } catch (const std::exception& e) {
+            qWarning() << "Loading model failed with error" << e.what();
+        }
     }
     emit error(1);
 }
@@ -95,6 +111,7 @@ std::vector<cv::String> ObjectDetectorWorker::getOutputsNames(const cv::dnn::Net
             names[i] = layersNames[outLayers[i] - 1];
         }
     }
+    qDebug() << names;
     return names;
 }
 
@@ -143,22 +160,40 @@ void ObjectDetectorWorker::processOpenCVFrame()
     } else {
         qDebug() << "Using frame as-is: " << m_frame.rows << m_frame.cols;
         frame=m_frame;
-    }
+    }    
 
-    qDebug() << "Final frame size: " << frame.rows << frame.cols;
-
-    cv::dnn::blobFromImage(frame, blob, m_darknet_scale, cv::Size(m_width, m_height), cv::Scalar(), true, false);
-    qDebug() << "blobFromImage" << timer.elapsed()/1000.0 << "s";
-
+    cv::dnn::blobFromImage(frame, blob, m_darknet_scale, cv::Size(m_width, m_height), cv::Scalar(), true, false);    
     m_net.setInput(blob);
+
+    m_net.enableWinograd(false);
+
     std::vector<cv::Mat> outs;
     std::vector<std::vector<cv::Mat>> outs2;
 
     try {
         const cv::String a;
-        m_net.forward(outs2, getOutputsNames(m_net));
+        if (m_width==640) {
+            m_net.forward(outs2, getOutputsNames(m_net));
+        } else {
+            m_net.forward(outs, m_net.getUnconnectedOutLayersNames());
+
+            qDebug() << outs[0].size[1];
+            qDebug() << outs[0].size[2];
+            qDebug() << outs[0].size[3];
+
+            qDebug() << outs[1].size[1];
+            qDebug() << outs[1].size[2];
+            qDebug() << outs[1].size[3];
+
+            qDebug() << outs[2].size[1];
+            qDebug() << outs[2].size[2];
+            qDebug() << outs[2].size[3];
+
+        }
     } catch (const std::exception& e) {
         qWarning() << "OpenCV DNN failed: " << e.what();
+        emit detectionEnded();
+        m_processing=false;
         return;
     }
 
@@ -201,7 +236,7 @@ void ObjectDetectorWorker::processOpenCVFrame()
             }
 
             minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
-            // qDebug() << "cv::minMaxLoc" << i << j << confidence << scores.depth() << scores.channels();
+            qDebug() << "cv::minMaxLoc" << i << j << confidence << scores.depth() << scores.channels();
 
             // Skip if outside confidence
             if (confidence < m_confidence) {
