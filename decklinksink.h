@@ -48,6 +48,7 @@ protected:
     void imageToBuffer(const QImage &frame);
 private:
     int m_devices=0;
+    int m_default=1;
     bool m_haveDeckLink=false;
     bool m_haveOutput=false;
     QSize m_fbsize;

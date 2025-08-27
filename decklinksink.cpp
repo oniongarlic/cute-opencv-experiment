@@ -132,7 +132,7 @@ Decklinksink::Decklinksink(QObject *parent)
             dev["inputs"]=(qint64)value;
         }
 
-        qDebug() << "Device" << dev;
+        //qDebug() << "Device" << dev;
 
         m_devices++;
         m_deviceList.append(dev);
@@ -145,13 +145,8 @@ Decklinksink::Decklinksink(QObject *parent)
 
     qDebug() << "Found devices" << m_devices << m_deviceList;
 
-    if (m_output) {
-        result = m_output->CreateVideoFrame(m_fbsize.width(), m_fbsize.height(), m_fbsize.width()*4, bmdFormat8BitBGRA, bmdFrameFlagDefault, &m_frame);
-        if (result!=S_OK)
-            qWarning("Failed to create video frame");
-    } else {
-        qWarning("!!! No output set ?");
-    }
+    if (m_default>-1)
+        setOutput(m_default);
 
     emit haveDeckLinkChanged();
 }
@@ -172,9 +167,22 @@ void Decklinksink::setVideoSink(QObject *videosink)
 
 bool Decklinksink::setOutput(uint index)
 {
+    HRESULT result;
+
     if (index>m_outputs.count())
         return false;
     m_output=m_outputs.at(index);
+
+    if (m_output) {
+        result = m_output->CreateVideoFrame(m_fbsize.width(), m_fbsize.height(), m_fbsize.width()*4, bmdFormat8BitBGRA, bmdFrameFlagDefault, &m_frame);
+        if (result!=S_OK) {
+            qWarning("Failed to create video frame");
+            return false;
+        }
+    } else {
+        qWarning("!!! No output set ?");
+        return false;
+    }
 
     return true;
 }
