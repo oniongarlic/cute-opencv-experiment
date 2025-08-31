@@ -29,6 +29,8 @@ public:
 
     Q_INVOKABLE bool setMode(qint32 mode);
 
+    Q_INVOKABLE bool setKeyer(bool enable);
+
     int devices() const;
 
 signals:

@@ -69,6 +69,7 @@ Decklinksink::Decklinksink(QObject *parent)
         if ((value & bmdDeviceSupportsPlayback) != 0) {
             IDeckLinkDisplayModeIterator *dmi;
             IDeckLinkDisplayMode *dm;
+            IDeckLinkKeyer *k;
             QVariantList modes;
 
             result = deckLink->QueryInterface(IID_IDeckLinkOutput, (void**)&m_output);
@@ -92,6 +93,15 @@ Decklinksink::Decklinksink(QObject *parent)
                 mode["mode"]=m;
                 modes.append(mode);
             }
+
+            result = deckLink->QueryInterface (IID_IDeckLinkKeyer, (void **) &k);
+            if (result != S_OK) {
+                qDebug("No keyer for output");
+                dev["keyer"]=false;
+            } else {
+                dev["keyer"]=true;
+            }
+
             m_outputs.append(m_output);
             dev["playback"]=true;
             dev["modes"]=modes;
@@ -192,6 +202,11 @@ bool Decklinksink::setMode(qint32 mode)
     m_mode=mode;
 
     return true;
+}
+
+bool Decklinksink::setKeyer(bool enable)
+{
+
 }
 
 void Decklinksink::displayFrame(const QVideoFrame &frame)
@@ -317,7 +332,7 @@ void Decklinksink::disableOutput()
     }
 
     if (m_output->DisableVideoOutput()!=S_OK)
-        qWarning("Failed to enable output");
+        qWarning("Failed to disable output");
 }
 
 bool Decklinksink::haveDeckLink() const
