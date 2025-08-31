@@ -11,6 +11,19 @@
 
 #include "DeckLinkAPI.h"
 
+typedef struct DeckLinkDevice
+{
+    QString name;
+    QString model;
+    QVariantMap properties;
+    IDeckLink *dev;
+    IDeckLinkOutput *output;
+    IDeckLinkInput *input;
+    IDeckLinkKeyer *key;
+    BMDDisplayMode mode;
+    IDeckLinkMutableVideoFrame *frame;
+} DeckLinkDevice;
+
 class Decklinksink : public QObject
 {
     Q_OBJECT
@@ -58,11 +71,13 @@ private:
 
     QVideoSink *m_videosink=nullptr;
 
-    // Available outputs
-    QList<IDeckLinkOutput *> m_outputs;
+    QList<DeckLinkDevice> m_devs;
+    DeckLinkDevice *m_current;
 
-    // Active output and frame
+    // Active output/input/keyer and frame
     IDeckLinkOutput *m_output=nullptr;
+    IDeckLinkInput *m_input=nullptr;
+    IDeckLinkKeyer *m_keyer=nullptr;
     IDeckLinkMutableVideoFrame* m_frame=nullptr;
 
     BMDDisplayMode m_mode=bmdModeHD1080p6000; // bmdModeHD1080p30

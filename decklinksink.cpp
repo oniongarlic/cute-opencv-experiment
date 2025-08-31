@@ -28,8 +28,20 @@ Decklinksink::Decklinksink(QObject *parent)
         IDeckLinkProfileAttributes* deckLinkAttributes = NULL;
         int64_t value;
 
+        DeckLinkDevice dld;
+        IDeckLinkInput *input=nullptr;
+        IDeckLinkOutput *output=nullptr;
+
         deckLink->GetModelName(&model);
         deckLink->GetDisplayName(&name);
+
+        dld.dev=deckLink;
+        dld.name=name;
+        dld.model=model;
+
+        dld.input=nullptr;
+        dld.output=nullptr;
+        dld.key=nullptr;
 
         QVariantMap dev;
         dev["modelName"]=QVariant(model);
@@ -72,8 +84,8 @@ Decklinksink::Decklinksink(QObject *parent)
             IDeckLinkKeyer *k;
             QVariantList modes;
 
-            result = deckLink->QueryInterface(IID_IDeckLinkOutput, (void**)&m_output);
-            m_output->GetDisplayModeIterator(&dmi);
+            result = deckLink->QueryInterface(IID_IDeckLinkOutput, (void**)&output);
+            output->GetDisplayModeIterator(&dmi);
             while ((dmi->Next(&dm))==S_OK) {
                 const char *mname;
                 int w,h,m;
@@ -98,16 +110,25 @@ Decklinksink::Decklinksink(QObject *parent)
             if (result != S_OK) {
                 qDebug("No keyer for output");
                 dev["keyer"]=false;
+                dld.key=nullptr;
             } else {
                 dev["keyer"]=true;
+                dld.key=k;
             }
 
-            m_outputs.append(m_output);
             dev["playback"]=true;
             dev["modes"]=modes;
-        } else {
-            qDebug("No playback support, skipping");
-            goto out;
+
+            dld.output=output;
+        }        
+
+        if ((value & bmdDeviceSupportsCapture) != 0) {
+            result = deckLink->QueryInterface(IID_IDeckLinkInput, (void**)&input);
+            if (result != S_OK) {
+
+            } else {
+                dld.input=input;
+            }
         }
 
         result = deckLinkAttributes->GetInt(BMDDeckLinkNumberOfSubDevices, &value);
@@ -147,6 +168,9 @@ Decklinksink::Decklinksink(QObject *parent)
         m_devices++;
         m_deviceList.append(dev);
 
+        dld.properties=dev;
+        m_devs.append(dld);
+
     out:;
 
         deckLinkAttributes->Release();
@@ -178,19 +202,24 @@ void Decklinksink::setVideoSink(QObject *videosink)
 bool Decklinksink::setOutput(uint index)
 {
     HRESULT result;
+    DeckLinkDevice d;
 
-    if (index>m_outputs.count())
+    if (index>m_devs.count()) {
+        qWarning("Requested device index too large");
         return false;
-    m_output=m_outputs.at(index);
+    }
+    d=m_devs.at(index);
+    qDebug() << d.name << d.model;
+    if (!d.output) {
+        qWarning("Requested device has no output");
+        return false;
+    }
 
-    if (m_output) {
-        result = m_output->CreateVideoFrame(m_fbsize.width(), m_fbsize.height(), m_fbsize.width()*4, bmdFormat8BitBGRA, bmdFrameFlagDefault, &m_frame);
-        if (result!=S_OK) {
-            qWarning("Failed to create video frame");
-            return false;
-        }
-    } else {
-        qWarning("!!! No output set ?");
+    m_output=d.output;
+    m_keyer=d.key;
+    result = m_output->CreateVideoFrame(m_fbsize.width(), m_fbsize.height(), m_fbsize.width()*4, bmdFormat8BitBGRA, bmdFrameFlagDefault, &m_frame);
+    if (result!=S_OK) {
+        qWarning("Failed to create video frame");
         return false;
     }
 
@@ -206,7 +235,16 @@ bool Decklinksink::setMode(qint32 mode)
 
 bool Decklinksink::setKeyer(bool enable)
 {
+    HRESULT result;
+    if (!m_keyer)
+        return false;
 
+    if (enable)
+        result=m_keyer->Enable(true);
+    else
+        result=m_keyer->Disable();
+
+    return result==S_OK;
 }
 
 void Decklinksink::displayFrame(const QVideoFrame &frame)
