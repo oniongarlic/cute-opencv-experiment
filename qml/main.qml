@@ -20,6 +20,37 @@ ApplicationWindow {
 
     property bool inProgress: false
 
+    menuBar: MenuBar {
+        Menu {
+            title: "Profile"
+            MenuItem {
+                text: "Clear"
+                onClicked: dls.setProfile(0)
+            }
+            MenuItem {
+                text: "1"
+                onClicked: dls.setProfile(1)
+            }
+            MenuItem {
+                text: "2"
+                onClicked: dls.setProfile(2)
+            }
+            MenuItem {
+                text: "3"
+                onClicked: dls.setProfile(3)
+            }
+            MenuItem {
+                text: "4"
+                onClicked: dls.setProfile(4)
+            }
+            MenuItem {
+                text: "5"
+                onClicked: dls.setProfile(5)
+            }
+        }
+
+    }
+
     ToolBar {
         id: mainToolbar
         RowLayout {
@@ -201,7 +232,7 @@ ApplicationWindow {
 
     DeckLinkSink {
         id: dls
-        videoSink: vc.videoSink
+        //videoSink: vc.videoSink
     }
 
     OpenCVVideoFilter {
@@ -285,6 +316,19 @@ ApplicationWindow {
                     text: "Clear"
                     onClicked: {
                         dls.clearBuffer();
+                    }
+                }
+
+                ToolButton {
+                    text: "K-ON"
+                    onClicked: {
+                        dls.setKeyer(true)
+                    }
+                }
+                ToolButton {
+                    text: "K-Off"
+                    onClicked: {
+                        dls.setKeyer(false)
                     }
                 }
             }

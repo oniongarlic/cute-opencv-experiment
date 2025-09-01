@@ -42,6 +42,7 @@ public:
 
     Q_INVOKABLE bool setMode(qint32 mode);
 
+    Q_INVOKABLE bool setProfile(uint profile);
     Q_INVOKABLE bool setKeyer(bool enable);
 
     int devices() const;
@@ -63,16 +64,16 @@ protected:
     void imageToBuffer(const QImage &frame);
 private:
     int m_devices=0;
-    int m_default=1;
+    int m_default=0;
     bool m_haveDeckLink=false;
-    bool m_haveOutput=false;
+
     QSize m_fbsize;
     QVariantList m_deviceList;
 
     QVideoSink *m_videosink=nullptr;
 
     QList<DeckLinkDevice> m_devs;
-    DeckLinkDevice *m_current;
+    int m_current=-1;
 
     // Active output/input/keyer and frame
     IDeckLinkOutput *m_output=nullptr;

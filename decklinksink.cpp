@@ -47,6 +47,8 @@ Decklinksink::Decklinksink(QObject *parent)
         dev["modelName"]=QVariant(model);
         dev["displayName"]=QVariant(name);
 
+        qDebug() << "*** Device: "<< dld.name;
+
         result = deckLink->QueryInterface(IID_IDeckLinkProfileAttributes, (void**)&deckLinkAttributes);
         if (result != S_OK) {
             qWarning("Failed to get decklink device attributes");
@@ -88,7 +90,8 @@ Decklinksink::Decklinksink(QObject *parent)
             output->GetDisplayModeIterator(&dmi);
             while ((dmi->Next(&dm))==S_OK) {
                 const char *mname;
-                int w,h,m;
+                qint64 w,h;
+                uint m;
 
                 QVariantMap mode;
 
@@ -105,6 +108,7 @@ Decklinksink::Decklinksink(QObject *parent)
                 mode["mode"]=m;
                 modes.append(mode);
             }
+            dmi->Release();
 
             result = deckLink->QueryInterface (IID_IDeckLinkKeyer, (void **) &k);
             if (result != S_OK) {
@@ -112,8 +116,58 @@ Decklinksink::Decklinksink(QObject *parent)
                 dev["keyer"]=false;
                 dld.key=nullptr;
             } else {
+                bool ki, ke;
+                qDebug("Keyer supported");
                 dev["keyer"]=true;
                 dld.key=k;
+
+                result = deckLinkAttributes->GetFlag(BMDDeckLinkSupportsInternalKeying, &ki);
+                result = deckLinkAttributes->GetFlag(BMDDeckLinkSupportsExternalKeying, &ke);
+
+                qDebug() << "Int, Ext" << ki << ke;
+            }
+
+            IDeckLinkProfileManager *manager = NULL;
+            if (deckLink->QueryInterface (IID_IDeckLinkProfileManager, (void **) &manager) == S_OK) {
+                qDebug("Has duplex/profiles mode");
+                dev["profiles"]=true;
+
+                int64_t current;
+                result=deckLinkAttributes->GetInt(BMDDeckLinkProfileID, &current);
+
+                qDebug() << "Current profile ID" << current;
+
+                dev["profile"]=QVariant((qint64)current);
+
+                IDeckLinkProfileIterator *pi;
+                IDeckLinkProfile *p;
+                manager->GetProfiles(&pi);
+
+                while ((pi->Next(&p))==S_OK) {
+                    bool pactive;
+                    IDeckLinkProfileAttributes*	pa;
+                    int64_t pid=0;
+
+                    result=p->QueryInterface(IID_IDeckLinkProfileAttributes, (void**)&pa);
+                    if (result==S_OK) {
+                        result=pa->GetInt(BMDDeckLinkProfileID, &pid);
+                    }
+                    p->IsActive(&pactive);
+                    qDebug() << "*** Profile: " << pid << pactive;
+                }
+
+                IDeckLinkProfile *profile = NULL;
+                BMDProfileID bmd_profile_id = 0;
+                result = manager->GetProfile(bmd_profile_id, &profile);
+
+                if (result==S_OK && profile) {
+                    result=profile->SetActive();
+                    profile->Release();
+                }
+
+                manager->Release();
+            } else {
+                dev["profiles"]=false;
             }
 
             dev["playback"]=true;
@@ -174,7 +228,7 @@ Decklinksink::Decklinksink(QObject *parent)
     out:;
 
         deckLinkAttributes->Release();
-        deckLink->Release();
+        // deckLink->Release();
     }
 
     qDebug() << "Found devices" << m_devices << m_deviceList;
@@ -209,14 +263,16 @@ bool Decklinksink::setOutput(uint index)
         return false;
     }
     d=m_devs.at(index);
-    qDebug() << d.name << d.model;
+    qDebug() << "*** Output set to" << d.name << d.model;
     if (!d.output) {
         qWarning("Requested device has no output");
         return false;
     }
 
+    m_current=index;
     m_output=d.output;
     m_keyer=d.key;
+
     result = m_output->CreateVideoFrame(m_fbsize.width(), m_fbsize.height(), m_fbsize.width()*4, bmdFormat8BitBGRA, bmdFrameFlagDefault, &m_frame);
     if (result!=S_OK) {
         qWarning("Failed to create video frame");
@@ -233,16 +289,75 @@ bool Decklinksink::setMode(qint32 mode)
     return true;
 }
 
+bool Decklinksink::setProfile(uint profile)
+{
+    HRESULT result;
+    IDeckLinkProfileManager *manager = NULL;
+    IDeckLinkProfile *lp = NULL;
+    BMDProfileID profile_id=0;
+
+    if (!m_haveDeckLink)
+        return false;
+
+    if (m_current<0) {
+        qWarning("No device set!");
+        return false;
+    }
+
+    DeckLinkDevice d=m_devs.at(m_current);
+
+    if (d.dev->QueryInterface (IID_IDeckLinkProfileManager, (void **) &manager) != S_OK) {
+        qWarning("Current device does not support profiles");
+        return false;
+    }
+
+    switch (profile) {
+    case 0:
+        profile_id=0;
+        break;
+    case 1:
+        profile_id=bmdProfileOneSubDeviceFullDuplex;
+        break;
+    case 2:
+        profile_id=bmdProfileOneSubDeviceHalfDuplex;
+        break;
+    case 3:
+        profile_id=bmdProfileTwoSubDevicesFullDuplex;
+        break;
+    case 4:
+        profile_id=bmdProfileTwoSubDevicesHalfDuplex;
+        break;
+    case 5:
+        profile_id=bmdProfileFourSubDevicesHalfDuplex;
+        break;
+    }
+
+    result=manager->GetProfile(profile_id, &lp);
+
+    if (result==S_OK && profile) {
+        result=lp->SetActive();
+        lp->Release();
+    }
+
+    manager->Release();
+
+    return result==S_OK;
+}
+
 bool Decklinksink::setKeyer(bool enable)
 {
     HRESULT result;
-    if (!m_keyer)
+    if (!m_keyer) {
+        qWarning("Keyer not set");
         return false;
+    }
 
     if (enable)
         result=m_keyer->Enable(true);
     else
         result=m_keyer->Disable();
+
+    qDebug() << "Keyer set " << (result==S_OK);
 
     return result==S_OK;
 }
