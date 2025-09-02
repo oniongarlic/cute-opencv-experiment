@@ -22,7 +22,7 @@ DeckLink::DeckLink(QObject *parent)
 
     /* Look for devices */
     while ((deckLinkIterator->Next(&deckLink))==S_OK) {
-        const char *model, *name, *handle;
+        const char *model, *name;
         IDeckLinkProfileAttributes* deckLinkAttributes = NULL;
         int64_t value;
 

@@ -148,6 +148,9 @@ void Decklinksink::displayFrame(const QVideoFrame &frame)
     if (!m_decklink->haveDeckLink())
         return;
 
+    if (!m_output)
+        return;
+
     QImage img=frame.toImage();
     QImage f;
 

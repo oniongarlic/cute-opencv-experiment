@@ -18,7 +18,7 @@ class Decklinksink : public QObject
     Q_OBJECT
     QML_ELEMENT
     Q_PROPERTY(QObject* decklink READ getDecklink WRITE setDecklink NOTIFY decklinkChanged FINAL REQUIRED)
-    Q_PROPERTY(QObject* videoSink READ getVideoSink WRITE setVideoSink NOTIFY videoSinkChanged FINAL)    
+    Q_PROPERTY(QObject* videoSink READ getVideoSink WRITE setVideoSink NOTIFY videoSinkChanged FINAL)
 public:
     explicit Decklinksink(QObject *parent = nullptr);
     bool haveDeckLink() const;
@@ -31,7 +31,7 @@ public:
     Q_INVOKABLE bool setMode(qint32 mode);
 
     Q_INVOKABLE bool setProfile(uint profile);
-    Q_INVOKABLE bool setKeyer(bool enable);    
+    Q_INVOKABLE bool setKeyer(bool enable);
 
     QObject *getVideoSink() const;
 
@@ -61,6 +61,8 @@ private:
     int m_current=-1;
     QSize m_fbsize;
     QVideoSink *m_videosink=nullptr;
+
+    bool m_use_precompiled=true;
 
     // Active output/input/keyer and frame
     IDeckLinkOutput *m_output=nullptr;
