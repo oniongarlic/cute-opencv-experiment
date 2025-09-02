@@ -2,9 +2,8 @@ QT += quick multimedia widgets
 CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
-    cuteimageprovider.cpp \
-    decklinksink.cpp \
     main.cpp \
+    cuteimageprovider.cpp \
     ocvobjectcolordetector.cpp \
     objectdetector.cpp \
     cuteopencv.cpp \
@@ -13,12 +12,18 @@ SOURCES += \
 
 HEADERS += \
     cuteimageprovider.h \
-    decklinksink.h \
     ocvobjectcolordetector.h \
     objectdetector.h \
     cuteopencv.h \
     cuteopencvbase.h \
     objectdetectorworker.h
+
+# Decklink experiments
+HEADERS += decklink.h decklinksink.h
+SOURCES += decklink.cpp decklinksink.cpp
+
+# DECKLINK_SDK_PATH=/opt/decklink/include
+DECKLINK_SDK_PATH=/home/studio/repos/decklink-sdk-12-include
 
 RESOURCES += qml.qrc
 
@@ -26,7 +31,6 @@ DEFINES += YOLO_CUSTOM
 # DEFINES += YOLO_OLD
 # RESOURCES += yolo.qrc
 
-DECKLINK_SDK_PATH=/opt/decklink/include
 
 lessThan(QT_VERSION, 6.2) {
     HEADERS += ovvideofilter.h ovvideofilterrunnable.h

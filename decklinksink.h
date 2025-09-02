@@ -11,26 +11,14 @@
 
 #include "DeckLinkAPI.h"
 
-typedef struct DeckLinkDevice
-{
-    QString name;
-    QString model;
-    QVariantMap properties;
-    IDeckLink *dev;
-    IDeckLinkOutput *output;
-    IDeckLinkInput *input;
-    IDeckLinkKeyer *key;
-    BMDDisplayMode mode;
-    IDeckLinkMutableVideoFrame *frame;
-} DeckLinkDevice;
+#include "decklink.h"
 
 class Decklinksink : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(QObject* videoSink WRITE setVideoSink FINAL)
-    Q_PROPERTY(bool haveDeckLink READ haveDeckLink NOTIFY haveDeckLinkChanged FINAL)
-    Q_PROPERTY(int devices READ devices NOTIFY devicesChanged FINAL)
+    Q_PROPERTY(QObject* decklink READ getDecklink WRITE setDecklink NOTIFY decklinkChanged FINAL REQUIRED)
+    Q_PROPERTY(QObject* videoSink READ getVideoSink WRITE setVideoSink NOTIFY videoSinkChanged FINAL)    
 public:
     explicit Decklinksink(QObject *parent = nullptr);
     bool haveDeckLink() const;
@@ -43,13 +31,19 @@ public:
     Q_INVOKABLE bool setMode(qint32 mode);
 
     Q_INVOKABLE bool setProfile(uint profile);
-    Q_INVOKABLE bool setKeyer(bool enable);
+    Q_INVOKABLE bool setKeyer(bool enable);    
 
-    int devices() const;
+    QObject *getVideoSink() const;
+
+    QObject *getDecklink() const;
+    void setDecklink(QObject *newDecklink);
 
 signals:
     void haveDeckLinkChanged();
     void devicesChanged();
+    void videoSinkChanged();
+
+    void decklinkChanged();
 
 public slots:
     void displayFrame(const QVideoFrame &frame);
@@ -63,17 +57,10 @@ public slots:
 protected:
     void imageToBuffer(const QImage &frame);
 private:
-    int m_devices=0;
-    int m_default=0;
-    bool m_haveDeckLink=false;
-
-    QSize m_fbsize;
-    QVariantList m_deviceList;
-
-    QVideoSink *m_videosink=nullptr;
-
-    QList<DeckLinkDevice> m_devs;
+    DeckLink *m_decklink = nullptr;
     int m_current=-1;
+    QSize m_fbsize;
+    QVideoSink *m_videosink=nullptr;
 
     // Active output/input/keyer and frame
     IDeckLinkOutput *m_output=nullptr;

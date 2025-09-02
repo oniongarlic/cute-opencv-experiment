@@ -15,6 +15,7 @@ typedef struct DeckLinkDevice
 {
     QString name;
     QString model;
+    bool valid;
     QVariantMap properties;
     QSize size;
     uint fps;
@@ -38,6 +39,8 @@ public:
     bool haveDeckLink() const;
     int devices() const;
 
+    DeckLinkDevice *getDevice(int index);
+
 signals:
     void haveDeckLinkChanged();
     void devicesChanged();
@@ -45,10 +48,7 @@ signals:
 private:
     int m_devices=0;
     bool m_haveDeckLink=false;
-
-    QVariantList m_deviceList;
-
-    QList<DeckLinkDevice> m_devs;
+    QList<DeckLinkDevice *> m_devs;
 };
 
 #endif // DECKLINKS_H

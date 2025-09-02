@@ -6,237 +6,8 @@
 Decklinksink::Decklinksink(QObject *parent)
     : QObject{parent}
 {
-    IDeckLinkIterator* deckLinkIterator	= nullptr;
-    IDeckLink* deckLink=nullptr;
-    HRESULT result;
-
-    deckLinkIterator=CreateDeckLinkIteratorInstance();
-    if (deckLinkIterator!=nullptr) {
-        qDebug() << "Found DeckLink support";
-        m_haveDeckLink=true;
-    } else {
-        qDebug() << "No DeckLink support installed";
-        return;
-    }
-
     m_fbsize.setWidth(1920);
     m_fbsize.setHeight(1080);
-
-    /* Look for devices */
-    while ((deckLinkIterator->Next(&deckLink))==S_OK) {
-        const char *model, *name, *handle;
-        IDeckLinkProfileAttributes* deckLinkAttributes = NULL;
-        int64_t value;
-
-        DeckLinkDevice dld;
-        IDeckLinkInput *input=nullptr;
-        IDeckLinkOutput *output=nullptr;
-
-        deckLink->GetModelName(&model);
-        deckLink->GetDisplayName(&name);
-
-        dld.dev=deckLink;
-        dld.name=name;
-        dld.model=model;
-
-        dld.input=nullptr;
-        dld.output=nullptr;
-        dld.key=nullptr;
-
-        QVariantMap dev;
-        dev["modelName"]=QVariant(model);
-        dev["displayName"]=QVariant(name);
-
-        qDebug() << "*** Device: "<< dld.name;
-
-        result = deckLink->QueryInterface(IID_IDeckLinkProfileAttributes, (void**)&deckLinkAttributes);
-        if (result != S_OK) {
-            qWarning("Failed to get decklink device attributes");
-            continue;
-        }
-
-        result = deckLinkAttributes->GetInt(BMDDeckLinkDeviceInterface, &value);
-        if (result != S_OK) {
-            qWarning("Failed to get decklink device interface attribute");
-            goto out;
-        }
-
-        switch(value) {
-        case bmdDeviceInterfacePCI:
-            dev["interface"]="PCI";
-            break;
-        case bmdDeviceInterfaceUSB:
-            dev["interface"]="USB";
-            break;
-        case bmdDeviceInterfaceThunderbolt:
-            dev["interface"]="Thunderbolt";
-            break;
-        default:
-            qDebug() << "Unknown interface?";
-        }
-
-        if (deckLinkAttributes->GetInt(BMDDeckLinkVideoIOSupport, &value) != S_OK) {
-            qDebug("No output support, skipping");
-            goto out;
-        }
-
-        if ((value & bmdDeviceSupportsPlayback) != 0) {
-            IDeckLinkDisplayModeIterator *dmi;
-            IDeckLinkDisplayMode *dm;
-            IDeckLinkKeyer *k;
-            QVariantList modes;
-
-            result = deckLink->QueryInterface(IID_IDeckLinkOutput, (void**)&output);
-            output->GetDisplayModeIterator(&dmi);
-            while ((dmi->Next(&dm))==S_OK) {
-                const char *mname;
-                qint64 w,h;
-                uint m;
-
-                QVariantMap mode;
-
-                dm->GetName(&mname);
-                h=dm->GetHeight();
-                w=dm->GetWidth();
-                m=dm->GetDisplayMode();
-
-                // qDebug() << m << mname << w << h;
-
-                mode["name"]=QVariant(mname);
-                mode["width"]=w;
-                mode["height"]=h;
-                mode["mode"]=m;
-                modes.append(mode);
-            }
-            dmi->Release();
-
-            result = deckLink->QueryInterface (IID_IDeckLinkKeyer, (void **) &k);
-            if (result != S_OK) {
-                qDebug("No keyer for output");
-                dev["keyer"]=false;
-                dld.key=nullptr;
-            } else {
-                bool ki, ke;
-                qDebug("Keyer supported");
-                dev["keyer"]=true;
-                dld.key=k;
-
-                result = deckLinkAttributes->GetFlag(BMDDeckLinkSupportsInternalKeying, &ki);
-                result = deckLinkAttributes->GetFlag(BMDDeckLinkSupportsExternalKeying, &ke);
-
-                qDebug() << "Int, Ext" << ki << ke;
-            }
-
-            IDeckLinkProfileManager *manager = NULL;
-            if (deckLink->QueryInterface (IID_IDeckLinkProfileManager, (void **) &manager) == S_OK) {
-                qDebug("Has duplex/profiles mode");
-                dev["profiles"]=true;
-
-                int64_t current;
-                result=deckLinkAttributes->GetInt(BMDDeckLinkProfileID, &current);
-
-                qDebug() << "Current profile ID" << current;
-
-                dev["profile"]=QVariant((qint64)current);
-
-                IDeckLinkProfileIterator *pi;
-                IDeckLinkProfile *p;
-                manager->GetProfiles(&pi);
-
-                while ((pi->Next(&p))==S_OK) {
-                    bool pactive;
-                    IDeckLinkProfileAttributes*	pa;
-                    int64_t pid=0;
-
-                    result=p->QueryInterface(IID_IDeckLinkProfileAttributes, (void**)&pa);
-                    if (result==S_OK) {
-                        result=pa->GetInt(BMDDeckLinkProfileID, &pid);
-                    }
-                    p->IsActive(&pactive);
-                    qDebug() << "*** Profile: " << pid << pactive;
-                }
-
-                IDeckLinkProfile *profile = NULL;
-                BMDProfileID bmd_profile_id = 0;
-                result = manager->GetProfile(bmd_profile_id, &profile);
-
-                if (result==S_OK && profile) {
-                    result=profile->SetActive();
-                    profile->Release();
-                }
-
-                manager->Release();
-            } else {
-                dev["profiles"]=false;
-            }
-
-            dev["playback"]=true;
-            dev["modes"]=modes;
-
-            dld.output=output;
-        }        
-
-        if ((value & bmdDeviceSupportsCapture) != 0) {
-            result = deckLink->QueryInterface(IID_IDeckLinkInput, (void**)&input);
-            if (result != S_OK) {
-
-            } else {
-                dld.input=input;
-            }
-        }
-
-        result = deckLinkAttributes->GetInt(BMDDeckLinkNumberOfSubDevices, &value);
-        if (result != S_OK) {
-            qWarning("Failed to get decklink device interface attribute");
-            goto out;
-        } else {
-            dev["subdevices"]=(qint64)value;
-        }
-
-        result = deckLinkAttributes->GetInt(BMDDeckLinkSubDeviceIndex, &value);
-        if (result != S_OK) {
-            qWarning("Failed to get decklink device interface attribute");
-            goto out;
-        } else {
-            dev["subindex"]=(qint64)value;
-        }
-
-        result = deckLinkAttributes->GetInt(BMDDeckLinkVideoOutputConnections, &value);
-        if (result != S_OK) {
-            qWarning("Failed to get decklink device interface attribute");
-            goto out;
-        } else {
-            dev["outputs"]=(qint64)value;
-        }
-
-        result = deckLinkAttributes->GetInt(BMDDeckLinkVideoInputConnections, &value);
-        if (result != S_OK) {
-            qWarning("Failed to get decklink device interface attribute");
-            goto out;
-        } else {
-            dev["inputs"]=(qint64)value;
-        }
-
-        //qDebug() << "Device" << dev;
-
-        m_devices++;
-        m_deviceList.append(dev);
-
-        dld.properties=dev;
-        m_devs.append(dld);
-
-    out:;
-
-        deckLinkAttributes->Release();
-        // deckLink->Release();
-    }
-
-    qDebug() << "Found devices" << m_devices << m_deviceList;
-
-    if (m_default>-1)
-        setOutput(m_default);
-
-    emit haveDeckLinkChanged();
 }
 
 void Decklinksink::setVideoSink(QObject *videosink)
@@ -251,27 +22,37 @@ void Decklinksink::setVideoSink(QObject *videosink)
     m_videosink = qobject_cast<QVideoSink*>(videosink);
 
     connect(m_videosink, &QVideoSink::videoFrameChanged, this, &Decklinksink::displayFrame);
+
+    emit videoSinkChanged();
+}
+
+QObject *Decklinksink::getVideoSink() const
+{
+    return m_videosink;
 }
 
 bool Decklinksink::setOutput(uint index)
 {
     HRESULT result;
-    DeckLinkDevice d;
+    DeckLinkDevice *d;
 
-    if (index>m_devs.count()) {
-        qWarning("Requested device index too large");
+    if (!m_decklink->haveDeckLink()) {
+        qWarning("No decklink device found");
         return false;
     }
-    d=m_devs.at(index);
-    qDebug() << "*** Output set to" << d.name << d.model;
-    if (!d.output) {
-        qWarning("Requested device has no output");
+
+    d=m_decklink->getDevice(index);
+
+    if (!d) {
+        qWarning("Invalid decklink device");
         return false;
-    }
+    }    
 
     m_current=index;
-    m_output=d.output;
-    m_keyer=d.key;
+    m_output=d->output;
+    m_keyer=d->key;
+
+    qDebug() << "Decklink output set to " << m_current << d->name;
 
     result = m_output->CreateVideoFrame(m_fbsize.width(), m_fbsize.height(), m_fbsize.width()*4, bmdFormat8BitBGRA, bmdFrameFlagDefault, &m_frame);
     if (result!=S_OK) {
@@ -296,7 +77,7 @@ bool Decklinksink::setProfile(uint profile)
     IDeckLinkProfile *lp = NULL;
     BMDProfileID profile_id=0;
 
-    if (!m_haveDeckLink)
+    if (!m_decklink->haveDeckLink())
         return false;
 
     if (m_current<0) {
@@ -304,9 +85,9 @@ bool Decklinksink::setProfile(uint profile)
         return false;
     }
 
-    DeckLinkDevice d=m_devs.at(m_current);
+    DeckLinkDevice *d=m_decklink->getDevice(m_current);
 
-    if (d.dev->QueryInterface (IID_IDeckLinkProfileManager, (void **) &manager) != S_OK) {
+    if (d->dev->QueryInterface (IID_IDeckLinkProfileManager, (void **) &manager) != S_OK) {
         qWarning("Current device does not support profiles");
         return false;
     }
@@ -364,7 +145,7 @@ bool Decklinksink::setKeyer(bool enable)
 
 void Decklinksink::displayFrame(const QVideoFrame &frame)
 {
-    if (!m_haveDeckLink)
+    if (!m_decklink->haveDeckLink())
         return;
 
     QImage img=frame.toImage();
@@ -393,7 +174,7 @@ void Decklinksink::displayImage(const QImage &frame)
 {
     QImage f;
 
-    if (!m_haveDeckLink)
+    if (!m_decklink->haveDeckLink())
         return;
 
     if (frame.size()==m_fbsize && frame.format()==QImage::Format_ARGB32) {
@@ -412,6 +193,9 @@ void Decklinksink::displayImage(const QImage &frame)
 void Decklinksink::clearBuffer()
 {
     uint8_t* deckLinkBuffer=nullptr;
+
+    if (!m_decklink->haveDeckLink())
+        return;
 
     if (m_frame->GetBytes((void**)&deckLinkBuffer) != S_OK) {
         qWarning("Failed to get buffer pointer");
@@ -440,7 +224,7 @@ void Decklinksink::imageToBuffer(const QImage &frame)
 
 void Decklinksink::displayImage(const QVariant image)
 {
-    if (!m_haveDeckLink)
+    if (!m_decklink->haveDeckLink())
         return;
 
     switch (image.metaType().id()) {
@@ -488,17 +272,23 @@ void Decklinksink::disableOutput()
         qWarning("Failed to disable output");
 }
 
-bool Decklinksink::haveDeckLink() const
-{
-    return m_haveDeckLink;
-}
-
 void Decklinksink::setFramebufferSize(QSize size)
 {
     m_fbsize=size;
 }
 
-int Decklinksink::devices() const
+QObject *Decklinksink::getDecklink() const
 {
-    return m_devices;
+    return m_decklink;
+}
+
+void Decklinksink::setDecklink(QObject *newDecklink)
+{
+    if (m_decklink == newDecklink)
+        return;
+
+    qDebug() << "Decklink set for sink " << this->objectName();
+
+    m_decklink = qobject_cast<DeckLink*>(newDecklink);
+    emit decklinkChanged();
 }

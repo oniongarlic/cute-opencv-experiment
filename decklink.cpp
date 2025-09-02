@@ -1,6 +1,7 @@
 #include "decklink.h"
 
 #include <QUrl>
+#include <QTimer>
 #include <QDebug>
 
 DeckLink::DeckLink(QObject *parent)
@@ -25,26 +26,27 @@ DeckLink::DeckLink(QObject *parent)
         IDeckLinkProfileAttributes* deckLinkAttributes = NULL;
         int64_t value;
 
-        DeckLinkDevice dld;
+        DeckLinkDevice *dld=new DeckLinkDevice;
         IDeckLinkInput *input=nullptr;
         IDeckLinkOutput *output=nullptr;
 
         deckLink->GetModelName(&model);
         deckLink->GetDisplayName(&name);
 
-        dld.dev=deckLink;
-        dld.name=name;
-        dld.model=model;
+        dld->dev=deckLink;
+        dld->name=name;
+        dld->model=model;
+        dld->valid=true;
 
-        dld.input=nullptr;
-        dld.output=nullptr;
-        dld.key=nullptr;
+        dld->input=nullptr;
+        dld->output=nullptr;
+        dld->key=nullptr;
 
         QVariantMap dev;
         dev["modelName"]=QVariant(model);
         dev["displayName"]=QVariant(name);
 
-        qDebug() << "*** Device: "<< dld.name;
+        qDebug() << "*** Device: "<< dld->name;
 
         result = deckLink->QueryInterface(IID_IDeckLinkProfileAttributes, (void**)&deckLinkAttributes);
         if (result != S_OK) {
@@ -111,12 +113,12 @@ DeckLink::DeckLink(QObject *parent)
             if (result != S_OK) {
                 qDebug("No keyer for output");
                 dev["keyer"]=false;
-                dld.key=nullptr;
+                dld->key=nullptr;
             } else {
                 bool ki, ke;
                 qDebug("Keyer supported");
                 dev["keyer"]=true;
-                dld.key=k;
+                dld->key=k;
 
                 result = deckLinkAttributes->GetFlag(BMDDeckLinkSupportsInternalKeying, &ki);
                 result = deckLinkAttributes->GetFlag(BMDDeckLinkSupportsExternalKeying, &ke);
@@ -170,7 +172,7 @@ DeckLink::DeckLink(QObject *parent)
             dev["playback"]=true;
             dev["modes"]=modes;
 
-            dld.output=output;
+            dld->output=output;
         }        
 
         if ((value & bmdDeviceSupportsCapture) != 0) {
@@ -178,7 +180,7 @@ DeckLink::DeckLink(QObject *parent)
             if (result != S_OK) {
 
             } else {
-                dld.input=input;
+                dld->input=input;
             }
         }
 
@@ -217,9 +219,7 @@ DeckLink::DeckLink(QObject *parent)
         //qDebug() << "Device" << dev;
 
         m_devices++;
-        m_deviceList.append(dev);
-
-        dld.properties=dev;
+        dld->properties=dev;
         m_devs.append(dld);
 
     out:;
@@ -228,10 +228,13 @@ DeckLink::DeckLink(QObject *parent)
         // deckLink->Release();
     }
 
-    qDebug() << "Found devices" << m_devices << m_deviceList;
+    qDebug() << "Found devices" << m_devices;
 
-    emit haveDeckLinkChanged();
-    emit devicesChanged();
+    QTimer::singleShot(0, this, [&]{
+        emit haveDeckLinkChanged();
+        emit devicesChanged();
+    });
+
 }
 
 bool DeckLink::haveDeckLink() const
@@ -242,4 +245,14 @@ bool DeckLink::haveDeckLink() const
 int DeckLink::devices() const
 {
     return m_devices;
+}
+
+DeckLinkDevice *DeckLink::getDevice(int index)
+{
+    if (index>m_devs.count() || index<0) {
+        qWarning("Requested device out of range");
+        return nullptr;
+    }
+
+    return m_devs.at(index);
 }

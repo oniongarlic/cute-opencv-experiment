@@ -17,6 +17,7 @@
 
 #include "cuteimageprovider.h"
 
+#include "decklink.h"
 #include "decklinksink.h"
 
 #ifdef Q_OS_ANDROID
@@ -119,6 +120,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<OvVideoFilterSink>("org.tal", 1,0, "OpenCVVideoFilter");
 #endif
 
+    qmlRegisterType<DeckLink>("org.tal.decklink", 1,0, "DeckLink");
     qmlRegisterType<Decklinksink>("org.tal.decklink", 1,0, "DeckLinkSink");
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

@@ -230,8 +230,23 @@ ApplicationWindow {
         }
     }
 
+    DeckLink {
+        id: dl
+        onDevicesChanged: {
+            console.debug("*** We have decklink devices", devices)
+        }
+        onHaveDeckLinkChanged: {
+            console.debug("*** We have decklink support")
+        }
+    }
+
     DeckLinkSink {
         id: dls
+        decklink: dl
+        onDecklinkChanged: {
+            setOutput(0)
+        }
+
         //videoSink: vc.videoSink
     }
 
