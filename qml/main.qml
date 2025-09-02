@@ -245,9 +245,15 @@ ApplicationWindow {
         decklink: dl
         onDecklinkChanged: {
             setOutput(0)
+        }        
+    }
+    DeckLinkSink {
+        id: dls2
+        decklink: dl
+        onDecklinkChanged: {
+            setOutput(1)
         }
-
-        //videoSink: vc.videoSink
+        videoSink: vc.videoSink
     }
 
     OpenCVVideoFilter {
@@ -315,14 +321,35 @@ ApplicationWindow {
                     }
                 }
 
+                ToolSeparator {
+
+                }
+
                 ToolButton {
-                    text: "Enable"
+                    text: "E2"
+                    onClicked: {
+                        dls2.enableOutput();
+                    }
+                }
+                ToolButton {
+                    text: "D2"
+                    onClicked: {
+                        dls2.disableOutput();
+                    }
+                }
+
+                ToolSeparator {
+
+                }
+
+                ToolButton {
+                    text: "E1"
                     onClicked: {
                         dls.enableOutput();
                     }
                 }
                 ToolButton {
-                    text: "Disable"
+                    text: "D1"
                     onClicked: {
                         dls.disableOutput();
                     }
