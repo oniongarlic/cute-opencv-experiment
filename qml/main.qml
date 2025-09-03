@@ -245,7 +245,7 @@ ApplicationWindow {
         decklink: dl
         onDecklinkChanged: {
             setOutput(0)
-        }        
+        }
     }
     DeckLinkSink {
         id: dls2
@@ -254,6 +254,14 @@ ApplicationWindow {
             setOutput(1)
         }
         videoSink: vc.videoSink
+    }
+
+    DeckLinkSource {
+        id: dlsrc
+        decklink: dl
+        onDecklinkChanged: {
+            setInput(3) // Duo SDI 4
+        }
     }
 
     OpenCVVideoFilter {
@@ -371,6 +379,22 @@ ApplicationWindow {
                     text: "K-Off"
                     onClicked: {
                         dls.setKeyer(false)
+                    }
+                }
+                ToolSeparator {
+
+                }
+
+                ToolButton {
+                    text: "I-E"
+                    onClicked: {
+                        dlsrc.enableInput()
+                    }
+                }
+                ToolButton {
+                    text: "I-D"
+                    onClicked: {
+                        dlsrc.disableInput()
                     }
                 }
             }
