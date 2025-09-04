@@ -3,7 +3,6 @@
 #include <QUrl>
 #include <QDebug>
 
-
 class DeckLinkInputCallback: public IDeckLinkInputCallback
 {
 public:
@@ -31,13 +30,14 @@ public:
             return S_OK;
         }
 
+        videoFrame->AddRef();
         h=videoFrame->GetHeight();
         w=videoFrame->GetWidth();
         f=videoFrame->GetPixelFormat();
 
         qDebug() << "Got frame" << h << w << f;
 
-        m_src->newFrame(frame);
+        m_src->newFrame(videoFrame);
 
         return S_OK;
     }
@@ -47,7 +47,7 @@ public:
     ULONG STDMETHODCALLTYPE Release() override { return 1; }
 
 private:
-    Decklinksource*  m_src;
+    Decklinksource*  m_src;        
 };
 
 Decklinksource::Decklinksource(QObject *parent)
@@ -55,7 +55,12 @@ Decklinksource::Decklinksource(QObject *parent)
 {
     m_fbsize.setWidth(1920);
     m_fbsize.setHeight(1080);
+    m_audio=false;
     m_icb=new DeckLinkInputCallback(this);
+
+    QObject::connect(this, &Decklinksource::frameQueued,
+                     this, &Decklinksource::processFrame,
+                     Qt::QueuedConnection);
 }
 
 void Decklinksource::setVideoSink(QObject *videosink)
@@ -75,6 +80,11 @@ bool Decklinksource::setInput(uint index)
 
     if (!m_decklink->haveDeckLink()) {
         qWarning("No decklink device found");
+        return false;
+    }
+
+    if (m_streaming) {
+        qWarning("Input device in use, can not change");
         return false;
     }
 
@@ -191,9 +201,37 @@ void Decklinksource::imageToBuffer(const QImage &frame)
     }
 }
 
-void Decklinksource::newFrame(QImage &frame)
+void Decklinksource::newFrame(IDeckLinkVideoInputFrame *frame)
 {
+    QMutexLocker locker(&m_mutex);
+    m_frames.enqueue(frame);
+    emit frameQueued();
+}
 
+void Decklinksource::processFrame()
+{
+    QMutexLocker locker(&m_mutex);
+    uint8_t* deckLinkBuffer=nullptr;
+
+    if (m_frames.isEmpty()) {
+        qWarning("No frames queueed ?");
+        return;
+    }
+
+    IDeckLinkVideoInputFrame *frame=m_frames.dequeue();
+
+    locker.unlock();
+
+    m_framecounter++;
+
+    if (frame->GetBytes((void**)&deckLinkBuffer)!= S_OK)
+        goto out;
+
+    // XXX do something with the frame, duh
+
+    out:
+
+    frame->Release();
 }
 
 bool Decklinksource::enableInput()
@@ -201,6 +239,10 @@ bool Decklinksource::enableInput()
     if (m_input==nullptr) {
         qWarning("No input");
         return false;
+    }
+
+    if (m_audio) {
+        m_input->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, 2);
     }
 
     if (m_input->EnableVideoInput(m_mode, bmdFormat8BitBGRA, bmdVideoInputFlagDefault | bmdVideoInputEnableFormatDetection)!=S_OK) {
@@ -211,6 +253,9 @@ bool Decklinksource::enableInput()
         qWarning("Failed to start stream input");
         return false;
     }
+
+    m_streaming=true;
+
     return true;
 }
 
@@ -226,10 +271,17 @@ bool Decklinksource::disableInput()
         return false;
     }
 
+    if (m_audio) {
+        m_input->DisableAudioInput();
+    }
+
+
     if (m_input->DisableVideoInput()!=S_OK) {
         qWarning("Failed to disable input");
         return false;
     }
+
+    m_streaming=false;
 
     return true;
 }

@@ -5,6 +5,8 @@
 #include <QVariant>
 #include <QImage>
 #include <QVideoFrame>
+#include <QQueue>
+#include <QMutex>
 #include <QQmlEngine>
 #include <QtMultimedia/QVideoSink>
 #include <QtMultimedia/QVideoFrame>
@@ -44,21 +46,32 @@ signals:
     void haveDeckLinkChanged();
     void devicesChanged();
     void decklinkChanged();
+    void frameQueued();
 
 public slots:
     bool enableInput();
     bool disableInput();
 protected:
     void imageToBuffer(const QImage &frame);
-    void newFrame(QImage &frame);
+    void newFrame(IDeckLinkVideoInputFrame *frame);
+
+protected slots:
+    void processFrame();
+
 private:
     DeckLink *m_decklink = nullptr;
-
     DeckLinkInputCallback *m_icb;
 
     int m_current=-1;
     QSize m_fbsize;
     QVideoSink *m_videosink=nullptr;
+
+    QMutex m_mutex;
+    QQueue<IDeckLinkVideoInputFrame *> m_frames;
+    uint64_t m_framecounter;
+
+    bool m_streaming=false;
+    bool m_audio=false;
 
     // Active output/input/keyer and frame    
     IDeckLinkInput *m_input=nullptr;
