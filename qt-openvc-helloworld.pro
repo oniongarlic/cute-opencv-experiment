@@ -19,8 +19,8 @@ HEADERS += \
     objectdetectorworker.h
 
 # Decklink experiments
-HEADERS += decklink.h decklinksink.h
-SOURCES += decklink.cpp decklinksink.cpp
+HEADERS += decklink.h decklinksink.h decklinksource.h
+SOURCES += decklink.cpp decklinksink.cpp decklinksource.cpp
 
 # DECKLINK_SDK_PATH=/opt/decklink/include
 DECKLINK_SDK_PATH=/home/studio/repos/decklink-sdk-12-include

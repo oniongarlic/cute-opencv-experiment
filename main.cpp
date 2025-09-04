@@ -19,6 +19,7 @@
 
 #include "decklink.h"
 #include "decklinksink.h"
+#include "decklinksource.h"
 
 #ifdef Q_OS_ANDROID
 #include "androidhelper.h"
@@ -122,6 +123,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<DeckLink>("org.tal.decklink", 1,0, "DeckLink");
     qmlRegisterType<Decklinksink>("org.tal.decklink", 1,0, "DeckLinkSink");
+    qmlRegisterType<Decklinksource>("org.tal.decklink", 1,0, "DeckLinkSource");
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
     if (engine.rootObjects().isEmpty())
