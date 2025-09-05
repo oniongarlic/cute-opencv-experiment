@@ -262,6 +262,7 @@ ApplicationWindow {
         onDecklinkChanged: {
             setInput(3) // Duo SDI 4
         }
+        videoSink: vodeck.videoSink
     }
 
     OpenCVVideoFilter {
@@ -515,10 +516,29 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.minimumHeight: root.height/5
                 Layout.maximumHeight: root.height/4
+
+                VideoOutput {
+                    id: vodeck                    
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: 128
+                    Layout.maximumHeight: 256
+                    Layout.minimumWidth: 128
+                    Layout.maximumWidth: 384
+                    fillMode: Image.PreserveAspectFit
+
+                    Rectangle {
+                        anchors.fill: parent
+                        border.color: "red"
+                        border.width: 1
+                    }
+                }
+
                 ListView {
                     id: detectedItemsList
                     Layout.fillHeight: true
                     Layout.fillWidth: true
+                    Layout.minimumWidth: 128
                     clip: true
                     //visible: detectedItems.count>0
                     model: detectedItems
@@ -569,6 +589,7 @@ ApplicationWindow {
 
                     Layout.fillHeight: true
                     Layout.fillWidth: true
+                    Layout.minimumWidth: 128
                     clip: true
 
                     highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
