@@ -2,6 +2,7 @@
 
 #include <QUrl>
 #include <QDebug>
+#include <QVideoFrameFormat>
 
 class DeckLinkInputCallback: public IDeckLinkInputCallback
 {
@@ -12,10 +13,16 @@ public:
     }
 
     HRESULT STDMETHODCALLTYPE VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode *newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags) override {
+        BMDTimeValue time;
+        BMDTimeScale scale;
+
+        newDisplayMode->GetFrameRate(&time, &scale);
 
         qDebug() << "VideoInputFormatChanged" << notificationEvents << detectedSignalFlags;
-
         qDebug() << "Mode: " << newDisplayMode->GetDisplayMode() << newDisplayMode->GetWidth() << newDisplayMode->GetHeight() << newDisplayMode->GetFlags();
+        qDebug() << time << scale;
+
+        m_src->modeChanged(newDisplayMode->GetDisplayMode(), newDisplayMode->GetWidth(), newDisplayMode->GetHeight(), (float)scale/(float)time);
 
         return S_OK;
     }
@@ -24,9 +31,15 @@ public:
         long w,h;
         uint f;
 
-        if (!videoFrame || (videoFrame->GetFlags() & bmdFrameHasNoInputSource))
+        if (!videoFrame)
         {
-            qDebug("No valid input frame\n");
+            qDebug("Invalid input frame");
+            return S_OK;
+        }
+
+        if (videoFrame->GetFlags() & bmdFrameHasNoInputSource)
+        {
+            qDebug("No valid input signal");
             return S_OK;
         }
 
@@ -35,7 +48,7 @@ public:
         w=videoFrame->GetWidth();
         f=videoFrame->GetPixelFormat();
 
-        qDebug() << "Got frame" << h << w << f;
+        //qDebug() << "Got frame" << h << w << f;
 
         m_src->newFrame(videoFrame);
 
@@ -65,7 +78,18 @@ Decklinksource::Decklinksource(QObject *parent)
 
 void Decklinksource::setVideoSink(QObject *videosink)
 {
+    if (videosink==nullptr) {
+        m_videosink=nullptr;
+        return;
+    }    
 
+    m_videosink = qobject_cast<QVideoSink*>(videosink);
+    if (!m_videosink) {
+        qWarning("Invalid video sink set");
+        return;
+    }
+
+    emit videoSinkChanged();
 }
 
 QObject *Decklinksource::getVideoSink() const
@@ -208,10 +232,26 @@ void Decklinksource::newFrame(IDeckLinkVideoInputFrame *frame)
     emit frameQueued();
 }
 
+void Decklinksource::modeChanged(qint32 mode, long width, long height, float fps)
+{
+    qDebug() << "Input mode detected " << (BMDDisplayMode)mode << width << height << fps;
+
+    if (m_mode==mode) {
+        qDebug() << "Mode is what we expect";
+    } else {
+        qDebug() << "Capture restart required";
+        m_mode=mode;
+    }
+
+    emit inputModeChanged();
+}
+
 void Decklinksource::processFrame()
 {
     QMutexLocker locker(&m_mutex);
     uint8_t* deckLinkBuffer=nullptr;
+    uint32_t h,w;
+    BMDPixelFormat pf;
 
     if (m_frames.isEmpty()) {
         qWarning("No frames queueed ?");
@@ -224,10 +264,35 @@ void Decklinksource::processFrame()
 
     m_framecounter++;
 
+    h=frame->GetHeight();
+    w=frame->GetWidth();
+    pf=frame->GetPixelFormat();
+
+    QVideoFrameFormat vff(QSize(w,h), QVideoFrameFormat::Format_YUV422P);
+
     if (frame->GetBytes((void**)&deckLinkBuffer)!= S_OK)
         goto out;
 
-    // XXX do something with the frame, duh
+    // XXX something is off...
+    {
+        QVideoFrame vf(vff);
+        uint8_t *dst;
+        uint bpl=vf.bytesPerLine(0);
+
+        vf.map(QVideoFrame::WriteOnly);
+
+        dst=vf.bits(0);
+
+        for (uint y=0;y<h;y++) {
+            memcpy(dst+y*bpl, deckLinkBuffer+y+w*2, w*2);
+        }
+
+        vf.unmap();
+
+        if (m_videosink) {            
+            m_videosink->setVideoFrame(vf);
+        }
+    }    
 
     out:
 
@@ -245,7 +310,8 @@ bool Decklinksource::enableInput()
         m_input->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, 2);
     }
 
-    if (m_input->EnableVideoInput(m_mode, bmdFormat8BitBGRA, bmdVideoInputFlagDefault | bmdVideoInputEnableFormatDetection)!=S_OK) {
+    //bmdFormat8BitBGRA
+    if (m_input->EnableVideoInput(m_mode, bmdFormat8BitYUV, bmdVideoInputFlagDefault | bmdVideoInputEnableFormatDetection)!=S_OK) {
         qWarning("Failed to enable input");
         return false;
     }
@@ -254,7 +320,7 @@ bool Decklinksource::enableInput()
         return false;
     }
 
-    m_streaming=true;
+    setStreaming(true);
 
     return true;
 }
@@ -281,7 +347,7 @@ bool Decklinksource::disableInput()
         return false;
     }
 
-    m_streaming=false;
+    setStreaming(false);
 
     return true;
 }
@@ -305,4 +371,17 @@ void Decklinksource::setDecklink(QObject *newDecklink)
 
     m_decklink = qobject_cast<DeckLink*>(newDecklink);
     emit decklinkChanged();
+}
+
+bool Decklinksource::streaming() const
+{
+    return m_streaming;
+}
+
+void Decklinksource::setStreaming(bool newStreaming)
+{
+    if (m_streaming == newStreaming)
+        return;
+    m_streaming = newStreaming;
+    emit streamingChanged();
 }

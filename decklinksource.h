@@ -22,10 +22,27 @@ class Decklinksource: public QObject
     friend DeckLinkInputCallback;
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(QObject* decklink READ getDecklink WRITE setDecklink NOTIFY decklinkChanged FINAL REQUIRED)    
+    Q_PROPERTY(QObject* decklink READ getDecklink WRITE setDecklink NOTIFY decklinkChanged FINAL REQUIRED)
+    Q_PROPERTY(QObject* videoSink READ getVideoSink WRITE setVideoSink NOTIFY videoSinkChanged FINAL)
+    Q_PROPERTY(bool streaming READ streaming NOTIFY streamingChanged FINAL)
 public:
     explicit Decklinksource(QObject *parent = nullptr);
     bool haveDeckLink() const;
+
+    // xxx { mode, width, height, fps } ?
+    enum InputFormat {
+        VideoSDPAL=bmdModePAL,
+        VideoSDNTSC=bmdModeNTSC,
+        VideoSDPALp=bmdModePALp,
+        VideoSDNTSCp=bmdModeNTSCp,
+
+        VideoHD1080p24=bmdModeHD1080p24,
+        VideoHD1080p25=bmdModeHD1080p25,
+        VideoHD1080p30=bmdModeHD1080p30,
+        VideoHD1080p50=bmdModeHD1080p50,
+        VideoHD1080p60=bmdModeHD1080p6000,
+    };
+    Q_ENUM(InputFormat);
 
     Q_INVOKABLE void setFramebufferSize(QSize size);
     Q_INVOKABLE void setVideoSink(QObject *videosink);
@@ -42,11 +59,17 @@ public:
     QObject *getDecklink() const;
     void setDecklink(QObject *newDecklink);
 
+    bool streaming() const;
+
 signals:
     void haveDeckLinkChanged();
+    void videoSinkChanged();
     void devicesChanged();
     void decklinkChanged();
     void frameQueued();
+    void inputModeChanged();
+    void streamingChanged();
+    void restartStream();
 
 public slots:
     bool enableInput();
@@ -54,7 +77,8 @@ public slots:
 protected:
     void imageToBuffer(const QImage &frame);
     void newFrame(IDeckLinkVideoInputFrame *frame);
-
+    void modeChanged(qint32 mode, long width, long height, float fps);
+    void setStreaming(bool newStreaming);
 protected slots:
     void processFrame();
 
