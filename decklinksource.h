@@ -28,6 +28,7 @@ class Decklinksource: public QObject
     Q_PROPERTY(quint32 frameCount READ frameCount NOTIFY frameCountChanged FINAL)
     Q_PROPERTY(QSize frameSize READ frameSize NOTIFY frameSizeChanged FINAL)
     Q_PROPERTY(qreal fps READ fps NOTIFY fpsChanged FINAL)
+    Q_PROPERTY(bool audio READ audio WRITE setAudio NOTIFY audioChanged FINAL)
 public:
     explicit Decklinksource(QObject *parent = nullptr);
     bool haveDeckLink() const;
@@ -70,6 +71,9 @@ public:
 
     uint fps() const;
 
+    bool audio() const;
+    void setAudio(bool newAudio);
+
 signals:
     void haveDeckLinkChanged();
     void videoSinkChanged();
@@ -83,19 +87,23 @@ signals:
     void frameCountChanged(quint32 frames);
 
     void validSignal();
+    void invalidSignal();
 
     void frameSizeChanged();
 
     void fpsChanged(qreal fps);
+
+    void audioChanged();
 
 public slots:
     bool enableInput();
     bool disableInput();
 protected:
     void imageToBuffer(const QImage &frame);
-    void newFrame(IDeckLinkVideoInputFrame *frame);
+    void newFrame(IDeckLinkVideoInputFrame *frame, IDeckLinkAudioInputPacket *audio);
     void modeChanged(quint32 mode, long width, long height, float fps);
     void setStreaming(bool newStreaming);
+    void noInputSource();
 protected slots:
     void processFrame();
 
@@ -109,6 +117,7 @@ private:
 
     QMutex m_mutex;
     QQueue<IDeckLinkVideoInputFrame *> m_frames;
+    QQueue<IDeckLinkAudioInputPacket *> m_apackets;
     uint64_t m_framecounter;
 
     bool m_streaming=false;
@@ -125,6 +134,8 @@ private:
     BMDDisplayMode m_mode=bmdModeHD1080p30; // bmdModeHD1080p6000; //
     QSize m_frameSize;
     qreal m_fps=0;
+    bool m_signal=false;
+    bool m_invalid=false;
 };
 
 #endif // DECKLINKSOURCE_H

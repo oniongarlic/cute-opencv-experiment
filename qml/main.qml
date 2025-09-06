@@ -48,6 +48,15 @@ ApplicationWindow {
                 onClicked: dls.setProfile(5)
             }
         }
+        Menu {
+            title: "Capture"
+            MenuItem {
+                id: captureAudio
+                text: "Audio"
+                checkable: true
+                checked: dlsrc.audio
+            }
+        }
 
     }
 
@@ -262,6 +271,7 @@ ApplicationWindow {
     DeckLinkSource {
         id: dlsrc
         decklink: dl
+        audio: captureAudio.checked
         onDecklinkChanged: {
             setMode(DeckLinkSource.VideoSDPAL)
             setInput(0) // Duo SDI 4

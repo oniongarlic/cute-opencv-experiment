@@ -39,18 +39,18 @@ public:
 
         if (videoFrame->GetFlags() & bmdFrameHasNoInputSource)
         {
-            qDebug("No valid input signal");
+            m_src->noInputSource();
             return S_OK;
         }
 
-        videoFrame->AddRef();
-        h=videoFrame->GetHeight();
-        w=videoFrame->GetWidth();
-        f=videoFrame->GetPixelFormat();
-
-        //qDebug() << "Got frame" << h << w << f;
-
-        m_src->newFrame(videoFrame);
+        if (videoFrame && !audioPacket) {
+            videoFrame->AddRef();
+            m_src->newFrame(videoFrame, nullptr);
+        } else {
+            videoFrame->AddRef();
+            audioPacket->AddRef();
+            m_src->newFrame(videoFrame, audioPacket);
+        }
 
         return S_OK;
     }
@@ -228,10 +228,13 @@ void Decklinksource::imageToBuffer(const QImage &frame)
     }
 }
 
-void Decklinksource::newFrame(IDeckLinkVideoInputFrame *frame)
+void Decklinksource::newFrame(IDeckLinkVideoInputFrame *frame, IDeckLinkAudioInputPacket* audio)
 {
     QMutexLocker locker(&m_mutex);
     m_frames.enqueue(frame);
+    if (audio) {
+        m_apackets.enqueue(audio);
+    }
     emit frameQueued();
 }
 
@@ -265,13 +268,20 @@ void Decklinksource::processFrame()
     uint32_t h,w;
     BMDPixelFormat pf;    
     HRESULT result;
+    IDeckLinkVideoInputFrame *frame=nullptr;
+    IDeckLinkAudioInputPacket *ap=nullptr;
 
     if (m_frames.isEmpty()) {
         qWarning("No frames queueed ?");
         return;
     }    
 
-    IDeckLinkVideoInputFrame *frame=m_frames.dequeue();
+    frame=m_frames.dequeue();
+
+    if (m_audio) {
+        ap=m_apackets.dequeue();
+        qDebug() << "Audio" << ap->GetSampleFrameCount();
+    }
 
     locker.unlock();
 
@@ -283,12 +293,14 @@ void Decklinksource::processFrame()
     HRESULT hr = m_output->CreateVideoFrame(
         (int32_t)w,
         (int32_t)h,
-        (int32_t)w * 4,        // row bytes (4 bytes per pixel)
+        (int32_t)w * 4,
         bmdFormat8BitARGB,
         bmdFrameFlagDefault,
         &rgbaFrame);
 
     QVideoFrameFormat vff(QSize(w,h), QVideoFrameFormat::Format_ARGB8888);
+    vff.setFrameRate(m_fps);
+
     QVideoFrame vf(vff);
 
     if (frame->GetBytes((void**)&deckLinkBuffer)!= S_OK)
@@ -324,6 +336,9 @@ out: ;
 
     frame->Release();
     rgbaFrame->Release();
+    if (ap) {
+        ap->Release();
+    }
 
     emit frameCountChanged(m_framecounter);
 }
@@ -417,6 +432,14 @@ void Decklinksource::setStreaming(bool newStreaming)
     emit streamingChanged();
 }
 
+void Decklinksource::noInputSource()
+{
+    if (!m_invalid) {
+        m_invalid=true;
+        emit invalidSignal();
+    }
+}
+
 quint32 Decklinksource::frameCount() const
 {
     return m_framecounter;
@@ -430,4 +453,23 @@ QSize Decklinksource::frameSize() const
 uint Decklinksource::fps() const
 {
     return m_fps;
+}
+
+bool Decklinksource::audio() const
+{
+    return m_audio;
+}
+
+void Decklinksource::setAudio(bool newAudio)
+{
+    if (m_audio == newAudio)
+        return;
+
+    if (m_streaming) {
+        qWarning("Can not change audio setting, streaming in progress");
+        return;
+    }
+
+    m_audio = newAudio;
+    emit audioChanged();
 }
