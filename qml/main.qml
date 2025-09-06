@@ -65,6 +65,9 @@ ApplicationWindow {
                 text: "n/a"
                 Layout.preferredWidth: 100
             }
+            Text {
+                text: dlsrc.frameCount
+            }
             Rectangle {
                 id: crect
                 Layout.fillHeight: true
@@ -260,7 +263,8 @@ ApplicationWindow {
         id: dlsrc
         decklink: dl
         onDecklinkChanged: {
-            setInput(3) // Duo SDI 4
+            setMode(DeckLinkSource.VideoSDPAL)
+            setInput(0) // Duo SDI 4
         }
         videoSink: vodeck.videoSink
     }
@@ -531,6 +535,7 @@ ApplicationWindow {
                         anchors.fill: parent
                         border.color: "red"
                         border.width: 1
+                        color: "transparent"
                     }
                 }
 

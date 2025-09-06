@@ -71,6 +71,8 @@ Decklinksource::Decklinksource(QObject *parent)
     m_audio=false;
     m_icb=new DeckLinkInputCallback(this);
 
+    m_conv = CreateVideoConversionInstance();
+
     QObject::connect(this, &Decklinksource::frameQueued,
                      this, &Decklinksource::processFrame,
                      Qt::QueuedConnection);
@@ -121,6 +123,7 @@ bool Decklinksource::setInput(uint index)
 
     m_current=index;
     m_input=d->input;
+    m_output=d->output;
     m_keyer=d->key;
 
     qDebug() << "Decklink input set to " << m_current << d->name;
@@ -232,71 +235,97 @@ void Decklinksource::newFrame(IDeckLinkVideoInputFrame *frame)
     emit frameQueued();
 }
 
-void Decklinksource::modeChanged(qint32 mode, long width, long height, float fps)
+void Decklinksource::modeChanged(quint32 mode, long width, long height, float fps)
 {
     qDebug() << "Input mode detected " << (BMDDisplayMode)mode << width << height << fps;
 
+    m_frameSize.setHeight(height);
+    m_frameSize.setWidth(width);
+    emit frameSizeChanged();
+
+    m_fps=fps;
+    emit fpsChanged(m_fps);
+
     if (m_mode==mode) {
         qDebug() << "Mode is what we expect";
-    } else {
-        qDebug() << "Capture restart required";
-        m_mode=mode;
+        emit validSignal();
+        return;
     }
 
-    emit inputModeChanged();
+    qDebug() << "Capture restart required, got new mode" << mode << ", requested was" << m_mode;
+    quint32 old=m_mode;
+    m_mode=mode;
+    emit inputModeChanged(m_mode, old);
 }
 
 void Decklinksource::processFrame()
 {
     QMutexLocker locker(&m_mutex);
-    uint8_t* deckLinkBuffer=nullptr;
+    uint8_t *deckLinkBuffer=nullptr;
     uint32_t h,w;
-    BMDPixelFormat pf;
+    BMDPixelFormat pf;    
+    HRESULT result;
 
     if (m_frames.isEmpty()) {
         qWarning("No frames queueed ?");
         return;
-    }
+    }    
 
     IDeckLinkVideoInputFrame *frame=m_frames.dequeue();
 
     locker.unlock();
 
-    m_framecounter++;
-
     h=frame->GetHeight();
     w=frame->GetWidth();
     pf=frame->GetPixelFormat();
 
-    QVideoFrameFormat vff(QSize(w,h), QVideoFrameFormat::Format_YUV422P);
+    IDeckLinkMutableVideoFrame* rgbaFrame = nullptr;
+    HRESULT hr = m_output->CreateVideoFrame(
+        (int32_t)w,
+        (int32_t)h,
+        (int32_t)w * 4,        // row bytes (4 bytes per pixel)
+        bmdFormat8BitARGB,
+        bmdFrameFlagDefault,
+        &rgbaFrame);
+
+    QVideoFrameFormat vff(QSize(w,h), QVideoFrameFormat::Format_ARGB8888);
+    QVideoFrame vf(vff);
 
     if (frame->GetBytes((void**)&deckLinkBuffer)!= S_OK)
         goto out;
 
-    // XXX something is off...
+    if (!deckLinkBuffer)
+        goto out;
+
+    result=m_conv->ConvertFrame(frame, rgbaFrame);
+    if (result!=S_OK) {
+        qWarning("Failed to convert frame!");
+    }
+
+    if (rgbaFrame->GetBytes((void**)&deckLinkBuffer)!= S_OK)
+        goto out;
+
     {
-        QVideoFrame vf(vff);
         uint8_t *dst;
-        uint bpl=vf.bytesPerLine(0);
 
-        vf.map(QVideoFrame::WriteOnly);
-
+        vf.map(QVideoFrame::ReadWrite);
         dst=vf.bits(0);
-
-        for (uint y=0;y<h;y++) {
-            memcpy(dst+y*bpl, deckLinkBuffer+y+w*2, w*2);
-        }
-
+        memcpy(dst, deckLinkBuffer, vf.mappedBytes(0));
         vf.unmap();
+    }
 
-        if (m_videosink) {            
-            m_videosink->setVideoFrame(vf);
-        }
-    }    
+    m_framecounter++;
 
-    out:
+    if (m_videosink) {
+        m_videosink->setVideoFrame(vf);
+    }
+
+out: ;
 
     frame->Release();
+    rgbaFrame->Release();
+
+    emit frameCountChanged(m_framecounter);
 }
 
 bool Decklinksource::enableInput()
@@ -305,6 +334,8 @@ bool Decklinksource::enableInput()
         qWarning("No input");
         return false;
     }
+
+    m_framecounter=0;
 
     if (m_audio) {
         m_input->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, 2);
@@ -320,7 +351,7 @@ bool Decklinksource::enableInput()
         return false;
     }
 
-    setStreaming(true);
+    setStreaming(true);    
 
     return true;
 }
@@ -334,7 +365,7 @@ bool Decklinksource::disableInput()
 
     if (m_input->StopStreams()!=S_OK) {
         qWarning("Failed to stop stream input");
-        return false;
+        //return false;
     }
 
     if (m_audio) {
@@ -384,4 +415,19 @@ void Decklinksource::setStreaming(bool newStreaming)
         return;
     m_streaming = newStreaming;
     emit streamingChanged();
+}
+
+quint32 Decklinksource::frameCount() const
+{
+    return m_framecounter;
+}
+
+QSize Decklinksource::frameSize() const
+{
+    return m_frameSize;
+}
+
+uint Decklinksource::fps() const
+{
+    return m_fps;
 }

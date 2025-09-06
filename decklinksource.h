@@ -25,6 +25,9 @@ class Decklinksource: public QObject
     Q_PROPERTY(QObject* decklink READ getDecklink WRITE setDecklink NOTIFY decklinkChanged FINAL REQUIRED)
     Q_PROPERTY(QObject* videoSink READ getVideoSink WRITE setVideoSink NOTIFY videoSinkChanged FINAL)
     Q_PROPERTY(bool streaming READ streaming NOTIFY streamingChanged FINAL)
+    Q_PROPERTY(quint32 frameCount READ frameCount NOTIFY frameCountChanged FINAL)
+    Q_PROPERTY(QSize frameSize READ frameSize NOTIFY frameSizeChanged FINAL)
+    Q_PROPERTY(qreal fps READ fps NOTIFY fpsChanged FINAL)
 public:
     explicit Decklinksource(QObject *parent = nullptr);
     bool haveDeckLink() const;
@@ -61,15 +64,29 @@ public:
 
     bool streaming() const;
 
+    quint32 frameCount() const;
+
+    QSize frameSize() const;
+
+    uint fps() const;
+
 signals:
     void haveDeckLinkChanged();
     void videoSinkChanged();
     void devicesChanged();
     void decklinkChanged();
     void frameQueued();
-    void inputModeChanged();
+    void inputModeChanged(quint32 newMode, quint32 oldMode);
     void streamingChanged();
     void restartStream();
+
+    void frameCountChanged(quint32 frames);
+
+    void validSignal();
+
+    void frameSizeChanged();
+
+    void fpsChanged(qreal fps);
 
 public slots:
     bool enableInput();
@@ -77,7 +94,7 @@ public slots:
 protected:
     void imageToBuffer(const QImage &frame);
     void newFrame(IDeckLinkVideoInputFrame *frame);
-    void modeChanged(qint32 mode, long width, long height, float fps);
+    void modeChanged(quint32 mode, long width, long height, float fps);
     void setStreaming(bool newStreaming);
 protected slots:
     void processFrame();
@@ -99,10 +116,15 @@ private:
 
     // Active output/input/keyer and frame    
     IDeckLinkInput *m_input=nullptr;
+    IDeckLinkOutput *m_output=nullptr;
     IDeckLinkKeyer *m_keyer=nullptr;
     IDeckLinkMutableVideoFrame* m_frame=nullptr;
 
+    IDeckLinkVideoConversion *m_conv;
+
     BMDDisplayMode m_mode=bmdModeHD1080p30; // bmdModeHD1080p6000; //
+    QSize m_frameSize;
+    qreal m_fps=0;
 };
 
 #endif // DECKLINKSOURCE_H
