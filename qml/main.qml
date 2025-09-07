@@ -57,13 +57,21 @@ ApplicationWindow {
                 checked: dlsrc.audio
             }
         }
-
     }
 
     ToolBar {
         id: mainToolbar
         RowLayout {
             anchors.fill: parent
+            ComboBox {
+                id: inputCombo
+                textRole: "name"
+            }
+            ComboBox {
+                id: outputCombo
+                textRole: "name"
+            }
+
             Text {
                 id: cnameText
                 text: "n/a"
@@ -246,6 +254,10 @@ ApplicationWindow {
         id: dl
         onDevicesChanged: {
             console.debug("*** We have decklink devices", devices)
+            var d=dl.getDeviceProperties(0)
+            console.debug(d)
+            outputCombo.model=d["outputModes"]
+            inputCombo.model=d["inputModes"]
         }
         onHaveDeckLinkChanged: {
             console.debug("*** We have decklink support")

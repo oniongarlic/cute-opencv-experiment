@@ -118,7 +118,7 @@ private:
     QMutex m_mutex;
     QQueue<IDeckLinkVideoInputFrame *> m_frames;
     QQueue<IDeckLinkAudioInputPacket *> m_apackets;
-    uint64_t m_framecounter;
+    uint64_t m_framecounter=0;
 
     bool m_streaming=false;
     bool m_audio=false;

@@ -170,17 +170,50 @@ DeckLink::DeckLink(QObject *parent)
             }
 
             dev["playback"]=true;
-            dev["modes"]=modes;
+            dev["outputModes"]=modes;
 
             dld->output=output;
         }        
 
         if ((value & bmdDeviceSupportsCapture) != 0) {
+            QVariantList modes;
+
             result = deckLink->QueryInterface(IID_IDeckLinkInput, (void**)&input);
             if (result != S_OK) {
 
             } else {
+                IDeckLinkDisplayModeIterator *dmi;
+                IDeckLinkDisplayMode *dm;
                 dld->input=input;
+
+                output->GetDisplayModeIterator(&dmi);
+                while ((dmi->Next(&dm))==S_OK) {
+                    const char *mname;
+                    qint64 w,h;
+                    uint m;
+                    BMDTimeValue tv;
+                    BMDTimeScale ts;
+
+                    QVariantMap mode;
+
+                    dm->GetName(&mname);
+                    h=dm->GetHeight();
+                    w=dm->GetWidth();
+                    m=dm->GetDisplayMode();
+                    dm->GetFrameRate(&tv, &ts);
+
+                    qDebug() << "INPUT MODE: " << m << mname << w << h << tv << ts;
+
+                    mode["name"]=QVariant(mname);
+                    mode["width"]=w;
+                    mode["height"]=h;
+                    mode["mode"]=m;
+                    modes.append(mode);
+                }
+                dmi->Release();
+
+                dev["record"]=true;
+                dev["inputModes"]=modes;
             }
         }
 
@@ -247,12 +280,28 @@ int DeckLink::devices() const
     return m_devices;
 }
 
+QVariantMap DeckLink::getDeviceProperties(int index)
+{
+    if (index>m_devs.count() || index<0) {
+        qWarning("Requested device out of range");
+        return QVariantMap();
+    }
+    auto d=m_devs.at(index);
+
+    return d->properties;
+}
+
 DeckLinkDevice *DeckLink::getDevice(int index)
 {
+    DeckLinkDevice *d;
     if (index>m_devs.count() || index<0) {
         qWarning("Requested device out of range");
         return nullptr;
     }
 
-    return m_devs.at(index);
+    d=m_devs.at(index);
+
+    qDebug() << index << d->name << d->properties;
+
+    return d;
 }

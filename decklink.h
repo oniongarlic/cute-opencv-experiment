@@ -11,7 +11,7 @@
 
 #include "DeckLinkAPI.h"
 
-typedef struct DeckLinkDevice
+struct DeckLinkDevice
 {
     QString name;
     QString model;
@@ -26,7 +26,14 @@ typedef struct DeckLinkDevice
     IDeckLinkKeyer *key;
     BMDDisplayMode mode;
     IDeckLinkMutableVideoFrame *frame;
-} DeckLinkDevice;
+
+    Q_GADGET
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(QString model MEMBER model)
+    Q_PROPERTY(uint fps MEMBER fps)
+    Q_PROPERTY(QVariantMap properties MEMBER properties)
+};
+Q_DECLARE_METATYPE(DeckLinkDevice)
 
 class DeckLink : public QObject
 {
@@ -38,6 +45,8 @@ public:
     explicit DeckLink(QObject *parent = nullptr);
     bool haveDeckLink() const;
     int devices() const;
+
+    Q_INVOKABLE QVariantMap getDeviceProperties(int index);
 
     DeckLinkDevice *getDevice(int index);
 
