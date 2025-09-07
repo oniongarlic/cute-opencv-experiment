@@ -66,10 +66,18 @@ ApplicationWindow {
             ComboBox {
                 id: inputCombo
                 textRole: "name"
+                valueRole: "mode"
+                onActivated: {
+                    console.debug(currentValue)
+                    dlsrc.setMode(currentValue)
+                }
             }
             ComboBox {
                 id: outputCombo
                 textRole: "name"
+                onActivated: {
+                    dls.setMode(currentValue)
+                }
             }
 
             Text {
@@ -414,12 +422,14 @@ ApplicationWindow {
 
                 ToolButton {
                     text: "I-E"
+                    enabled: !dlsrc.streaming
                     onClicked: {
                         dlsrc.enableInput()
                     }
                 }
                 ToolButton {
                     text: "I-D"
+                    enabled: dlsrc.streaming
                     onClicked: {
                         dlsrc.disableInput()
                     }
