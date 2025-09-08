@@ -63,6 +63,11 @@ bool Decklinksink::setOutput(uint index)
     return true;
 }
 
+qint32 Decklinksink::getMode()
+{
+    return m_mode;
+}
+
 bool Decklinksink::setMode(qint32 mode)
 {
     m_mode=mode;

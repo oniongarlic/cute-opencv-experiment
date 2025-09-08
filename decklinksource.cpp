@@ -133,7 +133,7 @@ bool Decklinksource::setInput(uint index)
     return true;
 }
 
-bool Decklinksource::getMode()
+qint32 Decklinksource::getMode()
 {
     return m_mode;
 }
