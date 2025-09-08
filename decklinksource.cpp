@@ -123,8 +123,7 @@ bool Decklinksource::setInput(uint index)
 
     m_current=index;
     m_input=d->input;
-    m_output=d->output;
-    m_keyer=d->key;
+    m_output=d->output;    
 
     qDebug() << "Decklink input set to " << m_current << d->name;
 
@@ -196,24 +195,6 @@ bool Decklinksource::setProfile(uint profile)
     }
 
     manager->Release();
-
-    return result==S_OK;
-}
-
-bool Decklinksource::setKeyer(bool enable)
-{
-    HRESULT result;
-    if (!m_keyer) {
-        qWarning("Keyer not set");
-        return false;
-    }
-
-    if (enable)
-        result=m_keyer->Enable(true);
-    else
-        result=m_keyer->Disable();
-
-    qDebug() << "Keyer set " << (result==S_OK);
 
     return result==S_OK;
 }

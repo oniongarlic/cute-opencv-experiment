@@ -19,6 +19,7 @@ class Decklinksink : public QObject
     QML_ELEMENT
     Q_PROPERTY(QObject* decklink READ getDecklink WRITE setDecklink NOTIFY decklinkChanged FINAL REQUIRED)
     Q_PROPERTY(QObject* videoSink READ getVideoSink WRITE setVideoSink NOTIFY videoSinkChanged FINAL)
+    Q_PROPERTY(bool keyEnabled READ keyEnabled NOTIFY keyEnabledChanged FINAL)
 public:
     explicit Decklinksink(QObject *parent = nullptr);
     bool haveDeckLink() const;
@@ -39,12 +40,16 @@ public:
     QObject *getDecklink() const;
     void setDecklink(QObject *newDecklink);
 
+    bool keyEnabled() const;
+
 signals:
     void haveDeckLinkChanged();
     void devicesChanged();
     void videoSinkChanged();
 
     void decklinkChanged();
+
+    void keyEnabledChanged();
 
 public slots:
     void displayFrame(const QVideoFrame &frame);
@@ -64,6 +69,7 @@ private:
     QVideoSink *m_videosink=nullptr;
 
     bool m_use_precompiled=true;
+    bool m_keyEnabled=false;
 
     // Active output/input/keyer and frame
     IDeckLinkOutput *m_output=nullptr;

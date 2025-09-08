@@ -57,23 +57,18 @@ public:
     Q_INVOKABLE bool setMode(qint32 mode);
 
     Q_INVOKABLE bool setProfile(uint profile);
-    Q_INVOKABLE bool setKeyer(bool enable);    
 
     QObject *getVideoSink() const;
-
     QObject *getDecklink() const;
     void setDecklink(QObject *newDecklink);
 
     bool streaming() const;
-
     quint32 frameCount() const;
-
     QSize frameSize() const;
-
     uint fps() const;
 
     bool audio() const;
-    void setAudio(bool newAudio);
+    void setAudio(bool newAudio);    
 
 signals:
     void haveDeckLinkChanged();
@@ -84,16 +79,11 @@ signals:
     void inputModeChanged(quint32 newMode, quint32 oldMode);
     void streamingChanged();
     void restartStream();
-
     void frameCountChanged(quint32 frames);
-
     void validSignal();
     void invalidSignal();
-
     void frameSizeChanged();
-
     void fpsChanged(qreal fps);
-
     void audioChanged();
 
 public slots:
@@ -127,7 +117,6 @@ private:
     // Active output/input/keyer and frame    
     IDeckLinkInput *m_input=nullptr;
     IDeckLinkOutput *m_output=nullptr;
-    IDeckLinkKeyer *m_keyer=nullptr;
     IDeckLinkMutableVideoFrame* m_frame=nullptr;
 
     IDeckLinkVideoConversion *m_conv;

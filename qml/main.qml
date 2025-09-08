@@ -28,23 +28,23 @@ ApplicationWindow {
                 onClicked: dls.setProfile(0)
             }
             MenuItem {
-                text: "1"
+                text: "1 1-Full"
                 onClicked: dls.setProfile(1)
             }
             MenuItem {
-                text: "2"
+                text: "2 1-Half"
                 onClicked: dls.setProfile(2)
             }
             MenuItem {
-                text: "3"
+                text: "3 2-Full"
                 onClicked: dls.setProfile(3)
             }
             MenuItem {
-                text: "4"
+                text: "4 2-Half"
                 onClicked: dls.setProfile(4)
             }
             MenuItem {
-                text: "5"
+                text: "5 4-Half"
                 onClicked: dls.setProfile(5)
             }
         }
@@ -121,7 +121,9 @@ ApplicationWindow {
         console.debug(it)
 
         imp.setImage(it);
-        dls.displayImage(it)
+
+        dls.displayImage(file)
+        dls2.displayImage(file)
     }
 
     ImageGallerySelector {
@@ -269,21 +271,24 @@ ApplicationWindow {
         id: dl
         onDevicesChanged: {
             console.debug("*** We have decklink devices", devices)
-            var d=dl.getDeviceProperties(0)
-            console.debug(d)
-            outputCombo.model=d["outputModes"]
-            inputCombo.model=d["inputModes"]
         }
         onHaveDeckLinkChanged: {
             console.debug("*** We have decklink support")
 
-            // Sinks
-            dls.setOutput(0)
-            dls2.setOutput(1)
 
-            // Sources
+            // Sinks
+            dls.setOutput(0) // Duo 2 SDI-1 (1+2)
+            var d0=dl.getDeviceProperties(0)
+            outputCombo.model=d0["outputModes"]
+            outputCombo.currentIndex=outputCombo.indexOfValue(dls.getMode());
+
+            dls2.setOutput(1)
+            dls2.setMode(DeckLinkSource.VideoHD1080p30)
+
+            // Sources            
             dlsrc.setInput(3)
-            // dlsrc.setMode(DeckLinkSource.VideoSDPAL)
+            var d3=dl.getDeviceProperties(3)
+            inputCombo.model=d3["inputModes"]
             inputCombo.currentIndex=inputCombo.indexOfValue(dlsrc.getMode());
         }
     }
@@ -316,7 +321,7 @@ ApplicationWindow {
 
     OpenCVVideoFilter {
         id: cvfilter
-        //videoSink: vc.videoSink
+        // videoSink: vc.videoSink
 
         onColorFound: {
             console.debug(cgroup+":"+cname)
@@ -395,6 +400,12 @@ ApplicationWindow {
                         dls2.disableOutput();
                     }
                 }
+                ToolButton {
+                    text: ""
+                    onClicked: {
+                        dls2.displayImage()
+                    }
+                }
 
                 ToolSeparator {
 
@@ -455,6 +466,7 @@ ApplicationWindow {
         ColumnLayout {
             id: mainRow
             anchors.fill: parent
+            spacing: 4
 
             VideoOutput {
                 id: vc
@@ -566,7 +578,7 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 Layout.minimumHeight: root.height/5
-                Layout.maximumHeight: root.height/4
+                Layout.maximumHeight: root.height/3
 
                 VideoOutput {
                     id: vodeck                    

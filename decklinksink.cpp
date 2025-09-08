@@ -127,6 +127,8 @@ bool Decklinksink::setProfile(uint profile)
 
     manager->Release();
 
+    qDebug() << "Profile set " << profile_id << (bool)(result==S_OK);
+
     return result==S_OK;
 }
 
@@ -138,12 +140,15 @@ bool Decklinksink::setKeyer(bool enable)
         return false;
     }
 
-    if (enable)
+    if (enable) {
         result=m_keyer->Enable(true);
-    else
+        m_keyEnabled=result==S_OK ? true : false;
+    } else {
         result=m_keyer->Disable();
+        m_keyEnabled=result==S_OK ? false : true;
+    }
 
-    qDebug() << "Keyer set " << (result==S_OK);
+    qDebug() << "Keyer set to: " << m_keyEnabled;
 
     return result==S_OK;
 }
@@ -185,6 +190,9 @@ void Decklinksink::displayImage(const QImage &frame)
     if (!m_decklink->haveDeckLink())
         return;
 
+    if (!m_output)
+        return;
+
     if (frame.size()==m_fbsize && frame.format()==QImage::Format_ARGB32) {
         f=frame;
     } else if (frame.size()==m_fbsize) {
@@ -203,6 +211,9 @@ void Decklinksink::clearBuffer()
     uint8_t* deckLinkBuffer=nullptr;
 
     if (!m_decklink->haveDeckLink())
+        return;
+
+    if (!m_output)
         return;
 
     if (m_frame->GetBytes((void**)&deckLinkBuffer) != S_OK) {
@@ -235,17 +246,21 @@ void Decklinksink::displayImage(const QVariant image)
     if (!m_decklink->haveDeckLink())
         return;
 
+    if (!m_output)
+        return;
+
     switch (image.metaType().id()) {
     case QMetaType::QUrl: {
         QUrl tmp=image.value<QUrl>();
+        QImage img;
 
-        if (tmp.scheme()=="" || tmp.scheme()=="file") { // File or absolute path
-            QImage tmpi;
-            tmpi.load(tmp.path());
+        if (tmp.scheme()=="" || tmp.scheme()=="file") { // File or absolute path            
+            img.load(tmp.path());
         } else {
             qDebug() << "Unhandled QUrl scheme" << tmp.scheme();
+            return;
         }
-        displayImage(tmp);
+        displayImage(img);
     }
     break;
     case QMetaType::QImage: {
@@ -254,6 +269,7 @@ void Decklinksink::displayImage(const QVariant image)
     }
     break;
     default:
+        qWarning() << "Unhandled image source";
         return;
     }
 }
@@ -299,4 +315,9 @@ void Decklinksink::setDecklink(QObject *newDecklink)
 
     m_decklink = qobject_cast<DeckLink*>(newDecklink);
     emit decklinkChanged();
+}
+
+bool Decklinksink::keyEnabled() const
+{
+    return m_keyEnabled;
 }
