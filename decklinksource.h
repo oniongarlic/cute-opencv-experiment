@@ -53,6 +53,7 @@ public:
 
     Q_INVOKABLE bool setInput(uint index);
 
+    Q_INVOKABLE bool getMode();
     Q_INVOKABLE bool setMode(qint32 mode);
 
     Q_INVOKABLE bool setProfile(uint profile);

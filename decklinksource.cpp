@@ -133,6 +133,11 @@ bool Decklinksource::setInput(uint index)
     return true;
 }
 
+bool Decklinksource::getMode()
+{
+    return m_mode;
+}
+
 bool Decklinksource::setMode(qint32 mode)
 {
     m_mode=mode;
@@ -413,7 +418,7 @@ void Decklinksource::setDecklink(QObject *newDecklink)
     if (m_decklink == newDecklink)
         return;
 
-    qDebug() << "Decklink set for sink " << this->objectName();
+    qDebug() << "Decklink set for source " << this->objectName();
 
     m_decklink = qobject_cast<DeckLink*>(newDecklink);
     emit decklinkChanged();

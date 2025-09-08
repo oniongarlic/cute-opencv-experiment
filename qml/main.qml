@@ -63,14 +63,21 @@ ApplicationWindow {
         id: mainToolbar
         RowLayout {
             anchors.fill: parent
+            Label {
+                text: "Input"
+            }
             ComboBox {
                 id: inputCombo
                 textRole: "name"
-                valueRole: "mode"
+                valueRole: "mode"                
                 onActivated: {
                     console.debug(currentValue)
                     dlsrc.setMode(currentValue)
                 }
+            }
+
+            Label {
+                text: "Output"
             }
             ComboBox {
                 id: outputCombo
@@ -269,34 +276,42 @@ ApplicationWindow {
         }
         onHaveDeckLinkChanged: {
             console.debug("*** We have decklink support")
+
+            // Sinks
+            dls.setOutput(0)
+            dls2.setOutput(1)
+
+            // Sources
+            dlsrc.setInput(3)
+            // dlsrc.setMode(DeckLinkSource.VideoSDPAL)
+            inputCombo.currentIndex=inputCombo.indexOfValue(dlsrc.getMode());
         }
     }
 
     DeckLinkSink {
         id: dls
         decklink: dl
-        onDecklinkChanged: {
-            setOutput(0)
-        }
+        objectName: "Sink 1"
     }
     DeckLinkSink {
         id: dls2
         decklink: dl
-        onDecklinkChanged: {
-            setOutput(1)
-        }
+        objectName: "Sink 2"
         videoSink: vc.videoSink
     }
 
     DeckLinkSource {
         id: dlsrc
         decklink: dl
-        audio: captureAudio.checked
-        onDecklinkChanged: {
-            setMode(DeckLinkSource.VideoSDPAL)
-            setInput(0) // Duo SDI 4
-        }
+        objectName: "Source 4"
+        audio: captureAudio.checked        
         videoSink: vodeck.videoSink
+        onInvalidSignal: {
+            console.debug("*** Invalid input signal")
+        }
+        onValidSignal: {
+            console.debug("*** Got valid input signal")
+        }
     }
 
     OpenCVVideoFilter {

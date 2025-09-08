@@ -202,7 +202,7 @@ DeckLink::DeckLink(QObject *parent)
                     m=dm->GetDisplayMode();
                     dm->GetFrameRate(&tv, &ts);
 
-                    qDebug() << "INPUT MODE: " << m << mname << w << h << tv << ts;
+                    // qDebug() << "INPUT MODE: " << m << mname << w << h << tv << ts;
 
                     mode["name"]=QVariant(mname);
                     mode["width"]=w;
@@ -282,7 +282,7 @@ int DeckLink::devices() const
 
 QVariantMap DeckLink::getDeviceProperties(int index)
 {
-    if (index>m_devs.count() || index<0) {
+    if (index>m_devs.count()-1 || index<0) {
         qWarning("Requested device out of range");
         return QVariantMap();
     }
@@ -292,16 +292,11 @@ QVariantMap DeckLink::getDeviceProperties(int index)
 }
 
 DeckLinkDevice *DeckLink::getDevice(int index)
-{
-    DeckLinkDevice *d;
-    if (index>m_devs.count() || index<0) {
+{    
+    if (index>m_devs.count()-1 || index<0) {
         qWarning("Requested device out of range");
         return nullptr;
     }
 
-    d=m_devs.at(index);
-
-    qDebug() << index << d->name << d->properties;
-
-    return d;
+    return m_devs.at(index);
 }
