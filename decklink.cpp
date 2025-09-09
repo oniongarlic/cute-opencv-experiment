@@ -155,6 +155,7 @@ DeckLink::DeckLink(QObject *parent)
                     qDebug() << "*** Profile: " << pid << pactive;
                 }
 
+#if 0
                 IDeckLinkProfile *profile = NULL;
                 BMDProfileID bmd_profile_id = 0;
                 result = manager->GetProfile(bmd_profile_id, &profile);
@@ -163,6 +164,7 @@ DeckLink::DeckLink(QObject *parent)
                     result=profile->SetActive();
                     profile->Release();
                 }
+#endif
 
                 manager->Release();
             } else {

@@ -135,15 +135,21 @@ bool Decklinksink::setProfile(uint profile)
 bool Decklinksink::setKeyer(bool enable)
 {
     HRESULT result;
+
+    if (!m_decklink->haveDeckLink())
+        return false;
+
     if (!m_keyer) {
         qWarning("Keyer not set");
         return false;
     }
 
     if (enable) {
+        qDebug("*** Enable key");
         result=m_keyer->Enable(true);
         m_keyEnabled=result==S_OK ? true : false;
     } else {
+        qDebug("*** Disable key");
         result=m_keyer->Disable();
         m_keyEnabled=result==S_OK ? false : true;
     }
@@ -221,7 +227,7 @@ void Decklinksink::clearBuffer()
         return;
     }
 
-    memset(deckLinkBuffer, 0, m_fbsize.width()*m_fbsize.height()*4);
+    memset(deckLinkBuffer, 128, m_fbsize.width()*m_fbsize.height()*4);
 
     m_output->DisplayVideoFrameSync(m_frame);
 }
@@ -274,26 +280,61 @@ void Decklinksink::displayImage(const QVariant image)
     }
 }
 
-void Decklinksink::enableOutput()
-{    
-    if (m_output==nullptr) {
-        qWarning("No output");
-        return;
-    }    
-
-    if (m_output->EnableVideoOutput(m_mode, bmdVideoOutputFlagDefault)!=S_OK)
-        qWarning("Failed to enable output");
-}
-
-void Decklinksink::disableOutput()
+bool Decklinksink::enableOutput()
 {
+    HRESULT result;
+
     if (m_output==nullptr) {
         qWarning("No output");
-        return;
+        return false;
     }
 
-    if (m_output->DisableVideoOutput()!=S_OK)
-        qWarning("Failed to disable output");
+    result=m_output->EnableVideoOutput(m_mode, bmdVideoOutputFlagDefault);
+    switch (result) {
+    case S_OK:
+        return true;
+        break;
+    case E_UNEXPECTED:
+        qWarning("Error: Unexpected");
+        break;
+    case E_OUTOFMEMORY:
+        qWarning("Error: Out of memory");
+        break;
+    case E_ACCESSDENIED:
+        qWarning("Error: Access denied");
+        break;
+    case E_INVALIDARG:
+        qWarning("Error: Invalid argument");
+        break;
+    case E_FAIL:
+        qWarning("Error: Failed");
+        break;
+    default:
+        qWarning("Error: Other error");
+        break;
+    }
+
+    qWarning() << "Failed to enable output, mode " << m_mode << HRESULT_CODE(result);
+
+    return false;
+}
+
+bool Decklinksink::disableOutput()
+{
+    HRESULT result;
+
+    if (m_output==nullptr) {
+        qWarning("No output");
+        return false;
+    }
+
+    result=m_output->DisableVideoOutput();
+
+    if (result!=S_OK) {
+        qWarning() << "Failed to disable output" << result;
+        return false;
+    }
+    return true;
 }
 
 void Decklinksink::setFramebufferSize(QSize size)

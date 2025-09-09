@@ -56,8 +56,8 @@ public slots:
     void displayImage(const QImage &frame);
     void displayImage(const QVariant image);
 
-    void enableOutput();
-    void disableOutput();
+    bool enableOutput();
+    bool disableOutput();
 
     void clearBuffer();
 protected:

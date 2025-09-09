@@ -69,9 +69,9 @@ ApplicationWindow {
             ComboBox {
                 id: inputCombo
                 textRole: "name"
-                valueRole: "mode"                
+                valueRole: "mode"
                 onActivated: {
-                    console.debug(currentValue)
+                    console.debug("Input mode", currentValue)
                     dlsrc.setMode(currentValue)
                 }
             }
@@ -82,9 +82,28 @@ ApplicationWindow {
             ComboBox {
                 id: outputCombo
                 textRole: "name"
+                valueRole: "mode"
                 onActivated: {
+                    console.debug("Output mode", currentValue)
                     dls.setMode(currentValue)
                 }
+            }
+
+            CheckBox {
+                id: sdi1
+                text: "1"
+            }
+            CheckBox {
+                id: sdi2
+                text: "2"
+            }
+            CheckBox {
+                id: sdi3
+                text: "3"
+            }
+            CheckBox {
+                id: sdi4
+                text: "4"
             }
 
             Text {
@@ -122,8 +141,13 @@ ApplicationWindow {
 
         imp.setImage(it);
 
-        dls.displayImage(file)
-        dls2.displayImage(file)
+        //dls.displayImage(it)
+
+        if (sdi1.checked)
+            dls.displayImage(file)
+
+        if (sdi2.checked)
+            dls2.displayImage(file)
     }
 
     ImageGallerySelector {
@@ -279,10 +303,10 @@ ApplicationWindow {
             // Sinks
             dls.setOutput(0) // Duo 2 SDI-1 (1+2)
             var d0=dl.getDeviceProperties(0)
-            outputCombo.model=d0["outputModes"]
+            outputCombo.model=d0["outputModes"]            
             outputCombo.currentIndex=outputCombo.indexOfValue(dls.getMode());
 
-            dls2.setOutput(1)
+            dls2.setOutput(1) // Duo 2 SDI-3
             dls2.setMode(DeckLinkSource.VideoHD1080p30)
 
             // Sources            

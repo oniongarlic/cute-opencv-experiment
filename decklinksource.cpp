@@ -199,6 +199,18 @@ bool Decklinksource::setProfile(uint profile)
     return result==S_OK;
 }
 
+bool Decklinksource::grabFrame()
+{
+    m_grabframe=true;
+
+    return true;
+}
+
+QImage Decklinksource::getImage()
+{
+    return m_frameImage;
+}
+
 void Decklinksource::imageToBuffer(const QImage &frame)
 {
     uint8_t* deckLinkBuffer=nullptr;
@@ -316,6 +328,12 @@ void Decklinksource::processFrame()
 
     if (m_videosink) {
         m_videosink->setVideoFrame(vf);
+    }
+
+    if (m_grabframe) {
+        m_grabframe=false;
+        m_frameImage=vf.toImage();
+        emit frameGrabbed();
     }
 
 out: ;

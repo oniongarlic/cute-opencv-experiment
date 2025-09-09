@@ -58,6 +58,9 @@ public:
 
     Q_INVOKABLE bool setProfile(uint profile);
 
+    Q_INVOKABLE bool grabFrame();
+    Q_INVOKABLE QImage getImage();
+
     QObject *getVideoSink() const;
     QObject *getDecklink() const;
     void setDecklink(QObject *newDecklink);
@@ -85,6 +88,7 @@ signals:
     void frameSizeChanged();
     void fpsChanged(qreal fps);
     void audioChanged();
+    void frameGrabbed();
 
 public slots:
     bool enableInput();
@@ -126,6 +130,8 @@ private:
     qreal m_fps=0;
     bool m_signal=false;
     bool m_invalid=false;
+    bool m_grabframe=false;
+    QImage m_frameImage;
 };
 
 #endif // DECKLINKSOURCE_H
