@@ -35,6 +35,10 @@ public:
     Q_INVOKABLE bool setProfile(uint profile);
     Q_INVOKABLE bool setKeyer(bool enable);
 
+    Q_INVOKABLE bool keyerLevel(uint8_t level);
+    Q_INVOKABLE bool keyerRampUp(uint32_t frames);
+    Q_INVOKABLE bool keyerRampDown(uint32_t frames);
+
     QObject *getVideoSink() const;
 
     QObject *getDecklink() const;

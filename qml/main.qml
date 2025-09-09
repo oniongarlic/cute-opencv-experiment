@@ -106,6 +106,15 @@ ApplicationWindow {
                 text: "4"
             }
 
+            Slider {
+                from: 0
+                to: 255
+                stepSize: 1
+                onMoved: {
+                    dls.keyerLevel(value)
+                }
+            }
+
             Text {
                 id: cnameText
                 text: "n/a"
@@ -464,6 +473,18 @@ ApplicationWindow {
                     text: "K-Off"
                     onClicked: {
                         dls.setKeyer(false)
+                    }
+                }
+                ToolButton {
+                    text: "KR-Up"
+                    onClicked: {
+                        dls.keyerRampUp(60)
+                    }
+                }
+                ToolButton {
+                    text: "KR-Down"
+                    onClicked: {
+                        dls.keyerRampDown(60)
                     }
                 }
                 ToolSeparator {

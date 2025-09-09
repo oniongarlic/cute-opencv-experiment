@@ -159,6 +159,57 @@ bool Decklinksink::setKeyer(bool enable)
     return result==S_OK;
 }
 
+bool Decklinksink::keyerLevel(uint8_t level)
+{
+    HRESULT result;
+
+    if (!m_decklink->haveDeckLink())
+        return false;
+
+    if (!m_keyer) {
+        qWarning("Keyer not set");
+        return false;
+    }
+
+    result=m_keyer->SetLevel(level);
+
+    return result==S_OK;
+}
+
+bool Decklinksink::keyerRampUp(uint32_t frames)
+{
+    HRESULT result;
+
+    if (!m_decklink->haveDeckLink())
+        return false;
+
+    if (!m_keyer) {
+        qWarning("Keyer not set");
+        return false;
+    }
+
+    result=m_keyer->RampUp(frames);
+
+    return result==S_OK;
+}
+
+bool Decklinksink::keyerRampDown(uint32_t frames)
+{
+    HRESULT result;
+
+    if (!m_decklink->haveDeckLink())
+        return false;
+
+    if (!m_keyer) {
+        qWarning("Keyer not set");
+        return false;
+    }
+
+    result=m_keyer->RampDown(frames);
+
+    return result==S_OK;
+}
+
 void Decklinksink::displayFrame(const QVideoFrame &frame)
 {
     if (!m_decklink->haveDeckLink())
