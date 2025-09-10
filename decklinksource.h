@@ -40,6 +40,10 @@ public:
         VideoSDPALp=bmdModePALp,
         VideoSDNTSCp=bmdModeNTSCp,
 
+        VideoHD720p50=bmdModeHD720p50,
+        VideoHD720p59=bmdModeHD720p5994,
+        VideoHD720p60=bmdModeHD720p60,
+
         VideoHD1080p24=bmdModeHD1080p24,
         VideoHD1080p25=bmdModeHD1080p25,
         VideoHD1080p30=bmdModeHD1080p30,
