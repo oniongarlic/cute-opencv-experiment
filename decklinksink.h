@@ -33,7 +33,7 @@ public:
     Q_INVOKABLE bool setMode(qint32 mode);
 
     Q_INVOKABLE bool setProfile(uint profile);
-    Q_INVOKABLE bool setKeyer(bool enable);
+    Q_INVOKABLE bool setKeyer(bool enable, uint8_t level=255, bool external=true);
 
     Q_INVOKABLE bool keyerLevel(uint8_t level);
     Q_INVOKABLE bool keyerRampUp(uint32_t frames);

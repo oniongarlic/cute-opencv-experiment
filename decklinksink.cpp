@@ -132,7 +132,7 @@ bool Decklinksink::setProfile(uint profile)
     return result==S_OK;
 }
 
-bool Decklinksink::setKeyer(bool enable)
+bool Decklinksink::setKeyer(bool enable, uint8_t level, bool external)
 {
     HRESULT result;
 
@@ -146,13 +146,16 @@ bool Decklinksink::setKeyer(bool enable)
 
     if (enable) {
         qDebug("*** Enable key");
-        result=m_keyer->Enable(true);
+        result=m_keyer->Enable(external);
         m_keyEnabled=result==S_OK ? true : false;
     } else {
         qDebug("*** Disable key");
         result=m_keyer->Disable();
         m_keyEnabled=result==S_OK ? false : true;
     }
+
+    // Make sure a blending level is set, default seems to be a bit random
+    keyerLevel(level);
 
     qDebug() << "Keyer set to: " << m_keyEnabled;
 
