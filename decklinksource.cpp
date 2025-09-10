@@ -332,7 +332,7 @@ void Decklinksource::processFrame()
 
     if (m_grabframe) {
         m_grabframe=false;
-        m_frameImage=vf.toImage();
+        m_frameImage=vf.toImage().rgbSwapped();
         emit frameGrabbed();
     }
 
