@@ -110,6 +110,7 @@ ApplicationWindow {
                 from: 0
                 to: 255
                 stepSize: 1
+                wheelEnabled: true
                 onMoved: {
                     dls.keyerLevel(value)
                 }
@@ -350,6 +351,11 @@ ApplicationWindow {
         onValidSignal: {
             console.debug("*** Got valid input signal")
         }
+        onFrameGrabbed: {
+            imp.setImage(getImage());
+            // just some random string to get it set
+            previewImage.source="image://cute/frame_"+frameCount
+        }
     }
 
     OpenCVVideoFilter {
@@ -385,10 +391,17 @@ ApplicationWindow {
             RowLayout {
                 anchors.fill: parent
                 ToolButton {
-                    text: "Image"
+                    text: "Load Image"
                     enabled: !inProgress
                     onClicked: {
                         filesDialog.startSelector();
+                    }
+                }
+                ToolButton {
+                    text: "Grab"
+                    enabled: dlsrc.streaming
+                    onClicked: {
+                        dlsrc.grabFrame();
                     }
                 }
                 ToolButton {
