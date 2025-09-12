@@ -134,6 +134,21 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 width: 40;
             }
+            ToolSeparator {
+
+            }
+            ToolButton {
+                text: "F"
+                onClicked: videoFilesDialog.open()
+            }
+            ToolButton {
+                text: "P"
+                onClicked: mediaPlayer.play()
+            }
+            ToolButton {
+                text: "S"
+                onClicked: mediaPlayer.stop()
+            }
         }
     }
 
@@ -158,6 +173,20 @@ ApplicationWindow {
 
         if (sdi2.checked)
             dls2.displayImage(file)
+    }
+
+    MediaPlayer {
+        id: mediaPlayer
+        videoOutput: vc
+    }
+
+    FileDialog {
+        id: videoFilesDialog
+        nameFilters: [ "*.mp4", "*.mov" ]
+        title: qsTr("Select video file")
+        onAccepted: {
+            mediaPlayer.source=file;
+        }
     }
 
     ImageGallerySelector {
