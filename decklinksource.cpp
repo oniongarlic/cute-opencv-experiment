@@ -190,8 +190,12 @@ bool Decklinksource::setProfile(uint profile)
     result=manager->GetProfile(profile_id, &lp);
 
     if (result==S_OK && profile) {
-        result=lp->SetActive();
+        result=lp->SetActive();        
         lp->Release();
+        if (result==S_OK) {
+            m_profile=profile_id;
+            emit profileChanged();
+        }
     }
 
     manager->Release();
@@ -476,4 +480,9 @@ void Decklinksource::setAudio(bool newAudio)
 
     m_audio = newAudio;
     emit audioChanged();
+}
+
+int Decklinksource::profile() const
+{
+    return m_profile;
 }

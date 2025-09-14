@@ -29,6 +29,9 @@ class Decklinksource: public QObject
     Q_PROPERTY(QSize frameSize READ frameSize NOTIFY frameSizeChanged FINAL)
     Q_PROPERTY(qreal fps READ fps NOTIFY fpsChanged FINAL)
     Q_PROPERTY(bool audio READ audio WRITE setAudio NOTIFY audioChanged FINAL)
+
+    Q_PROPERTY(int profile READ profile NOTIFY profileChanged FINAL)
+
 public:
     explicit Decklinksource(QObject *parent = nullptr);
     bool haveDeckLink() const;
@@ -75,7 +78,9 @@ public:
     uint fps() const;
 
     bool audio() const;
-    void setAudio(bool newAudio);    
+    void setAudio(bool newAudio);
+
+    int profile() const;
 
 signals:
     void haveDeckLinkChanged();
@@ -93,6 +98,8 @@ signals:
     void fpsChanged(qreal fps);
     void audioChanged();
     void frameGrabbed();
+
+    void profileChanged();
 
 public slots:
     bool enableInput();
@@ -130,12 +137,14 @@ private:
     IDeckLinkVideoConversion *m_conv;
 
     BMDDisplayMode m_mode=bmdModeHD1080p30; // bmdModeHD1080p6000; //
+    BMDPixelFormat m_format;
     QSize m_frameSize;
     qreal m_fps=0;
     bool m_signal=false;
     bool m_invalid=false;
     bool m_grabframe=false;
     QImage m_frameImage;
+    int m_profile=0;
 };
 
 #endif // DECKLINKSOURCE_H
