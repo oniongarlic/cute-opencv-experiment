@@ -291,15 +291,6 @@ void Decklinksource::processFrame()
     w=frame->GetWidth();
     pf=frame->GetPixelFormat();
 
-    IDeckLinkMutableVideoFrame* rgbaFrame = nullptr;
-    HRESULT hr = m_output->CreateVideoFrame(
-        (int32_t)w,
-        (int32_t)h,
-        (int32_t)w * 4,
-        bmdFormat8BitARGB,
-        bmdFrameFlagDefault,
-        &rgbaFrame);
-
     QVideoFrameFormat vff(QSize(w,h), QVideoFrameFormat::Format_ARGB8888);
     vff.setFrameRate(m_fps);
 
@@ -311,15 +302,36 @@ void Decklinksource::processFrame()
     if (!deckLinkBuffer)
         goto out;
 
-    result=m_conv->ConvertFrame(frame, rgbaFrame);
-    if (result!=S_OK) {
-        qWarning("Failed to convert frame!");
-    }
+    if (pf==bmdFormat8BitYUV) {
+        IDeckLinkMutableVideoFrame* rgbaFrame = nullptr;
+        HRESULT hr = m_output->CreateVideoFrame(
+            (int32_t)w,
+            (int32_t)h,
+            (int32_t)w * 4,
+            bmdFormat8BitARGB,
+            bmdFrameFlagDefault,
+            &rgbaFrame);
 
-    if (rgbaFrame->GetBytes((void**)&deckLinkBuffer)!= S_OK)
-        goto out;
+        result=m_conv->ConvertFrame(frame, rgbaFrame);
+        if (result!=S_OK) {
+            qWarning("Failed to convert frame!");
+        }
 
-    {
+        if (rgbaFrame->GetBytes((void**)&deckLinkBuffer)!= S_OK)
+            goto out;
+
+        {
+            uint8_t *dst;
+
+            vf.map(QVideoFrame::ReadWrite);
+            dst=vf.bits(0);
+            memcpy(dst, deckLinkBuffer, vf.mappedBytes(0));
+            vf.unmap();
+        }
+
+        rgbaFrame->Release();
+    } else {
+        // bmdFormat8BitARGB
         uint8_t *dst;
 
         vf.map(QVideoFrame::ReadWrite);
@@ -342,8 +354,7 @@ void Decklinksource::processFrame()
 
 out: ;
 
-    frame->Release();
-    rgbaFrame->Release();
+    frame->Release();    
     if (ap) {
         ap->Release();
     }
@@ -352,7 +363,10 @@ out: ;
 }
 
 bool Decklinksource::enableInput()
-{    
+{
+    BMDDisplayMode amode;
+    bool supported;
+
     if (m_input==nullptr) {
         qWarning("No input");
         return false;
@@ -364,10 +378,24 @@ bool Decklinksource::enableInput()
         m_input->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, 2);
     }
 
-    //bmdFormat8BitBGRA
-    if (m_input->EnableVideoInput(m_mode, bmdFormat8BitYUV, bmdVideoInputFlagDefault | bmdVideoInputEnableFormatDetection)!=S_OK) {
-        qWarning("Failed to enable input");
+    if (m_input->DoesSupportVideoMode(bmdVideoConnectionUnspecified, m_mode, bmdFormat8BitBGRA, bmdNoVideoInputConversion, bmdSupportedVideoModeDefault, &amode, &supported)!=S_OK) {
+        qWarning("Failed to query supported mode");
         return false;
+    }
+
+    // RGBA is supported for some resolution and fps only
+    if (supported) {
+        if (m_input->EnableVideoInput(m_mode, bmdFormat8BitBGRA, bmdVideoInputFlagDefault | bmdVideoInputEnableFormatDetection)!=S_OK) {
+            qWarning("Failed to enable input");
+            return false;
+        }
+        m_format=bmdFormat8BitBGRA;
+    } else {
+        if (m_input->EnableVideoInput(m_mode, bmdFormat8BitYUV, bmdVideoInputFlagDefault | bmdVideoInputEnableFormatDetection)!=S_OK) {
+            qWarning("Failed to enable input");
+            return false;
+        }
+        m_format=bmdFormat8BitYUV;
     }
     if (m_input->StartStreams()!=S_OK) {
         qWarning("Failed to start stream input");
