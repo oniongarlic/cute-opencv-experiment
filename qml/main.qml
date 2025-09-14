@@ -184,8 +184,9 @@ ApplicationWindow {
         id: videoFilesDialog
         nameFilters: [ "*.mp4", "*.mov" ]
         title: qsTr("Select video file")
+        currentFolder: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
         onAccepted: {
-            mediaPlayer.source=file;
+            mediaPlayer.source=selectedFile;
         }
     }
 

@@ -14,12 +14,10 @@ Item {
 
     FileDialog {
         id: filesDialog
-        nameFilters: [ "*.jpg" ]
+        nameFilters: [ "*.jpg", "*.png" ]
         title: qsTr("Select image file")
-        onAccepted: {
-            // XXX: Need to convert to string, otherwise sucka
-            var f=""+fileUrl
-            fileSelected(f);
+        onAccepted: {            
+            fileSelected(selectedFile);
         }
     }
 }
