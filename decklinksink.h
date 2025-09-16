@@ -8,6 +8,7 @@
 #include <QQmlEngine>
 #include <QtMultimedia/QVideoSink>
 #include <QtMultimedia/QVideoFrame>
+#include <QtMultimedia/QAudioSink>
 
 #include "DeckLinkAPI.h"
 
@@ -71,6 +72,7 @@ private:
     int m_current=-1;
     QSize m_fbsize;
     QVideoSink *m_videosink=nullptr;
+    QAudioSink *m_audiosink=nullptr;
 
     bool m_use_precompiled=true;
     bool m_keyEnabled=false;
