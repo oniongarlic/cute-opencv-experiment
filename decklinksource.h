@@ -143,6 +143,7 @@ private:
     bool m_signal=false;
     bool m_invalid=false;
     bool m_grabframe=false;
+    bool m_autorestart=true;
     QImage m_frameImage;
     int m_profile=0;
 };

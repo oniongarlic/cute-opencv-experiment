@@ -15,10 +15,12 @@ public:
     HRESULT STDMETHODCALLTYPE VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode *newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags) override {
         BMDTimeValue time;
         BMDTimeScale scale;
+        const char *name;
 
         newDisplayMode->GetFrameRate(&time, &scale);
+        newDisplayMode->GetName(&name);
 
-        qDebug() << "VideoInputFormatChanged" << notificationEvents << detectedSignalFlags;
+        qDebug() << "VideoInputFormatChanged" << name << notificationEvents << detectedSignalFlags;
         qDebug() << "Mode: " << newDisplayMode->GetDisplayMode() << newDisplayMode->GetWidth() << newDisplayMode->GetHeight() << newDisplayMode->GetFlags();
         qDebug() << time << scale;
 
@@ -31,14 +33,12 @@ public:
         long w,h;
         uint f;
 
-        if (!videoFrame)
-        {
+        if (!videoFrame) {
             qDebug("Invalid input frame");
             return S_OK;
         }
 
-        if (videoFrame->GetFlags() & bmdFrameHasNoInputSource)
-        {
+        if (videoFrame->GetFlags() & bmdFrameHasNoInputSource) {
             m_src->noInputSource();
             return S_OK;
         }
@@ -261,6 +261,17 @@ void Decklinksource::modeChanged(quint32 mode, long width, long height, float fp
     quint32 old=m_mode;
     m_mode=mode;
     emit inputModeChanged(m_mode, old);
+
+    if (m_autorestart) {
+        qDebug("Restarting stream with detected mode");
+        m_input->StopStreams();
+        m_input->FlushStreams();
+        m_input->DisableVideoInput();
+        if (m_input->EnableVideoInput(m_mode, m_format, bmdVideoInputFlagDefault | bmdVideoInputEnableFormatDetection)!=S_OK) {
+            qWarning("Failed to enable input");
+        }
+        m_input->StartStreams();
+    }
 }
 
 void Decklinksource::processFrame()
@@ -302,9 +313,11 @@ void Decklinksource::processFrame()
     if (!deckLinkBuffer)
         goto out;
 
-    if (pf==bmdFormat8BitYUV) {
+    switch (pf) {
+    case bmdFormat8BitYUV: {
+        qDebug() << "YUV" << m_framecounter;
         IDeckLinkMutableVideoFrame* rgbaFrame = nullptr;
-        HRESULT hr = m_output->CreateVideoFrame(
+        result = m_output->CreateVideoFrame(
             (int32_t)w,
             (int32_t)h,
             (int32_t)w * 4,
@@ -312,13 +325,21 @@ void Decklinksource::processFrame()
             bmdFrameFlagDefault,
             &rgbaFrame);
 
+        if (result!=S_OK) {
+            qWarning("Failed to create RGB conversion frame!");
+            goto out;
+        }
+
         result=m_conv->ConvertFrame(frame, rgbaFrame);
         if (result!=S_OK) {
             qWarning("Failed to convert frame!");
+            goto out;
         }
 
-        if (rgbaFrame->GetBytes((void**)&deckLinkBuffer)!= S_OK)
+        if (rgbaFrame->GetBytes((void**)&deckLinkBuffer)!= S_OK) {
+            qWarning("Failed to get converted buffer!");
             goto out;
+        }
 
         {
             uint8_t *dst;
@@ -330,14 +351,23 @@ void Decklinksource::processFrame()
         }
 
         rgbaFrame->Release();
-    } else {
-        // bmdFormat8BitARGB
+    }
+    break;
+    case bmdFormat8BitBGRA:
+    case bmdFormat8BitARGB: {
         uint8_t *dst;
+
+        qDebug() << "RGB" << m_framecounter;
 
         vf.map(QVideoFrame::ReadWrite);
         dst=vf.bits(0);
         memcpy(dst, deckLinkBuffer, vf.mappedBytes(0));
         vf.unmap();
+    }
+    break;
+    default:
+        qWarning("Unexpected frame format, only ARGB, BGRA and 8-bit YUV supported");
+        break;
     }
 
     m_framecounter++;
@@ -383,18 +413,22 @@ bool Decklinksource::enableInput()
         return false;
     }
 
+    qDebug() << m_mode << amode << supported;
+
     // RGBA is supported for some resolution and fps only
     if (supported) {
         if (m_input->EnableVideoInput(m_mode, bmdFormat8BitBGRA, bmdVideoInputFlagDefault | bmdVideoInputEnableFormatDetection)!=S_OK) {
             qWarning("Failed to enable input");
             return false;
         }
+        qDebug("Using BGRA");
         m_format=bmdFormat8BitBGRA;
     } else {
         if (m_input->EnableVideoInput(m_mode, bmdFormat8BitYUV, bmdVideoInputFlagDefault | bmdVideoInputEnableFormatDetection)!=S_OK) {
             qWarning("Failed to enable input");
             return false;
         }
+        qDebug("Using YUV");
         m_format=bmdFormat8BitYUV;
     }
     if (m_input->StartStreams()!=S_OK) {
