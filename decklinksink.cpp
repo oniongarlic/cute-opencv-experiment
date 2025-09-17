@@ -8,6 +8,13 @@ Decklinksink::Decklinksink(QObject *parent)
 {
     m_fbsize.setWidth(1920);
     m_fbsize.setHeight(1080);
+
+    QAudioFormat af;
+    af.setSampleRate(48000);
+    af.setChannelCount(2);
+    af.setSampleFormat(QAudioFormat::Int16);
+
+    m_audiosink=new QAudioSink(af, this);
 }
 
 void Decklinksink::setVideoSink(QObject *videosink)
@@ -415,4 +422,9 @@ void Decklinksink::setDecklink(QObject *newDecklink)
 bool Decklinksink::keyEnabled() const
 {
     return m_keyEnabled;
+}
+
+QObject *Decklinksink::getAudioSink() const
+{
+    return m_audiosink;
 }

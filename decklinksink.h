@@ -20,6 +20,7 @@ class Decklinksink : public QObject
     QML_ELEMENT
     Q_PROPERTY(QObject* decklink READ getDecklink WRITE setDecklink NOTIFY decklinkChanged FINAL REQUIRED)
     Q_PROPERTY(QObject* videoSink READ getVideoSink WRITE setVideoSink NOTIFY videoSinkChanged FINAL)
+    Q_PROPERTY(QObject* audioSink READ getAudioSink FINAL)
     Q_PROPERTY(bool keyEnabled READ keyEnabled NOTIFY keyEnabledChanged FINAL)
 public:
     explicit Decklinksink(QObject *parent = nullptr);
@@ -46,6 +47,8 @@ public:
     void setDecklink(QObject *newDecklink);
 
     bool keyEnabled() const;
+
+    QObject *getAudioSink() const;
 
 signals:
     void haveDeckLinkChanged();
