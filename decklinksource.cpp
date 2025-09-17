@@ -16,15 +16,18 @@ public:
         BMDTimeValue time;
         BMDTimeScale scale;
         const char *name;
+        float fps;
 
         newDisplayMode->GetFrameRate(&time, &scale);
         newDisplayMode->GetName(&name);
+        QSize size(newDisplayMode->GetWidth(), newDisplayMode->GetHeight());
+        fps=(float)scale/(float)time;
 
         qDebug() << "VideoInputFormatChanged" << name << notificationEvents << detectedSignalFlags;
-        qDebug() << "Mode: " << newDisplayMode->GetDisplayMode() << newDisplayMode->GetWidth() << newDisplayMode->GetHeight() << newDisplayMode->GetFlags();
+        qDebug() << "Mode: " << newDisplayMode->GetDisplayMode() << size << fps  << newDisplayMode->GetFlags();
         qDebug() << time << scale;
 
-        m_src->modeChanged(newDisplayMode->GetDisplayMode(), newDisplayMode->GetWidth(), newDisplayMode->GetHeight(), (float)scale/(float)time);
+        m_src->modeChanged(newDisplayMode->GetDisplayMode(), size, fps);
 
         return S_OK;
     }
@@ -240,12 +243,11 @@ void Decklinksource::newFrame(IDeckLinkVideoInputFrame *frame, IDeckLinkAudioInp
     emit frameQueued();
 }
 
-void Decklinksource::modeChanged(quint32 mode, long width, long height, float fps)
+void Decklinksource::modeChanged(quint32 mode, const QSize size, float fps)
 {
-    qDebug() << "Input mode detected " << (BMDDisplayMode)mode << width << height << fps;
+    qDebug() << "Input mode detected " << (BMDDisplayMode)mode << size << fps;
 
-    m_frameSize.setHeight(height);
-    m_frameSize.setWidth(width);
+    m_frameSize=size;
     emit frameSizeChanged();
 
     m_fps=fps;

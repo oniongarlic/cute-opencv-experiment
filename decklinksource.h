@@ -107,7 +107,7 @@ public slots:
 protected:
     void imageToBuffer(const QImage &frame);
     void newFrame(IDeckLinkVideoInputFrame *frame, IDeckLinkAudioInputPacket *audio);
-    void modeChanged(quint32 mode, long width, long height, float fps);
+    void modeChanged(quint32 mode, const QSize size, float fps);
     void setStreaming(bool newStreaming);
     void noInputSource();
 protected slots:
