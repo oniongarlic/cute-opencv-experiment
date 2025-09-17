@@ -33,6 +33,10 @@ public:
             format=bmdFormat8BitARGB;
         } else if (detectedSignalFlags & bmdDetectedVideoInputYCbCr422) {
             format=bmdFormat8BitYUV;
+        } else {
+            // Fallback
+            qWarning("Unknown frame format?");
+            format=bmdFormat8BitYUV;
         }
 
         m_src->modeChanged(newDisplayMode->GetDisplayMode(), format, size, fps);
@@ -299,6 +303,9 @@ void Decklinksource::processFrame()
     HRESULT result;
     IDeckLinkVideoInputFrame *frame=nullptr;
     IDeckLinkAudioInputPacket *ap=nullptr;
+    BMDTimeValue stime, ftime;
+    BMDTimeScale vscale=1001;
+    void *abuffer;
 
     if (m_frames.isEmpty()) {
         qWarning("No frames queueed ?");
@@ -308,8 +315,13 @@ void Decklinksource::processFrame()
     frame=m_frames.dequeue();
 
     if (m_audio) {
+        long fc;
         ap=m_apackets.dequeue();
-        qDebug() << "Audio" << ap->GetSampleFrameCount();
+        fc=ap->GetSampleFrameCount();
+        qDebug() << "Audio" << fc << fc*m_achannels*(m_abitdepth/8);
+        if (ap->GetBytes(&abuffer)==S_OK) {
+
+        }
     }
 
     locker.unlock();
@@ -317,6 +329,9 @@ void Decklinksource::processFrame()
     h=frame->GetHeight();
     w=frame->GetWidth();
     pf=frame->GetPixelFormat();
+    frame->GetStreamTime(&stime, &ftime, vscale);
+
+    qDebug() << stime << ftime << m_framecounter;
 
     QVideoFrameFormat vff(QSize(w,h), QVideoFrameFormat::Format_ARGB8888);
     vff.setFrameRate(m_fps);
@@ -330,8 +345,7 @@ void Decklinksource::processFrame()
         goto out;
 
     switch (pf) {
-    case bmdFormat8BitYUV: {
-        qDebug() << "YUV" << m_framecounter;
+    case bmdFormat8BitYUV: {        
         IDeckLinkMutableVideoFrame* rgbaFrame = nullptr;
         result = m_output->CreateVideoFrame(
             (int32_t)w,
@@ -371,9 +385,7 @@ void Decklinksource::processFrame()
     break;
     case bmdFormat8BitBGRA:
     case bmdFormat8BitARGB: {
-        uint8_t *dst;
-
-        qDebug() << "RGB" << m_framecounter;
+        uint8_t *dst;        
 
         vf.map(QVideoFrame::ReadWrite);
         dst=vf.bits(0);
@@ -421,15 +433,13 @@ bool Decklinksource::enableInput()
     m_framecounter=0;
 
     if (m_audio) {
-        m_input->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, 2);
+        m_input->EnableAudioInput(bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, m_achannels);
     }
 
     if (m_input->DoesSupportVideoMode(bmdVideoConnectionUnspecified, m_mode, bmdFormat8BitBGRA, bmdNoVideoInputConversion, bmdSupportedVideoModeDefault, &amode, &supported)!=S_OK) {
         qWarning("Failed to query supported mode");
         return false;
-    }
-
-    qDebug() << m_mode << amode << supported;
+    }    
 
     // RGBA is supported for some resolution and fps only
     if (supported) {

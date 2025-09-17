@@ -128,6 +128,8 @@ private:
 
     bool m_streaming=false;
     bool m_audio=false;
+    uint m_achannels=2;
+    uint m_abitdepth=16;
 
     // Active output/input/keyer and frame    
     IDeckLinkInput *m_input=nullptr;
