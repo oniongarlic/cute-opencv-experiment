@@ -98,8 +98,8 @@ signals:
     void fpsChanged(qreal fps);
     void audioChanged();
     void frameGrabbed();
-
     void profileChanged();
+    void restartRequired();
 
 public slots:
     bool enableInput();
@@ -107,7 +107,7 @@ public slots:
 protected:
     void imageToBuffer(const QImage &frame);
     void newFrame(IDeckLinkVideoInputFrame *frame, IDeckLinkAudioInputPacket *audio);
-    void modeChanged(quint32 mode, const QSize size, float fps);
+    void modeChanged(quint32 mode, BMDPixelFormat format, const QSize size, float fps);
     void setStreaming(bool newStreaming);
     void noInputSource();
 protected slots:

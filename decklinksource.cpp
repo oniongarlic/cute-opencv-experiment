@@ -15,6 +15,7 @@ public:
     HRESULT STDMETHODCALLTYPE VideoInputFormatChanged(BMDVideoInputFormatChangedEvents notificationEvents, IDeckLinkDisplayMode *newDisplayMode, BMDDetectedVideoInputFormatFlags detectedSignalFlags) override {
         BMDTimeValue time;
         BMDTimeScale scale;
+        BMDPixelFormat format;
         const char *name;
         float fps;
 
@@ -27,7 +28,14 @@ public:
         qDebug() << "Mode: " << newDisplayMode->GetDisplayMode() << size << fps  << newDisplayMode->GetFlags();
         qDebug() << time << scale;
 
-        m_src->modeChanged(newDisplayMode->GetDisplayMode(), size, fps);
+        // Check input formats
+        if (detectedSignalFlags & bmdDetectedVideoInputRGB444) {
+            format=bmdFormat8BitARGB;
+        } else if (detectedSignalFlags & bmdDetectedVideoInputYCbCr422) {
+            format=bmdFormat8BitYUV;
+        }
+
+        m_src->modeChanged(newDisplayMode->GetDisplayMode(), format, size, fps);
 
         return S_OK;
     }
@@ -243,7 +251,7 @@ void Decklinksource::newFrame(IDeckLinkVideoInputFrame *frame, IDeckLinkAudioInp
     emit frameQueued();
 }
 
-void Decklinksource::modeChanged(quint32 mode, const QSize size, float fps)
+void Decklinksource::modeChanged(quint32 mode, BMDPixelFormat format, const QSize size, float fps)
 {
     qDebug() << "Input mode detected " << (BMDDisplayMode)mode << size << fps;
 
@@ -253,15 +261,18 @@ void Decklinksource::modeChanged(quint32 mode, const QSize size, float fps)
     m_fps=fps;
     emit fpsChanged(m_fps);
 
-    if (m_mode==mode) {
-        qDebug() << "Mode is what we expect";
+    if (m_mode==mode && m_format==format) {
+        qDebug() << "Mode and format as requested, valid.";
         emit validSignal();
         return;
     }
 
-    qDebug() << "Capture restart required, got new mode" << mode << ", requested was" << m_mode;
+    qDebug() << "Capture restart required, got new mode or format" << mode << format << ", requested was" << m_mode << m_format;
+
     quint32 old=m_mode;
     m_mode=mode;
+    m_format=format;
+
     emit inputModeChanged(m_mode, old);
 
     if (m_autorestart) {
@@ -273,6 +284,9 @@ void Decklinksource::modeChanged(quint32 mode, const QSize size, float fps)
             qWarning("Failed to enable input");
         }
         m_input->StartStreams();
+    } else {
+        qWarning("Manual restart required");
+        emit restartRequired();
     }
 }
 
