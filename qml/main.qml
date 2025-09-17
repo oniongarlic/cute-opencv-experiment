@@ -177,7 +177,12 @@ ApplicationWindow {
 
     MediaPlayer {
         id: mediaPlayer
-        videoOutput: vc
+        //videoOutput: vc
+        audioOutput: ao
+    }
+
+    AudioOutput {
+        id: ao
     }
 
     FileDialog {
@@ -556,109 +561,177 @@ ApplicationWindow {
             anchors.fill: parent
             spacing: 4
 
-            VideoOutput {
-                id: vc
+            GridLayout {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                Layout.minimumHeight: 256
-                Layout.minimumWidth: parent.width
-                fillMode: Image.PreserveAspectFit
+                rows: 2
+                columns: 2
+                rowSpacing: 4
+                columnSpacing: 4
 
-                MouseArea {
-                    anchors.fill: parent
-                    onPressAndHold: {
-                        console.debug(mouse.x)
-                        console.debug(mouse.y)
-
-                        console.debug(mouse.x/width)
-                        console.debug(mouse.y/height)
-
-                        // cd.setRoi();
-                    }
-                    onClicked: {
-                        camera.searchAndLock();
-                    }
-                    onDoubleClicked: {
-                        camera.imageCapture.capture();
-                    }
-                }
-
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 33
-                    height: 33
-                    border.width: 4
-                    border.color: "green"
-                    color: "transparent"
-                }
-
-                Image {
-                    id: previewImage
-                    anchors.fill: parent
+                // 1
+                VideoOutput {
+                    id: vc
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    Layout.minimumHeight: 256
+                    Layout.preferredWidth: parent.width/2
                     fillMode: Image.PreserveAspectFit
-                    Item {
-                        id: pvr
-                        x: parent.height==parent.paintedHeight ? parent.width/2-width/2 : 0
-                        y: parent.width==parent.paintedWidth ? parent.height/2-height/2 : 0
-                        width: parent.paintedWidth
-                        height: parent.paintedHeight
-
-                        Rectangle {
-                            id: objectCenter
-                            color: "transparent"
-                            x: detectedItemsList.c ? detectedItemsList.c.x-2 : 0
-                            y: detectedItemsList.c ? detectedItemsList.c.y-2 : 0
-                            width: 4
-                            height: 4
-                            border.width: 2
-                            border.color: "green"
-                            visible: x>0 && y>0
-                        }
-
-                        Repeater {
-                            model: detectedItems
-                            delegate: objectMarkerDelegate
-                        }
-
-                        Component {
-                            id: objectMarkerDelegate
-                            ObjectMarker {
-                                o: Qt.rect(ox, oy, owidth, oheight);
-                                objectConfidence: confidence
-                                objectName: name
-                                objectColor: ocolor
-                                activated: index==detectedItemsList.currentIndex
-                            }
-                        }
-                    }
 
                     MouseArea {
                         anchors.fill: parent
-                        enabled: !inProgress
+                        onPressAndHold: {
+                            console.debug(mouse.x)
+                            console.debug(mouse.y)
+
+                            console.debug(mouse.x/width)
+                            console.debug(mouse.y/height)
+
+                            // cd.setRoi();
+                        }
                         onClicked: {
-                            previewImage.visible=false;
-                            detectedItems.clear();
+                            camera.searchAndLock();
+                        }
+                        onDoubleClicked: {
+                            camera.imageCapture.capture();
                         }
                     }
 
-                    function mapNormalizedRectToItem(r) {
-                        console.debug(r)
-                        return Qt.rect(r.x*pvr.width, r.y*pvr.height, r.width*pvr.width, r.height*pvr.height)
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 33
+                        height: 33
+                        border.width: 4
+                        border.color: "green"
+                        color: "transparent"
                     }
 
-                    function mapNormalizedPointToItem(r) {
-                        //console.debug(r)
-                        return Qt.point(r.x*pvr.width, r.y*pvr.height)
+                    Image {
+                        id: previewImage
+                        anchors.fill: parent
+                        fillMode: Image.PreserveAspectFit
+                        Item {
+                            id: pvr
+                            x: parent.height==parent.paintedHeight ? parent.width/2-width/2 : 0
+                            y: parent.width==parent.paintedWidth ? parent.height/2-height/2 : 0
+                            width: parent.paintedWidth
+                            height: parent.paintedHeight
+
+                            Rectangle {
+                                id: objectCenter
+                                color: "transparent"
+                                x: detectedItemsList.c ? detectedItemsList.c.x-2 : 0
+                                y: detectedItemsList.c ? detectedItemsList.c.y-2 : 0
+                                width: 4
+                                height: 4
+                                border.width: 2
+                                border.color: "green"
+                                visible: x>0 && y>0
+                            }
+
+                            Repeater {
+                                model: detectedItems
+                                delegate: objectMarkerDelegate
+                            }
+
+                            Component {
+                                id: objectMarkerDelegate
+                                ObjectMarker {
+                                    o: Qt.rect(ox, oy, owidth, oheight);
+                                    objectConfidence: confidence
+                                    objectName: name
+                                    objectColor: ocolor
+                                    activated: index==detectedItemsList.currentIndex
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: !inProgress
+                            onClicked: {
+                                previewImage.visible=false;
+                                detectedItems.clear();
+                            }
+                        }
+
+                        function mapNormalizedRectToItem(r) {
+                            console.debug(r)
+                            return Qt.rect(r.x*pvr.width, r.y*pvr.height, r.width*pvr.width, r.height*pvr.height)
+                        }
+
+                        function mapNormalizedPointToItem(r) {
+                            //console.debug(r)
+                            return Qt.point(r.x*pvr.width, r.y*pvr.height)
+                        }
+                    }
+
+                    BusyIndicator {
+                        anchors.centerIn: parent
+                        width: 128
+                        height: 128
+                        visible: inProgress
+                        running: inProgress
+                    }
+                    Rectangle {
+                        anchors.fill: parent
+                        border.color: "red"
+                        border.width: 1
+                        color: "transparent"
                     }
                 }
 
-                BusyIndicator {
-                    anchors.centerIn: parent
-                    width: 128
-                    height: 128
-                    visible: inProgress
-                    running: inProgress
+                // 2
+                VideoOutput {
+                    id: vc2
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    Layout.minimumHeight: 256
+                    Layout.minimumWidth: parent.width/2
+                    fillMode: Image.PreserveAspectFit
+                    Rectangle {
+                        anchors.fill: parent
+                        border.color: "blue"
+                        border.width: 1
+                        color: "transparent"
+                    }
+                }
+
+                // 3
+                VideoOutput {
+                    id: vc3
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    Layout.minimumHeight: 256
+                    Layout.minimumWidth: parent.width/2
+                    fillMode: Image.PreserveAspectFit
+                    Rectangle {
+                        anchors.fill: parent
+                        border.color: "green"
+                        border.width: 1
+                        color: "transparent"
+                    }
+                }
+
+                // 4
+                VideoOutput {
+                    id: vc4
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    Layout.minimumHeight: 256
+                    Layout.minimumWidth: parent.width/2
+                    fillMode: Image.PreserveAspectFit
+                    Rectangle {
+                        anchors.fill: parent
+                        border.color: "orange"
+                        border.width: 1
+                        color: "transparent"
+                    }
                 }
             }
 
