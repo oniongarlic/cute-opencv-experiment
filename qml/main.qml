@@ -379,7 +379,7 @@ ApplicationWindow {
         decklink: dl
         objectName: "Source 4"
         audio: captureAudio.checked        
-        videoSink: vodeck.videoSink
+        videoSink: vc4.videoSink
         onInvalidSignal: {
             console.debug("*** Invalid input signal")
         }
@@ -559,7 +559,9 @@ ApplicationWindow {
         ColumnLayout {
             id: mainRow
             anchors.fill: parent
+            anchors.margins: 4
             spacing: 4
+            // uniformCellSizes: true
 
             GridLayout {
                 Layout.fillHeight: true
@@ -577,7 +579,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignTop
                     Layout.minimumHeight: 256
-                    Layout.preferredWidth: parent.width/2
+                    Layout.preferredWidth: mainRow.width/2
                     fillMode: Image.PreserveAspectFit
 
                     MouseArea {
@@ -690,7 +692,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignTop
                     Layout.minimumHeight: 256
-                    Layout.minimumWidth: parent.width/2
+                    Layout.preferredWidth: mainRow.width/2
                     fillMode: Image.PreserveAspectFit
                     Rectangle {
                         anchors.fill: parent
@@ -707,7 +709,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignTop
                     Layout.minimumHeight: 256
-                    Layout.minimumWidth: parent.width/2
+                    Layout.preferredWidth: mainRow.width/2
                     fillMode: Image.PreserveAspectFit
                     Rectangle {
                         anchors.fill: parent
@@ -724,7 +726,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignTop
                     Layout.minimumHeight: 256
-                    Layout.minimumWidth: parent.width/2
+                    Layout.preferredWidth: mainRow.width/2
                     fillMode: Image.PreserveAspectFit
                     Rectangle {
                         anchors.fill: parent
@@ -739,25 +741,7 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 Layout.minimumHeight: root.height/5
-                Layout.maximumHeight: root.height/3
-
-                VideoOutput {
-                    id: vodeck                    
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    Layout.minimumHeight: 128
-                    Layout.maximumHeight: 256
-                    Layout.minimumWidth: 128
-                    Layout.maximumWidth: 384
-                    fillMode: Image.PreserveAspectFit
-
-                    Rectangle {
-                        anchors.fill: parent
-                        border.color: "red"
-                        border.width: 1
-                        color: "transparent"
-                    }
-                }
+                Layout.maximumHeight: root.height/3                
 
                 ListView {
                     id: detectedItemsList
