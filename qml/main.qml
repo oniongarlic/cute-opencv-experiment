@@ -175,6 +175,10 @@ ApplicationWindow {
             dls2.displayImage(file)
     }
 
+    function imageToDecklink(sink, file) {
+
+    }
+
     MediaPlayer {
         id: mediaPlayer
         //videoOutput: vc
@@ -348,13 +352,13 @@ ApplicationWindow {
             // Sinks
             dls.setOutput(0) // Duo 2 SDI-1 (1+2)
             var d0=dl.getDeviceProperties(0)
-            outputCombo.model=d0["outputModes"]            
+            outputCombo.model=d0["outputModes"]
             outputCombo.currentIndex=outputCombo.indexOfValue(dls.getMode());
 
             dls2.setOutput(1) // Duo 2 SDI-3
             dls2.setMode(DeckLinkSource.VideoHD1080p30)
 
-            // Sources            
+            // Sources
             dlsrc.setInput(3)
             var d3=dl.getDeviceProperties(3)
             inputCombo.model=d3["inputModes"]
@@ -378,7 +382,7 @@ ApplicationWindow {
         id: dlsrc
         decklink: dl
         objectName: "Source 4"
-        audio: captureAudio.checked        
+        audio: captureAudio.checked
         videoSink: vc4.videoSink
         onInvalidSignal: {
             console.debug("*** Invalid input signal")
@@ -741,7 +745,7 @@ ApplicationWindow {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 Layout.minimumHeight: root.height/5
-                Layout.maximumHeight: root.height/3                
+                Layout.maximumHeight: root.height/3
 
                 ListView {
                     id: detectedItemsList
@@ -812,24 +816,44 @@ ApplicationWindow {
                             processImageFile(f);
                     }
 
+                    function processFile(index) {
+                        processImageFile(f);
+                    }
+
                     Component {
                         id: fileDelegate
-                        Item {
+                        ItemDelegate {
                             width: ListView.view.width
                             height: r.height
-                            Row {
-                                id: r
-                                spacing: 8
-                                width: parent.width
-                                Text { text: fileName }
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    fileList.processItem(index);
-                                }
-                                onDoubleClicked: {
 
+                            onClicked: {
+                                onClicked: fileList.processItem(index);
+                            }
+
+                            RowLayout {
+                                id: r
+                                width: parent.width
+                                height: 20
+                                spacing: 4
+                                RowLayout{
+                                    id: rl
+                                    spacing: 8
+                                    Layout.fillWidth: true
+                                    Layout.minimumWidth: parent.width/4
+                                    Layout.maximumWidth: parent.width/3
+                                    Text { text: fileName }
+                                }
+                                Button {
+                                    text: "1"
+                                    Layout.fillWidth: false
+                                    visible: !fileModel.isFolder(index)
+                                    onClicked: fileList.processItem(index);
+                                }
+                                Button {
+                                    text: "2"
+                                    Layout.fillWidth: false
+                                    visible: !fileModel.isFolder(index)
+                                    onClicked: fileList.processItem(index);
                                 }
                             }
                         }
