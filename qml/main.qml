@@ -798,7 +798,8 @@ ApplicationWindow {
 
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                    Layout.minimumWidth: 128
+                    Layout.minimumWidth: 200
+                    Layout.maximumWidth: 260
                     clip: true
 
                     highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
