@@ -425,6 +425,7 @@ ApplicationWindow {
 
     Page {
         id: mainView
+        anchors.fill: parent
 
         footer: ToolBar {
             RowLayout {
@@ -746,7 +747,6 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.minimumHeight: root.height/5
                 Layout.maximumHeight: root.height/3
-
                 ListView {
                     id: detectedItemsList
                     Layout.fillHeight: true
@@ -802,7 +802,8 @@ ApplicationWindow {
 
                     Layout.fillHeight: true
                     Layout.fillWidth: true
-                    Layout.minimumWidth: 128
+                    Layout.minimumWidth: 200
+                    Layout.maximumWidth: 260
                     clip: true
 
                     highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
