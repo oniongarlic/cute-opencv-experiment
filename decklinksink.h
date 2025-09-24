@@ -10,6 +10,8 @@
 #include <QtMultimedia/QVideoFrame>
 #include <QtMultimedia/QAudioSink>
 
+#include <QIODevice>
+
 #include "DeckLinkAPI.h"
 
 #include "decklink.h"
@@ -48,7 +50,7 @@ public:
 
     bool keyEnabled() const;
 
-    QObject *getAudioSink() const;
+    Q_INVOKABLE QObject *getAudioSink() const;
 
 signals:
     void haveDeckLinkChanged();
@@ -76,6 +78,8 @@ private:
     QSize m_fbsize;
     QVideoSink *m_videosink=nullptr;
     QAudioSink *m_audiosink=nullptr;
+
+    QIODevice *m_audiosinkdevice=nullptr;
 
     bool m_use_precompiled=true;
     bool m_keyEnabled=false;

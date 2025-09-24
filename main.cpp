@@ -100,7 +100,12 @@ int main(int argc, char *argv[])
         const QList<QCameraFormat> formats = cameraDevice.videoFormats();
         for (const QCameraFormat &format : formats) {
             qDebug() << format.resolution() << format.pixelFormat() << format.minFrameRate() << format.maxFrameRate();
-        }
+        }        
+    }
+
+    auto audioOutputs=QMediaDevices::audioOutputs();
+    for (const QAudioDevice &audioDevice : audioOutputs) {
+        qDebug() << audioDevice.description();
     }
 
     engine.rootContext()->setContextProperty("dnnConfig", dnn_config);

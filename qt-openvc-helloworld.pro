@@ -2,6 +2,7 @@ QT += quick multimedia widgets
 CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
+    decklinkaudiodevice.cpp \    
     main.cpp \
     cuteimageprovider.cpp \
     ocvobjectcolordetector.cpp \
@@ -12,6 +13,7 @@ SOURCES += \
 
 HEADERS += \
     cuteimageprovider.h \
+    decklinkaudiodevice.h \    
     ocvobjectcolordetector.h \
     objectdetector.h \
     cuteopencv.h \

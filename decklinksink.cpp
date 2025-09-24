@@ -1,7 +1,9 @@
 #include "decklinksink.h"
+#include "decklinkaudiodevice.h"
 
 #include <QUrl>
 #include <QDebug>
+#include <QAudioOutput>
 
 Decklinksink::Decklinksink(QObject *parent)
     : QObject{parent}
@@ -9,12 +11,18 @@ Decklinksink::Decklinksink(QObject *parent)
     m_fbsize.setWidth(1920);
     m_fbsize.setHeight(1080);
 
+    m_audiosinkdevice=new DeckLinkAudioDevice(this);
+    m_audiosinkdevice->open(QIODevice::WriteOnly);
+
     QAudioFormat af;
     af.setSampleRate(48000);
     af.setChannelCount(2);
     af.setSampleFormat(QAudioFormat::Int16);
 
+    QAudioOutput a;
+
     m_audiosink=new QAudioSink(af, this);
+    //m_audiosink->start(m_audiosinkdevice);
 }
 
 void Decklinksink::setVideoSink(QObject *videosink)
