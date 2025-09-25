@@ -186,7 +186,7 @@ ApplicationWindow {
 
     MediaPlayer {
         id: mediaPlayer
-        //videoOutput: vc
+        videoOutput: vc2
         audioOutput: ao
     }
 
@@ -353,7 +353,6 @@ ApplicationWindow {
         onHaveDeckLinkChanged: {
             console.debug("*** We have decklink support")
 
-
             // Sinks
             dls.setOutput(0) // Duo 2 SDI-1 (1+2)
             var d0=dl.getDeviceProperties(0)
@@ -362,6 +361,7 @@ ApplicationWindow {
 
             dls2.setOutput(1) // Duo 2 SDI-3
             dls2.setMode(DeckLinkSource.VideoHD1080p30)
+            mediaPlayer.audioBufferOutput=dls2.getAudioBuffer()
 
             // Sources
             dlsrc.setInput(3)
@@ -375,12 +375,13 @@ ApplicationWindow {
         id: dls
         decklink: dl
         objectName: "Sink 1"
+        //videoSink: vc.videoSink
     }
     DeckLinkSink {
         id: dls2
         decklink: dl
         objectName: "Sink 2"
-        videoSink: vc.videoSink
+        videoSink: vc2.videoSink
     }
 
     DeckLinkSource {

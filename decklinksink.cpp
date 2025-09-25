@@ -19,6 +19,9 @@ Decklinksink::Decklinksink(QObject *parent)
     af.setChannelCount(2);
     af.setSampleFormat(QAudioFormat::Int16);
 
+    m_audio_buffer=new QAudioBufferOutput(af, this);
+    connect(m_audio_buffer, &QAudioBufferOutput::audioBufferReceived, this, &Decklinksink::onAudioBufferReceived);
+
     QAudioOutput a;
 
     m_audiosink=new QAudioSink(af, this);
@@ -36,7 +39,11 @@ void Decklinksink::setVideoSink(QObject *videosink)
     }
     m_videosink = qobject_cast<QVideoSink*>(videosink);
 
-    connect(m_videosink, &QVideoSink::videoFrameChanged, this, &Decklinksink::displayFrame);
+    if (m_videosink) {
+        connect(m_videosink, &QVideoSink::videoFrameChanged, this, &Decklinksink::displayFrame);
+    } else {
+        qWarning("Not a QVideoSink");
+    }
 
     emit videoSinkChanged();
 }
@@ -301,6 +308,16 @@ void Decklinksink::clearBuffer()
     m_output->DisplayVideoFrameSync(m_frame);
 }
 
+void Decklinksink::onAudioBufferReceived(const QAudioBuffer &buffer)
+{
+    uint32_t result;
+
+    if (!m_audio)
+        return;
+
+    m_output->WriteAudioSamplesSync((void *)buffer.constData<quint16>(), buffer.frameCount(), &result);
+}
+
 void Decklinksink::imageToBuffer(const QImage &frame)
 {
     uint8_t* deckLinkBuffer=nullptr;
@@ -361,6 +378,9 @@ bool Decklinksink::enableOutput()
     result=m_output->EnableVideoOutput(m_mode, bmdVideoOutputFlagDefault);
     switch (result) {
     case S_OK:
+        if (m_audio) {
+            m_output->EnableAudioOutput(bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, 2, bmdAudioOutputStreamContinuous);
+        }
         return true;
         break;
     case E_UNEXPECTED:
@@ -399,6 +419,10 @@ bool Decklinksink::disableOutput()
 
     result=m_output->DisableVideoOutput();
 
+    if (m_audio) {
+        m_output->DisableAudioOutput();
+    }
+
     if (result!=S_OK) {
         qWarning() << "Failed to disable output" << result;
         return false;
@@ -435,4 +459,22 @@ bool Decklinksink::keyEnabled() const
 QObject *Decklinksink::getAudioSink() const
 {
     return m_audiosink;
+}
+
+QObject *Decklinksink::getAudioBuffer() const
+{
+    return m_audio_buffer;
+}
+
+bool Decklinksink::audioEnabled() const
+{
+    return m_audio;
+}
+
+void Decklinksink::setAudioEnabled(bool newAudio)
+{
+    if (m_audio == newAudio)
+        return;
+    m_audio = newAudio;
+    emit audioEnabledChanged();
 }

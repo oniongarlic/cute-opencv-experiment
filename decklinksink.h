@@ -8,6 +8,9 @@
 #include <QQmlEngine>
 #include <QtMultimedia/QVideoSink>
 #include <QtMultimedia/QVideoFrame>
+
+#include <QAudioBuffer>
+#include <QAudioBufferOutput>
 #include <QtMultimedia/QAudioSink>
 
 #include <QIODevice>
@@ -24,6 +27,7 @@ class Decklinksink : public QObject
     Q_PROPERTY(QObject* videoSink READ getVideoSink WRITE setVideoSink NOTIFY videoSinkChanged FINAL)
     Q_PROPERTY(QObject* audioSink READ getAudioSink FINAL)
     Q_PROPERTY(bool keyEnabled READ keyEnabled NOTIFY keyEnabledChanged FINAL)
+    Q_PROPERTY(bool audio READ audioEnabled WRITE setAudioEnabled NOTIFY audioEnabledChanged FINAL)
 public:
     explicit Decklinksink(QObject *parent = nullptr);
     bool haveDeckLink() const;
@@ -51,6 +55,10 @@ public:
     bool keyEnabled() const;
 
     Q_INVOKABLE QObject *getAudioSink() const;
+    Q_INVOKABLE QObject *getAudioBuffer() const;
+
+    bool audioEnabled() const;
+    void setAudioEnabled(bool newAudio);
 
 signals:
     void haveDeckLinkChanged();
@@ -61,6 +69,8 @@ signals:
 
     void keyEnabledChanged();
 
+    void audioEnabledChanged();
+
 public slots:
     void displayFrame(const QVideoFrame &frame);
     void displayImage(const QImage &frame);
@@ -70,6 +80,10 @@ public slots:
     bool disableOutput();
 
     void clearBuffer();
+
+protected slots:
+    void onAudioBufferReceived(const QAudioBuffer &buffer);
+
 protected:
     void imageToBuffer(const QImage &frame);
 private:
@@ -80,6 +94,8 @@ private:
     QAudioSink *m_audiosink=nullptr;
 
     QIODevice *m_audiosinkdevice=nullptr;
+    QAudioBufferOutput *m_audio_buffer=nullptr;
+    bool m_audio=true;
 
     bool m_use_precompiled=true;
     bool m_keyEnabled=false;
@@ -90,7 +106,7 @@ private:
     IDeckLinkKeyer *m_keyer=nullptr;
     IDeckLinkMutableVideoFrame* m_frame=nullptr;
 
-    BMDDisplayMode m_mode=bmdModeHD1080p6000; // bmdModeHD1080p30
+    BMDDisplayMode m_mode=bmdModeHD1080p6000; // bmdModeHD1080p30    
 };
 
 #endif // DECKLINKSINK_H
