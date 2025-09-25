@@ -152,6 +152,11 @@ ApplicationWindow {
         }
     }
 
+    function previewImageFile(file) {
+        imagePreview.source=file
+        imagePreview.visible=true;
+    }
+
     function processImageFile(file) {
         previewImage.source=file
         previewImage.visible=true;
@@ -747,6 +752,34 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.minimumHeight: root.height/5
                 Layout.maximumHeight: root.height/3
+
+                Rectangle {
+                    id: pcid
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 128
+
+                    Image {
+                        id: imagePreview
+                        anchors.fill: parent
+                        fillMode: Image.PreserveAspectFit
+                        asynchronous: true
+                    }
+
+
+                    RowLayout {
+                        anchors.bottom: pcid.bottom
+                        anchors.margins: 4
+                        Button {
+                            text: "1"
+                        }
+                        Button {
+                            text: "2"
+                        }
+                    }
+
+                }
+
                 ListView {
                     id: detectedItemsList
                     Layout.fillHeight: true
@@ -803,7 +836,7 @@ ApplicationWindow {
                     Layout.fillHeight: true
                     Layout.fillWidth: true
                     Layout.minimumWidth: 200
-                    Layout.maximumWidth: 260
+                    Layout.maximumWidth: 460
                     clip: true
 
                     highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
@@ -814,10 +847,11 @@ ApplicationWindow {
                         if (fileModel.isFolder(currentIndex))
                             fileModel.folder=f;
                         else
-                            processImageFile(f);
+                            previewImageFile(f);
                     }
 
                     function processFile(index) {
+                        var f=fileModel.get(currentIndex, "fileURL")
                         processImageFile(f);
                     }
 
@@ -848,13 +882,19 @@ ApplicationWindow {
                                     text: "1"
                                     Layout.fillWidth: false
                                     visible: !fileModel.isFolder(index)
-                                    onClicked: fileList.processItem(index);
+                                    onClicked: fileList.processFile(index);
                                 }
                                 Button {
                                     text: "2"
                                     Layout.fillWidth: false
                                     visible: !fileModel.isFolder(index)
-                                    onClicked: fileList.processItem(index);
+                                    onClicked: fileList.processFile(index);
+                                }
+                                Button {
+                                    text: "AI"
+                                    Layout.fillWidth: false
+                                    visible: !fileModel.isFolder(index)
+                                    onClicked: fileList.processFile(index);
                                 }
                             }
                         }
