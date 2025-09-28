@@ -288,7 +288,7 @@ void Decklinksink::displayImage(const QImage &frame)
     m_output->DisplayVideoFrameSync(m_frame);
 }
 
-void Decklinksink::clearBuffer()
+void Decklinksink::clearBuffer(int value)
 {
     uint8_t* deckLinkBuffer=nullptr;
 
@@ -303,7 +303,7 @@ void Decklinksink::clearBuffer()
         return;
     }
 
-    memset(deckLinkBuffer, 128, m_fbsize.width()*m_fbsize.height()*4);
+    memset(deckLinkBuffer, value, m_fbsize.width()*m_fbsize.height()*4);
 
     m_output->DisplayVideoFrameSync(m_frame);
 }

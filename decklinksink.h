@@ -79,7 +79,7 @@ public slots:
     bool enableOutput();
     bool disableOutput();
 
-    void clearBuffer();
+    void clearBuffer(int value=0);
 
 protected slots:
     void onAudioBufferReceived(const QAudioBuffer &buffer);
