@@ -26,6 +26,7 @@ class Decklinksink : public QObject
     Q_PROPERTY(QObject* decklink READ getDecklink WRITE setDecklink NOTIFY decklinkChanged FINAL REQUIRED)
     Q_PROPERTY(QObject* videoSink READ getVideoSink WRITE setVideoSink NOTIFY videoSinkChanged FINAL)
     Q_PROPERTY(QObject* audioSink READ getAudioSink FINAL)
+    Q_PROPERTY(bool outputEnabled READ outputEnabled NOTIFY outputEnabledChanged FINAL)
     Q_PROPERTY(bool keyEnabled READ keyEnabled NOTIFY keyEnabledChanged FINAL)
     Q_PROPERTY(bool premultiplied READ premultiplied WRITE setPremultiplied NOTIFY premultipliedChanged FINAL)
     Q_PROPERTY(bool audio READ audioEnabled WRITE setAudioEnabled NOTIFY audioEnabledChanged FINAL)
@@ -64,6 +65,8 @@ public:
     bool premultiplied() const;
     void setPremultiplied(bool newPremultiplied);
 
+    bool outputEnabled() const;
+
 signals:
     void haveDeckLinkChanged();
     void devicesChanged();
@@ -76,6 +79,8 @@ signals:
     void audioEnabledChanged();
 
     void premultipliedChanged();
+
+    void outputEnabledChanged();
 
 public slots:
     void displayFrame(const QVideoFrame &frame);
@@ -114,6 +119,7 @@ private:
 
     BMDDisplayMode m_mode=bmdModeHD1080p6000; // bmdModeHD1080p30
     bool m_premultiplied;
+    bool m_outputEnabled;
 };
 
 #endif // DECKLINKSINK_H

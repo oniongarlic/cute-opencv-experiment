@@ -387,6 +387,8 @@ bool Decklinksink::enableOutput()
 
     if (m_output==nullptr) {
         qWarning("No output");
+        m_outputEnabled=false;
+        emit outputEnabledChanged();
         return false;
     }
 
@@ -396,6 +398,8 @@ bool Decklinksink::enableOutput()
         if (m_audio) {
             m_output->EnableAudioOutput(bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, 2, bmdAudioOutputStreamContinuous);
         }
+        m_outputEnabled=true;
+        emit outputEnabledChanged();
         return true;
         break;
     case E_UNEXPECTED:
@@ -420,6 +424,9 @@ bool Decklinksink::enableOutput()
 
     qWarning() << "Failed to enable output, mode " << m_mode << HRESULT_CODE(result);
 
+    m_outputEnabled=false;
+    emit outputEnabledChanged();
+
     return false;
 }
 
@@ -429,6 +436,8 @@ bool Decklinksink::disableOutput()
 
     if (m_output==nullptr) {
         qWarning("No output");
+        m_outputEnabled=false;
+        emit outputEnabledChanged();
         return false;
     }
 
@@ -440,8 +449,14 @@ bool Decklinksink::disableOutput()
 
     if (result!=S_OK) {
         qWarning() << "Failed to disable output" << result;
+        m_outputEnabled=false;
+        emit outputEnabledChanged();
         return false;
     }
+
+    m_outputEnabled=false;
+    emit outputEnabledChanged();
+
     return true;
 }
 
@@ -505,4 +520,9 @@ void Decklinksink::setPremultiplied(bool newPremultiplied)
         return;
     m_premultiplied = newPremultiplied;
     emit premultipliedChanged();
+}
+
+bool Decklinksink::outputEnabled() const
+{
+    return m_outputEnabled;
 }
