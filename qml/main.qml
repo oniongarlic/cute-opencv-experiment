@@ -180,8 +180,8 @@ ApplicationWindow {
             dls2.displayImage(file)
     }
 
-    function imageToDecklink(sink, file) {
-
+    function imageToDecklink(sink, file) {        
+        sink.displayImage(file)
     }
 
     MediaPlayer {
@@ -493,11 +493,11 @@ ApplicationWindow {
                     }
                 }
                 ToolButton {
-                    text: ""
+                    text: "DI"
                     onClicked: {
                         dls2.displayImage()
                     }
-                }
+                }                
 
                 ToolSeparator {
 
@@ -516,10 +516,17 @@ ApplicationWindow {
                     }
                 }
                 ToolButton {
-                    text: "Clear"
+                    text: "Clr"
                     onClicked: {
                         dls.clearBuffer();
                     }
+                }
+
+                ToolButton {
+                    text: "PM"
+                    checkable: true
+                    checked: dls.premultiplied
+                    onClicked: dls.premultiplied=checked
                 }
 
                 ToolButton {
@@ -773,9 +780,11 @@ ApplicationWindow {
                         anchors.margins: 4
                         Button {
                             text: "1"
+                            onClicked: imageToDecklink(dls, imagePreview.source);
                         }
                         Button {
                             text: "2"
+                            onClicked: imageToDecklink(dls2, imagePreview.source);
                         }
                     }
 
