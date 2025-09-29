@@ -244,6 +244,10 @@ void Decklinksink::displayFrame(const QVideoFrame &frame)
         return;
 
     QImage img=frame.toImage();
+
+    if (img.isNull())
+        return;
+
     QImage f;
 
     switch (img.format()) {
@@ -262,30 +266,56 @@ void Decklinksink::displayFrame(const QVideoFrame &frame)
         f=img.convertToFormat(QImage::Format_ARGB32);
     }
     }
-    displayImage(f);
+
+    imageToBuffer(f);
+
+    m_output->DisplayVideoFrameSync(m_frame);
 }
 
 void Decklinksink::displayImage(const QImage &frame)
 {
     QImage f;
+    QImage::Format tf=QImage::Format_ARGB32;
 
     if (!m_decklink->haveDeckLink())
         return;
 
-    if (!m_output)
+    if (!m_output)        
         return;
 
-    if (frame.size()==m_fbsize && frame.format()==QImage::Format_ARGB32) {
+    if (frame.isNull())
+        return;
+
+    if (frame.hasAlphaChannel()) {
+        tf=m_premultiplied ? QImage::Format_ARGB32_Premultiplied : QImage::Format_ARGB32;
+    }
+
+    if (frame.size()==m_fbsize && frame.format()==tf) {
         f=frame;
     } else if (frame.size()==m_fbsize) {
-        f=frame.convertToFormat(QImage::Format_ARGB32);
+        f=frame.convertToFormat(tf);
     } else {
-        f=frame.scaled(m_fbsize.width(), m_fbsize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
+        f=frame.scaled(m_fbsize.width(), m_fbsize.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation).convertToFormat(tf);
     }
 
     imageToBuffer(f);
 
     m_output->DisplayVideoFrameSync(m_frame);
+}
+
+void Decklinksink::imageToBuffer(const QImage &frame)
+{
+    uint8_t* deckLinkBuffer=nullptr;
+
+    if (m_frame->GetBytes((void**)&deckLinkBuffer) != S_OK) {
+        qWarning("Failed to get buffer pointer");
+        return;
+    }
+
+    for (int i=0;i<frame.height(); i++) {
+        memcpy(deckLinkBuffer, frame.constScanLine(i), frame.bytesPerLine());
+        deckLinkBuffer += m_frame->GetRowBytes();
+    }
 }
 
 void Decklinksink::clearBuffer(int value)
@@ -316,21 +346,6 @@ void Decklinksink::onAudioBufferReceived(const QAudioBuffer &buffer)
         return;
 
     m_output->WriteAudioSamplesSync((void *)buffer.constData<quint16>(), buffer.frameCount(), &result);
-}
-
-void Decklinksink::imageToBuffer(const QImage &frame)
-{
-    uint8_t* deckLinkBuffer=nullptr;
-
-    if (m_frame->GetBytes((void**)&deckLinkBuffer) != S_OK) {
-        qWarning("Failed to get buffer pointer");
-        return;
-    }
-
-    for (int i=0;i<frame.height(); i++) {
-        memcpy(deckLinkBuffer, frame.constScanLine(i), frame.bytesPerLine());
-        deckLinkBuffer += m_frame->GetRowBytes();
-    }
 }
 
 void Decklinksink::displayImage(const QVariant image)
@@ -477,4 +492,17 @@ void Decklinksink::setAudioEnabled(bool newAudio)
         return;
     m_audio = newAudio;
     emit audioEnabledChanged();
+}
+
+bool Decklinksink::premultiplied() const
+{
+    return m_premultiplied;
+}
+
+void Decklinksink::setPremultiplied(bool newPremultiplied)
+{
+    if (m_premultiplied == newPremultiplied)
+        return;
+    m_premultiplied = newPremultiplied;
+    emit premultipliedChanged();
 }
