@@ -79,6 +79,18 @@ DeckLink::DeckLink(QObject *parent)
             goto out;
         }
 
+        if (deckLinkAttributes->GetInt(BMDDeckLinkPersistentID, &value) == S_OK) {
+            dev["PersistentID"]=(qint64)(value);
+        } else {
+            dev["PersistentID"]=0;
+        }
+
+        if (deckLinkAttributes->GetInt(BMDDeckLinkTopologicalID, &value) == S_OK) {
+            dev["TopologicalID"]=(qint64)(value);
+        } else {
+            dev["TopologicalID"]=0;
+        }
+
         if ((value & bmdDeviceSupportsPlayback) != 0) {
             IDeckLinkDisplayModeIterator *dmi;
             IDeckLinkDisplayMode *dm;
