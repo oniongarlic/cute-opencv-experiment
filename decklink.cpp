@@ -4,6 +4,20 @@
 #include <QTimer>
 #include <QDebug>
 
+QVariantMap getConnections(BMDVideoConnection value)
+{
+QVariantMap vo;
+
+vo["hdmi"]=(bool)(bmdVideoConnectionHDMI & value);
+vo["sdi"]=(bool)(bmdVideoConnectionSDI & value);
+vo["opticalsdi"]=(bool)(bmdVideoConnectionOpticalSDI & value);
+vo["component"]=(bool)(bmdVideoConnectionComponent & value);
+vo["composite"]=(bool)(bmdVideoConnectionComposite & value);
+vo["svideo"]=(bool)(bmdVideoConnectionSVideo & value);
+
+return vo;
+}
+
 DeckLink::DeckLink(QObject *parent)
     : QObject{parent}
 {
@@ -251,8 +265,8 @@ DeckLink::DeckLink(QObject *parent)
         if (result != S_OK) {
             qWarning("Failed to get decklink device interface attribute");
             goto out;
-        } else {
-            dev["outputs"]=(qint64)value;
+        } else {            
+            dev["outputs"]=getConnections(value);
         }
 
         result = deckLinkAttributes->GetInt(BMDDeckLinkVideoInputConnections, &value);
@@ -260,7 +274,7 @@ DeckLink::DeckLink(QObject *parent)
             qWarning("Failed to get decklink device interface attribute");
             goto out;
         } else {
-            dev["inputs"]=(qint64)value;
+            dev["inputs"]=getConnections(value);
         }
 
         //qDebug() << "Device" << dev;
