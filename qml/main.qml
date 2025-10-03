@@ -1,3 +1,5 @@
+import QtCore
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -196,9 +198,9 @@ ApplicationWindow {
 
     FileDialog {
         id: videoFilesDialog
-        nameFilters: [ "*.mp4", "*.mov" ]
+        nameFilters: [ "*.mp4 *.mov *.mkv *.avi" ]
         title: qsTr("Select video file")
-        currentFolder: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
+        currentFolder: StandardPaths.standardLocations(StandardPaths.MoviesLocation)[0]
         onAccepted: {
             mediaPlayer.source=selectedFile;
         }
