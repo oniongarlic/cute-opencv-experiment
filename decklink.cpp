@@ -74,11 +74,6 @@ DeckLink::DeckLink(QObject *parent)
             qDebug() << "Unknown interface?";
         }
 
-        if (deckLinkAttributes->GetInt(BMDDeckLinkVideoIOSupport, &value) != S_OK) {
-            qDebug("No output support, skipping");
-            goto out;
-        }
-
         if (deckLinkAttributes->GetInt(BMDDeckLinkPersistentID, &value) == S_OK) {
             dev["PersistentID"]=(qint64)(value);
         } else {
@@ -89,6 +84,11 @@ DeckLink::DeckLink(QObject *parent)
             dev["TopologicalID"]=(qint64)(value);
         } else {
             dev["TopologicalID"]=0;
+        }
+
+        if (deckLinkAttributes->GetInt(BMDDeckLinkVideoIOSupport, &value) != S_OK) {
+            qDebug("No output support, skipping");
+            goto out;
         }
 
         if ((value & bmdDeviceSupportsPlayback) != 0) {
