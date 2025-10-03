@@ -68,7 +68,12 @@ bool Decklinksink::setOutput(uint index)
     if (!d) {
         qWarning("Invalid decklink device");
         return false;
-    }    
+    }
+
+    if (!d->output) {
+        qWarning("Device does not support output");
+        return false;
+    }
 
     m_current=index;
     m_output=d->output;
