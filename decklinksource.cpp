@@ -43,11 +43,7 @@ public:
 
         return S_OK;
     }
-    HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override {
-        QImage frame;
-        long w,h;
-        uint f;
-
+    HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(IDeckLinkVideoInputFrame* videoFrame, IDeckLinkAudioInputPacket* audioPacket) override {                
         if (!videoFrame) {
             qDebug("Invalid input frame");
             return S_OK;
@@ -69,7 +65,11 @@ public:
 
         return S_OK;
     }
-    HRESULT	STDMETHODCALLTYPE QueryInterface(REFIID iid, LPVOID *ppv) override { return E_NOINTERFACE; }
+    HRESULT	STDMETHODCALLTYPE QueryInterface(REFIID iid, LPVOID *ppv) override {
+        Q_UNUSED(iid)
+        Q_UNUSED(ppv)
+        return E_NOINTERFACE;
+    }
 
     ULONG STDMETHODCALLTYPE AddRef() override { return 1; }
     ULONG STDMETHODCALLTYPE Release() override { return 1; }
@@ -134,7 +134,12 @@ bool Decklinksource::setInput(uint index)
     if (!d) {
         qWarning("Invalid decklink device");
         return false;
-    }    
+    }
+
+    if (!d->input) {
+        qWarning("Decklink device has no input");
+        return false;
+    }
 
     m_current=index;
     m_input=d->input;
@@ -142,7 +147,9 @@ bool Decklinksource::setInput(uint index)
 
     qDebug() << "Decklink input set to " << m_current << d->name;
 
-    m_input->SetCallback(m_icb);
+    result=m_input->SetCallback(m_icb);
+    if (result!=S_OK)
+        qWarning("Failed to set input callback");
 
     return true;
 }
@@ -252,7 +259,7 @@ void Decklinksource::newFrame(IDeckLinkVideoInputFrame *frame, IDeckLinkAudioInp
     if (audio) {
         m_apackets.enqueue(audio);
     }
-    emit frameQueued();
+    emit frameQueued(m_frames.size());
 }
 
 void Decklinksource::modeChanged(quint32 mode, BMDPixelFormat format, const QSize size, float fps)
@@ -334,7 +341,7 @@ void Decklinksource::processFrame()
     qDebug() << stime << ftime << m_framecounter;
 
     QVideoFrameFormat vff(QSize(w,h), QVideoFrameFormat::Format_ARGB8888);
-    vff.setFrameRate(m_fps);
+    vff.setStreamFrameRate(m_fps);
 
     QVideoFrame vf(vff);
 

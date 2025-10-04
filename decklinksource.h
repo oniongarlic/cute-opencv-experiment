@@ -87,7 +87,7 @@ signals:
     void videoSinkChanged();
     void devicesChanged();
     void decklinkChanged();
-    void frameQueued();
+    void frameQueued(quint32 frames);
     void inputModeChanged(quint32 newMode, quint32 oldMode);
     void streamingChanged();
     void restartStream();
