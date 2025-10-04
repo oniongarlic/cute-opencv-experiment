@@ -154,6 +154,11 @@ bool Decklinksource::setInput(uint index)
     return true;
 }
 
+bool Decklinksource::setInputConnector(InputConnector ic)
+{
+
+}
+
 qint32 Decklinksource::getMode()
 {
     return m_mode;

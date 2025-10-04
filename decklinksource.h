@@ -55,10 +55,22 @@ public:
     };
     Q_ENUM(InputFormat);
 
+    enum InputConnector {
+        InputConnectorSDI=bmdVideoConnectionSDI,
+        InputConnectorOpticalSDI=bmdVideoConnectionOpticalSDI,
+        InputConnectorHDMI=bmdVideoConnectionHDMI,
+        InputConnectorComponent=bmdVideoConnectionComponent,
+        InputConnectorComposite=bmdVideoConnectionComposite,
+        InputConnectorSVideo=bmdVideoConnectionSVideo,
+    };
+    Q_ENUM(InputConnector);
+
     Q_INVOKABLE void setFramebufferSize(QSize size);
     Q_INVOKABLE void setVideoSink(QObject *videosink);
 
     Q_INVOKABLE bool setInput(uint index);
+
+    Q_INVOKABLE bool setInputConnector(InputConnector ic);
 
     Q_INVOKABLE qint32 getMode();
     Q_INVOKABLE bool setMode(qint32 mode);
