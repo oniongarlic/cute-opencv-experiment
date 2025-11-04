@@ -75,8 +75,6 @@ public:
     Q_INVOKABLE qint32 getMode();
     Q_INVOKABLE bool setMode(qint32 mode);
 
-    Q_INVOKABLE bool setProfile(uint profile);
-
     Q_INVOKABLE bool grabFrame();
     Q_INVOKABLE QImage getImage();
 

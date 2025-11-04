@@ -4,6 +4,21 @@
 #include <QTimer>
 #include <QDebug>
 
+#ifdef Q_OS_WIN
+#include <objbase.h>
+
+
+QString btoqs(BSTR name)
+{
+    QString s = QString::fromWCharArray(name);
+    SysFreeString(name);
+    return s;
+}
+
+#endif
+
+
+
 QVariantMap getConnections(BMDVideoConnection value)
 {
 QVariantMap vo;
@@ -23,10 +38,14 @@ DeckLink::DeckLink(QObject *parent)
 {
     IDeckLinkIterator* deckLinkIterator	= nullptr;
     IDeckLink* deckLink=nullptr;
-    HRESULT result;
-
+    HRESULT result = S_OK;
+    
+#ifdef Q_OS_WIN
+    result = CoCreateInstance(CLSID_CDeckLinkIterator, NULL, CLSCTX_ALL, IID_IDeckLinkIterator, (void**)&deckLinkIterator);
+#else
     deckLinkIterator=CreateDeckLinkIteratorInstance();
-    if (deckLinkIterator!=nullptr) {
+#endif
+    if (deckLinkIterator!=nullptr || FAILED(result)) {
         qDebug() << "Found DeckLink support";
         m_haveDeckLink=true;
     } else {
@@ -43,9 +62,18 @@ DeckLink::DeckLink(QObject *parent)
         DeckLinkDevice *dld=new DeckLinkDevice;
         IDeckLinkInput *input=nullptr;
         IDeckLinkOutput *output=nullptr;
+#ifdef Q_OS_WIN
+        BSTR bm, bn;
+        deckLink->GetModelName(&bm);
+        deckLink->GetDisplayName(&bn);
+        
+        dld->model=btoqs(bm);
+        dld->name=btoqs(bn);
 
+#else
         deckLink->GetModelName(&model);
         deckLink->GetDisplayName(&name);
+#endif
 
         dld->dev=deckLink;
         dld->name=name;
@@ -119,15 +147,19 @@ DeckLink::DeckLink(QObject *parent)
                 uint m;
 
                 QVariantMap mode;
-
+                
+#ifdef Q_OS_WIN
+                BSTR bm;
+                dm->GetName(&bm);
+                mode["name"]=btoqs(bm);
+#else
                 dm->GetName(&mname);
+                mode["name"]=QVariant(mname);
+#endif
                 h=dm->GetHeight();
                 w=dm->GetWidth();
                 m=dm->GetDisplayMode();
 
-                // qDebug() << m << mname << w << h;
-
-                mode["name"]=QVariant(mname);
                 mode["width"]=w;
                 mode["height"]=h;
                 mode["mode"]=m;
@@ -141,7 +173,7 @@ DeckLink::DeckLink(QObject *parent)
                 dev["keyer"]=false;
                 dld->key=nullptr;
             } else {
-                bool ki, ke;
+                int ki, ke;
                 qDebug("Keyer supported");
                 dev["keyer"]=true;
                 dld->key=k;
@@ -169,7 +201,7 @@ DeckLink::DeckLink(QObject *parent)
                 manager->GetProfiles(&pi);
 
                 while ((pi->Next(&p))==S_OK) {
-                    bool pactive;
+                    int pactive;
                     IDeckLinkProfileAttributes*	pa;
                     int64_t pid=0;
 
@@ -223,16 +255,20 @@ DeckLink::DeckLink(QObject *parent)
                     BMDTimeScale ts;
 
                     QVariantMap mode;
-
+                    
+#ifdef Q_OS_WIN
+                    BSTR bm;
+                    dm->GetName(&bm);
+                    mode["name"]=btoqs(bm);
+#else
                     dm->GetName(&mname);
+                    mode["name"]=QVariant(mname);
+#endif
                     h=dm->GetHeight();
                     w=dm->GetWidth();
                     m=dm->GetDisplayMode();
                     dm->GetFrameRate(&tv, &ts);
 
-                    // qDebug() << "INPUT MODE: " << m << mname << w << h << tv << ts;
-
-                    mode["name"]=QVariant(mname);
                     mode["width"]=w;
                     mode["height"]=h;
                     mode["mode"]=m;
@@ -266,7 +302,7 @@ DeckLink::DeckLink(QObject *parent)
             qWarning("Failed to get decklink device interface attribute");
             goto out;
         } else {            
-            dev["outputs"]=getConnections(value);
+            dev["outputs"]=getConnections((BMDVideoConnection)value);
         }
 
         result = deckLinkAttributes->GetInt(BMDDeckLinkVideoInputConnections, &value);
@@ -274,7 +310,7 @@ DeckLink::DeckLink(QObject *parent)
             qWarning("Failed to get decklink device interface attribute");
             goto out;
         } else {
-            dev["inputs"]=getConnections(value);
+            dev["inputs"]=getConnections((BMDVideoConnection)value);
         }
 
         //qDebug() << "Device" << dev;

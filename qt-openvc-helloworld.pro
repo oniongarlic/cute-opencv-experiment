@@ -24,8 +24,10 @@ HEADERS += \
 HEADERS += decklink.h decklinksink.h decklinksource.h
 SOURCES += decklink.cpp decklinksink.cpp decklinksource.cpp
 
+unix {
 # DECKLINK_SDK_PATH=/opt/decklink/include
 DECKLINK_SDK_PATH=/home/studio/repos/decklink-sdk-12-include
+}
 
 RESOURCES += qml.qrc
 
@@ -34,15 +36,9 @@ DEFINES += YOLO_CUSTOM
 # RESOURCES += yolo.qrc
 
 
-lessThan(QT_VERSION, 6.2) {
-    HEADERS += ovvideofilter.h ovvideofilterrunnable.h
-    SOURCES += ovvideofilter.cpp ovvideofilterrunnable.cpp
-}
-greaterThan(QT_VERSION, 6.1) {
-    QT += concurrent
-    HEADERS += ovvideofiltersink.h
-    SOURCES += ovvideofiltersink.cpp
-}
+QT += concurrent
+HEADERS += ovvideofiltersink.h
+SOURCES += ovvideofiltersink.cpp
 
 unix:!qnx:!android {
     CONFIG +=link_pkgconfig
@@ -63,6 +59,24 @@ unix:!qnx:!android {
     INCLUDEPATH += $$DECKLINK_SDK_PATH
     SOURCES += $${DECKLINK_SDK_PATH}/DeckLinkAPIDispatch.cpp
     LIBS += -ldl
+}
+
+
+win32 {
+INCLUDEPATH += c:/Qt/opencv/build/include
+
+LIBS += -LC:/Qt/opencv/build/x64/vc16/lib -lopencv_world4120
+
+INCLUDEPATH += c:/Qt/decklink/include
+# LIBS += -L"c:/Qt/decklink/x64" -ldecklinkapi
+SOURCES += c:/Qt/decklink/include/DeckLinkAPI_i.c
+
+# COM stuff 
+LIBS += -lole32 -luuid -loleaut32
+
+DEFINES+= YOLO_WEIGHTS=\\\"c:/ai/tk_final_416.weights\\\"
+DEFINES+= YOLO_CFG=\\\"c:/ai/tk-416.cfg\\\"
+DEFINES+= YOLO_NAMES=\\\"c:/ai/tk.names\\\"
 }
 
 # Android extras

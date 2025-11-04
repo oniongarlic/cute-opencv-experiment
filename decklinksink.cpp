@@ -18,10 +18,12 @@ Decklinksink::Decklinksink(QObject *parent)
     af.setSampleRate(48000);
     af.setChannelCount(2);
     af.setSampleFormat(QAudioFormat::Int16);
-
+    
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
     m_audio_buffer=new QAudioBufferOutput(af, this);
     connect(m_audio_buffer, &QAudioBufferOutput::audioBufferReceived, this, &Decklinksink::onAudioBufferReceived);
-
+#endif
+    
     QAudioOutput a;
 
     m_audiosink=new QAudioSink(af, this);
@@ -97,7 +99,7 @@ qint32 Decklinksink::getMode()
 
 bool Decklinksink::setMode(qint32 mode)
 {
-    m_mode=mode;
+    m_mode=(BMDDisplayMode)mode;
 
     return true;
 }
@@ -107,7 +109,7 @@ bool Decklinksink::setProfile(uint profile)
     HRESULT result;
     IDeckLinkProfileManager *manager = NULL;
     IDeckLinkProfile *lp = NULL;
-    BMDProfileID profile_id=0;
+    BMDProfileID profile_id=bmdProfileOneSubDeviceFullDuplex;
 
     if (!m_decklink->haveDeckLink())
         return false;
@@ -126,8 +128,6 @@ bool Decklinksink::setProfile(uint profile)
 
     switch (profile) {
     case 0:
-        profile_id=0;
-        break;
     case 1:
         profile_id=bmdProfileOneSubDeviceFullDuplex;
         break;

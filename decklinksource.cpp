@@ -20,11 +20,11 @@ public:
         float fps;
 
         newDisplayMode->GetFrameRate(&time, &scale);
-        newDisplayMode->GetName(&name);
+        //newDisplayMode->GetName(&name);
         QSize size(newDisplayMode->GetWidth(), newDisplayMode->GetHeight());
         fps=(float)scale/(float)time;
 
-        qDebug() << "VideoInputFormatChanged" << name << notificationEvents << detectedSignalFlags;
+        qDebug() << "VideoInputFormatChanged" << notificationEvents << detectedSignalFlags;
         qDebug() << "Mode: " << newDisplayMode->GetDisplayMode() << size << fps  << newDisplayMode->GetFlags();
         qDebug() << time << scale;
 
@@ -86,7 +86,12 @@ Decklinksource::Decklinksource(QObject *parent)
     m_audio=false;
     m_icb=new DeckLinkInputCallback(this);
 
+#ifdef Q_OS_WIN
+    HRESULT result;
+    result = CoCreateInstance(CLSID_CDeckLinkVideoConversion, NULL, CLSCTX_ALL, IID_IDeckLinkIterator, (void**)&m_conv);
+#else
     m_conv = CreateVideoConversionInstance();
+#endif
 
     QObject::connect(this, &Decklinksource::frameQueued,
                      this, &Decklinksource::processFrame,
@@ -156,7 +161,7 @@ bool Decklinksource::setInput(uint index)
 
 bool Decklinksource::setInputConnector(InputConnector ic)
 {
-
+    return false;
 }
 
 qint32 Decklinksource::getMode()
@@ -166,68 +171,9 @@ qint32 Decklinksource::getMode()
 
 bool Decklinksource::setMode(qint32 mode)
 {
-    m_mode=mode;
+    m_mode=(BMDDisplayMode)mode;
 
     return true;
-}
-
-bool Decklinksource::setProfile(uint profile)
-{
-    HRESULT result;
-    IDeckLinkProfileManager *manager = NULL;
-    IDeckLinkProfile *lp = NULL;
-    BMDProfileID profile_id=0;
-
-    if (!m_decklink->haveDeckLink())
-        return false;
-
-    if (m_current<0) {
-        qWarning("No device set!");
-        return false;
-    }
-
-    DeckLinkDevice *d=m_decklink->getDevice(m_current);
-
-    if (d->dev->QueryInterface (IID_IDeckLinkProfileManager, (void **) &manager) != S_OK) {
-        qWarning("Current device does not support profiles");
-        return false;
-    }
-
-    switch (profile) {
-    case 0:
-        profile_id=0;
-        break;
-    case 1:
-        profile_id=bmdProfileOneSubDeviceFullDuplex;
-        break;
-    case 2:
-        profile_id=bmdProfileOneSubDeviceHalfDuplex;
-        break;
-    case 3:
-        profile_id=bmdProfileTwoSubDevicesFullDuplex;
-        break;
-    case 4:
-        profile_id=bmdProfileTwoSubDevicesHalfDuplex;
-        break;
-    case 5:
-        profile_id=bmdProfileFourSubDevicesHalfDuplex;
-        break;
-    }
-
-    result=manager->GetProfile(profile_id, &lp);
-
-    if (result==S_OK && profile) {
-        result=lp->SetActive();        
-        lp->Release();
-        if (result==S_OK) {
-            m_profile=profile_id;
-            emit profileChanged();
-        }
-    }
-
-    manager->Release();
-
-    return result==S_OK;
 }
 
 bool Decklinksource::grabFrame()
@@ -286,7 +232,7 @@ void Decklinksource::modeChanged(quint32 mode, BMDPixelFormat format, const QSiz
     qDebug() << "Capture restart required, got new mode or format" << mode << format << ", requested was" << m_mode << m_format;
 
     quint32 old=m_mode;
-    m_mode=mode;
+    m_mode=(BMDDisplayMode)mode;
     m_format=format;
 
     emit inputModeChanged(m_mode, old);
@@ -435,7 +381,7 @@ out: ;
 bool Decklinksource::enableInput()
 {
     BMDDisplayMode amode;
-    bool supported;
+    int supported;
 
     if (m_input==nullptr) {
         qWarning("No input");
