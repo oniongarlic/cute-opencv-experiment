@@ -360,28 +360,46 @@ void Decklinksink::displayImage(const QVariant image)
 
     if (!m_output)
         return;
+    
+    QImage img;
 
     switch (image.metaType().id()) {
     case QMetaType::QUrl: {
         QUrl tmp=image.value<QUrl>();
-        QImage img;
 
-        if (tmp.scheme()=="" || tmp.scheme()=="file") { // File or absolute path            
-            img.load(tmp.path());
+        if (tmp.isLocalFile()) { // File or absolute path
+            if (!img.load(tmp.toLocalFile())) {
+                qWarning() << "Failed to load image from url" << tmp << tmp.toLocalFile();
+            }
         } else {
-            qDebug() << "Unhandled QUrl scheme" << tmp.scheme();
+            qDebug() << "Can load local files only" << tmp.scheme();
             return;
         }
         displayImage(img);
     }
     break;
     case QMetaType::QImage: {
-        const QImage tmp=image.value<QImage>();
-        displayImage(tmp.rgbSwapped());
+        img=image.value<QImage>();
+        displayImage(img.rgbSwapped());
+    }
+    break;
+    case QMetaType::QString: {
+        QString tmp=image.value<QString>();
+        QUrl utmp(tmp);
+        QString file=utmp.toLocalFile();
+        
+        //if (file.startsWith("file://"))
+        //    file.remove(0,7);
+        
+        if (img.load(file)) {
+            displayImage(img);
+        } else {
+            qWarning() << "Failed to load image from string" << tmp << utmp.path();
+        }
     }
     break;
     default:
-        qWarning() << "Unhandled image source";
+        qWarning() << "Unhandled image source" << image.metaType();
         return;
     }
 }
