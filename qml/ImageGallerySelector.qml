@@ -6,7 +6,7 @@ import QtQuick.Dialogs
 Item {
     id: igs
 
-    signal fileSelected(string src);
+    signal fileSelected(url src);
 
     function startSelector() {
         filesDialog.open();
@@ -16,7 +16,8 @@ Item {
         id: filesDialog
         nameFilters: [ "*.jpg", "*.png" ]
         title: qsTr("Select image file")
-        onAccepted: {            
+        onAccepted: {
+            console.debug("SF: "+selectedFile)
             fileSelected(selectedFile);
         }
     }
