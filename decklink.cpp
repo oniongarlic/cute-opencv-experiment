@@ -173,7 +173,7 @@ DeckLink::DeckLink(QObject *parent)
                 dev["keyer"]=false;
                 dld->key=nullptr;
             } else {
-                int ki, ke;
+                bool ki, ke;
                 qDebug("Keyer supported");
                 dev["keyer"]=true;
                 dld->key=k;
@@ -201,7 +201,7 @@ DeckLink::DeckLink(QObject *parent)
                 manager->GetProfiles(&pi);
 
                 while ((pi->Next(&p))==S_OK) {
-                    int pactive;
+                    bool pactive;
                     IDeckLinkProfileAttributes*	pa;
                     int64_t pid=0;
 
