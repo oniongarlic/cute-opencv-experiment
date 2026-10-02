@@ -65,7 +65,7 @@ unix:!qnx:!android {
 win32 {
 INCLUDEPATH += c:/Qt/opencv/build/include
 
-LIBS += -LC:/Qt/opencv/build/x64/vc16/lib -lopencv_world4120
+LIBS += -LC:/Qt/opencv/build/x64/vc16/lib -lopencv_world4140
 
 INCLUDEPATH += c:/Qt/decklink/include
 # LIBS += -L"c:/Qt/decklink/x64" -ldecklinkapi
