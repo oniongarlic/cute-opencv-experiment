@@ -45,7 +45,7 @@ DeckLink::DeckLink(QObject *parent)
 #else
     deckLinkIterator=CreateDeckLinkIteratorInstance();
 #endif
-    if (deckLinkIterator!=nullptr || FAILED(result)) {
+    if (deckLinkIterator!=nullptr || !FAILED(result)) {
         qDebug() << "Found DeckLink support";
         m_haveDeckLink=true;
     } else {
@@ -69,15 +69,14 @@ DeckLink::DeckLink(QObject *parent)
         
         dld->model=btoqs(bm);
         dld->name=btoqs(bn);
-
 #else
         deckLink->GetModelName(&model);
         deckLink->GetDisplayName(&name);
+        dld->name=name;
+        dld->model=model;
 #endif
 
         dld->dev=deckLink;
-        dld->name=name;
-        dld->model=model;
         dld->valid=true;
 
         dld->input=nullptr;
